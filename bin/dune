@@ -1,0 +1,4 @@
+(executable
+ (public_name ballast)
+ (name main)
+ (libraries ballast))
