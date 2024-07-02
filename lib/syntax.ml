@@ -11,12 +11,14 @@ module TrivMetaData : MetaData
 end
 
 type id   = string
+[@@deriving show]
 
 module AST (M : MetaData) = struct
 
   type tp =
     | TpId  of id * tp list
     | TpTup of tp list
+  [@@deriving show]
 
   type arith =
     | Add           of expr * expr

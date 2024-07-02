@@ -1,6 +1,7 @@
 (library
  (name ballast)
- (libraries core str))
+ (libraries core str)
+ (preprocess (pps ppx_deriving.show ppx_deriving.eq)))
 
 (menhir
   (modules parser))
