@@ -59,7 +59,7 @@ module AST (M : MetaData) = struct
     | QVar          of expr list
 
   and expr_qtfier = 
-    | QForall       of q_var * expr option * expr
+    | QForall       of q_var * expr list * expr
     | QExists       of q_var * expr
 
   and expr_bin_op = 

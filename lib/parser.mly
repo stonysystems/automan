@@ -168,12 +168,11 @@ q_var:
                                           { Syntax.ParserPass.QVar(a)          }
 
 qtfier_attr:
-  | LBRACE; TRIGGER; t = expr; RBRACE { Some t }
-  | (* empty *)                       { None   }
+  | LBRACE; TRIGGER; t = expr; RBRACE { t }
 
 expr_qtfier:
-  | FORALL; a = q_var; attr = qtfier_attr; SUCHTHAT; b = expr
-    { Syntax.ParserPass.QForall(a, attr, b) }
+  | FORALL; a = q_var; attrs = list(qtfier_attr); SUCHTHAT; b = expr
+    { Syntax.ParserPass.QForall(a, attrs, b) }
   | EXISTS; a = q_var; SUCHTHAT; b = expr
     { Syntax.ParserPass.QExists(a, b)       }
 
