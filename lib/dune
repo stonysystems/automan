@@ -1,2 +1,8 @@
 (library
- (name ballast))
+ (name ballast)
+ (libraries core str))
+
+(menhir
+  (modules parser))
+
+(ocamllex lexer)
