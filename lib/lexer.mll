@@ -20,13 +20,8 @@ rule lexeme = parse
   | "opened"        { Parser.OPENED                         }
   | "datatype"      { Parser.DATATYPE                       }
   | "predicate"     { Parser.PREDICATE                      }
-  | "seq"           { Parser.SEQ                            }
   | "set"           { Parser.SET                            }
-  | "Option"        { Parser.OPTION                         }
   | "map"           { Parser.MAP                            }
-  | "int"           { Parser.INT                            }
-  | "nat"           { Parser.NAT                            }
-  | "bool"          { Parser.BOOL                           }
   | "forall"        { Parser.FORALL                         }
   | "exists"        { Parser.EXISTS                         }
   | "if"            { Parser.IF                             }

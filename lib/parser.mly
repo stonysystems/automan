@@ -18,7 +18,7 @@
 %token SLICE
 %token ASSIGN
 %token IF ELSE THEN
-%token INT BOOL NAT SEQ MAP SET OPTION
+%token SET MAP
 %token ADD SUB MULT DIV MOD
 
 %token AND OR
@@ -237,7 +237,7 @@ expr_call:
   | a = ID; LPAREN; b = args; RPAREN      { Syntax.ParserPass.ExprCall(a, b)   }
 
 expr_num:
-  | a = NUM                               { Syntax.ParserPass.ExprNum(a)       }
+  | a = NUM                               { Syntax.ParserPass.ExprInt a       }
 
 expr_scpt:
   | a = expr; LSQBRAC; b = expr; RSQBRAC  { Syntax.ParserPass.ExprScpt(a, b)   }
@@ -350,39 +350,26 @@ lemma_df:
   | LEMMA; a = ID;
     LPAREN; b = formals; RPAREN;
     c = ctsts;
-    LBRACE; d = stmts; RBRACE;                         
+    LBRACE; d = stmts; RBRACE;
                                           { Syntax.ParserPass.Lemma (a, b, c, d)     } 
-
-return_func:
-  | a = tp                                { Syntax.ParserPass.ReturnFuncSgl a        }
-  | LPAREN; a = separated_list(COMMA, tp); RPAREN
-                                          { Syntax.ParserPass.ReturnFuncTpl a        }   
 
 function_df:
   | FUNCTION; a = ID; 
     LPAREN; b = formals; RPAREN;
-    COLON; c = return_func;
+    COLON; c = tp;
     d = ctsts
     LBRACE; e = expr; RBRACE              { Syntax.ParserPass.Function (a, b, c, d, e)}
 
 alias_df:
   | TYPE; a = ID; SGEQ; b = tp            { Syntax.ParserPass.Alias (a, b)            }
 
+// (* handling for "set" and "map" b/c these tokens are used in special constructor syntax *)
 tp:
-  | a = tp_coll     { Syntax.ParserPass.TpColl a }
-  | a = tp_prmt     { Syntax.ParserPass.TpPrmt a }
-  | a = ID          { Syntax.ParserPass.TpId a   }
-  | OPTION; LANGLE; a = tp; RANGLE              { Syntax.ParserPass.TpOption(a) }
-
-tp_coll:
-  | SEQ; LANGLE; b = tp; RANGLE                 { Syntax.ParserPass.TpCollSeq b          }
-  | SET; LANGLE; b = tp; RANGLE                 { Syntax.ParserPass.TpCollSet b          }
-  | MAP; LANGLE; a = tp; COMMA; b = tp; RANGLE  { Syntax.ParserPass.TpCollMap (a, b)     } 
-  | a = ID; LANGLE; b = tp; COMMA; c = tp; RANGLE 
-                                                { Syntax.ParserPass.TpIdCollMap(a, b, c) }
-
-tp_prmt:
-  | INT   { Syntax.ParserPass.PrmtInt    }
-  | BOOL  { Syntax.ParserPass.PrmtBool   }
-  | NAT   { Syntax.ParserPass.PrmtNat    }
-
+  | SET; LANGLE; p = tp; RANGLE
+    { Syntax.ParserPass.TpId ("set", [p]) }
+  | MAP; LANGLE; p1 = tp; COMMA; p2 = tp; RANGLE
+    { Syntax.ParserPass.TpId ("map", [p1;p2])}
+  | x = ID; LANGLE; ps = separated_list(COMMA, tp); RANGLE
+    { Syntax.ParserPass.TpId (x, ps) }
+  | LPAREN; ps = separated_list(COMMA, tp); RPAREN
+    { Syntax.ParserPass.TpTup ps }

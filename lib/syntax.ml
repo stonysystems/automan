@@ -14,38 +14,11 @@ type id   = string
 
 module AST (M : MetaData) = struct
 
-  type tp_prmt =
-    | PrmtInt
-    | PrmtBool
-    | PrmtNat
+  type tp =
+    | TpId  of id * tp list
+    | TpTup of tp list
 
-  and tp_coll =
-    (* seq<tp> *)
-    | TpCollSeq     of tp
-
-    (* set<tp> *)
-    | TpCollSet     of tp
-
-    (* map<tp, tp> *)
-    | TpCollMap     of tp * tp
-
-  (*
-    * id <tp, tp>, id is a alias of map
-    * there should also have alias for set/seq, to be added later   
-    *)
-    | TpIdCollMap   of id * tp * tp
-
-  and tp = 
-    | TpColl        of tp_coll
-    | TpPrmt        of tp_prmt
-    | TpOption      of tp
-
-  (*
-    * it's either a self-defined datatype or an alias for a built-in tp
-    *)
-    | TpId          of id 
-
-  and arith =
+  type arith =
     | Add           of expr * expr
     | Sub           of expr * expr
     | Mult          of expr * expr
@@ -218,7 +191,7 @@ module AST (M : MetaData) = struct
     | ExprId        of id
 
     (* 1 *)
-    | ExprNum       of num
+    | ExprInt       of int
 
     (* ( expr ) *)
     | PExpr         of expr
@@ -272,8 +245,8 @@ module AST (M : MetaData) = struct
     | Import        of id
     | DatatypeDef   of id * datatype_ctor list
     | Predicate     of M.predicate_t * id * formal list * ctst list * expr
-    | Function      of id * formal list * return_func * ctst list * expr
-    | FuncMethod    of id * formal list * return_func * ctst list * expr
+    | Function      of id * formal list * tp * ctst list * expr
+    | FuncMethod    of id * formal list * tp * ctst list * expr
     | Method        of id * formal list * return_mthd * ctst list * stmt list
     | Lemma         of id * formal list * ctst list * stmt list
     | Alias         of id * tp
