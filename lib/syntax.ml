@@ -1,20 +1,20 @@
 (** Abstract syntax. *)
 
 module type MetaData = sig
-  type predicate_t
+  (* Use [@opaque] for instances where we don't want to / can't print this *)
+  type predicate_t [@@deriving show]
 end
 
 module TrivMetaData : MetaData
   with type predicate_t = unit
 = struct
-  type predicate_t = unit
+  type predicate_t = unit [@@deriving show]
 end
 
 type id   = string
 [@@deriving show]
 
 module AST (M : MetaData) = struct
-
   type tp =
     | TpId  of id * tp list
     | TpTup of tp list
@@ -27,7 +27,7 @@ module AST (M : MetaData) = struct
     | Div           of expr * expr
     | Mod           of expr * expr
 
-  and boolean = 
+  and boolean =
     | And           of expr * expr
     | Or            of expr * expr
 
@@ -59,7 +59,7 @@ module AST (M : MetaData) = struct
     | QVar          of expr list
 
   and expr_qtfier = 
-    | QForall       of q_var * expr
+    | QForall       of q_var * expr option * expr
     | QExists       of q_var * expr
 
   and expr_bin_op = 
@@ -249,7 +249,7 @@ module AST (M : MetaData) = struct
     | Predicate     of M.predicate_t * id * formal list * ctst list * expr
     | Function      of id * formal list * tp * ctst list * expr
     | FuncMethod    of id * formal list * tp * ctst list * expr
-    | Method        of id * formal list * return_mthd * ctst list * stmt list
+    | Method        of id * formal list * tp * ctst list * stmt list
     | Lemma         of id * formal list * ctst list * stmt list
     | Alias         of id * tp
 
@@ -258,16 +258,7 @@ module AST (M : MetaData) = struct
   and file_level = 
     | Include       of id
     | Module        of id * module_items
-
-  and return_func = 
-    (* tp *)
-    | ReturnFuncSgl of tp
-    (* (tp1, tp2, tp3) *)
-    | ReturnFuncTpl of tp list
-
-  and return_mthd = 
-    | ReturnMthdTpl of formal list
-
+  [@@deriving show]
 end
 
 module ParserPass = AST (TrivMetaData)

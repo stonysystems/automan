@@ -24,6 +24,7 @@ rule lexeme = parse
   | "map"           { Parser.MAP                            }
   | "forall"        { Parser.FORALL                         }
   | "exists"        { Parser.EXISTS                         }
+  | ":trigger"      { Parser.TRIGGER                        }
   | "if"            { Parser.IF                             }
   | "else"          { Parser.ELSE                           }
   | "then"          { Parser.THEN                           }

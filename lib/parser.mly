@@ -8,6 +8,7 @@
 %token PREDICATE
 %token FORALL
 %token EXISTS
+%token TRIGGER
 %token VAR
 %token REQUIRES ENSURES DECREASES
 %token ASSERT
@@ -166,10 +167,15 @@ q_var:
   | a = separated_nonempty_list(COMMA, expr_q_var)  
                                           { Syntax.ParserPass.QVar(a)          }
 
+qtfier_attr:
+  | LBRACE; TRIGGER; t = expr; RBRACE { Some t }
+  | (* empty *)                       { None   }
+
 expr_qtfier:
-  | FORALL; a = q_var; SUCHTHAT; b = expr 
-                                          { Syntax.ParserPass.QForall(a, b)    }
-  | EXISTS; a = q_var; SUCHTHAT; b = expr { Syntax.ParserPass.QExists(a, b)    }
+  | FORALL; a = q_var; attr = qtfier_attr; SUCHTHAT; b = expr
+    { Syntax.ParserPass.QForall(a, attr, b) }
+  | EXISTS; a = q_var; SUCHTHAT; b = expr
+    { Syntax.ParserPass.QExists(a, b)       }
 
 expr_bin_op:
   | a = arith                             { Syntax.ParserPass.Arith(a)         }
@@ -369,7 +375,11 @@ tp:
     { Syntax.ParserPass.TpId ("set", [p]) }
   | MAP; LANGLE; p1 = tp; COMMA; p2 = tp; RANGLE
     { Syntax.ParserPass.TpId ("map", [p1;p2])}
-  | x = ID; LANGLE; ps = separated_list(COMMA, tp); RANGLE
+  | x = ID; ps = tp_params
     { Syntax.ParserPass.TpId (x, ps) }
   | LPAREN; ps = separated_list(COMMA, tp); RPAREN
     { Syntax.ParserPass.TpTup ps }
+
+tp_params:
+  | LANGLE; ps = separated_list(COMMA, tp); RANGLE { ps }
+  | (* empty *)                                    { [] }

@@ -1,2 +1,9 @@
 (test
- (name test_ballast))
+ (name test_ballast)
+ (modules test_ballast)
+ (libraries core core_unix.command_unix async_unix ballast))
+
+(test
+  (name test_parser)
+  (modules test_parser)
+  (libraries core core_unix.command_unix async_unix ballast))
