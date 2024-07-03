@@ -25,6 +25,8 @@ rule lexeme = parse
   | "forall"        { Parser.FORALL                         }
   | "exists"        { Parser.EXISTS                         }
   | ":trigger"      { Parser.TRIGGER                        }
+  | ":opaque"       { Parser.OPAQUE                         }
+  | ":transparent"  { Parser.TRANSPARENT                    }
   | "if"            { Parser.IF                             }
   | "else"          { Parser.ELSE                           }
   | "then"          { Parser.THEN                           }

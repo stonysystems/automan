@@ -8,7 +8,7 @@
 %token PREDICATE
 %token FORALL
 %token EXISTS
-%token TRIGGER
+%token TRIGGER OPAQUE TRANSPARENT
 %token VAR
 %token REQUIRES ENSURES DECREASES
 %token ASSERT
@@ -358,12 +358,20 @@ lemma_df:
     LBRACE; d = stmts; RBRACE;
                                           { Syntax.ParserPass.Lemma (a, b, c, d)     } 
 
+entity_attr:
+  | TRANSPARENT { Syntax.ParserPass.EntAttrTransparent }
+  | OPAQUE      { Syntax.ParserPass.EntAttrOpaque      }
+
+entity_attr_decl:
+  | LBRACE; attr = entity_attr; RBRACE    { attr }
+
 function_df:
-  | FUNCTION; a = ID; 
+  | FUNCTION; attrs = list(entity_attr_decl); a = ID;
     LPAREN; b = formals; RPAREN;
     COLON; c = tp;
     d = ctsts
-    LBRACE; e = expr; RBRACE              { Syntax.ParserPass.Function (a, b, c, d, e)}
+    LBRACE; e = expr; RBRACE
+    { Syntax.ParserPass.Function (attrs, a, b, c, d, e)}
 
 alias_df:
   | TYPE; a = ID; SGEQ; b = tp            { Syntax.ParserPass.Alias (a, b)            }

@@ -20,6 +20,11 @@ module AST (M : MetaData) = struct
     | TpTup of tp list
   [@@deriving show]
 
+  type entity_attr =
+    | EntAttrOpaque
+    | EntAttrTransparent
+  [@@deriving show]
+
   type arith =
     | Add           of expr * expr
     | Sub           of expr * expr
@@ -243,11 +248,12 @@ module AST (M : MetaData) = struct
     | Ensures       of expr
     | Decreases     of expr
 
+
   and module_item = 
     | Import        of id
     | DatatypeDef   of id * datatype_ctor list
     | Predicate     of M.predicate_t * id * formal list * ctst list * expr
-    | Function      of id * formal list * tp * ctst list * expr
+    | Function      of entity_attr list * id * formal list * tp * ctst list * expr
     | FuncMethod    of id * formal list * tp * ctst list * expr
     | Method        of id * formal list * tp * ctst list * stmt list
     | Lemma         of id * formal list * ctst list * stmt list
