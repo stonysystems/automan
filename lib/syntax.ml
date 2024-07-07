@@ -1,5 +1,7 @@
 (** Abstract syntax. *)
 
+open Internal
+
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
   type predicate_t [@@deriving show]
@@ -12,259 +14,249 @@ module TrivMetaData : MetaData
 end
 
 type id   = string
-[@@deriving show]
+[@@deriving show, eq]
+
+(* https://dafny.org/dafny/DafnyRef/DafnyRef.html#172753-basic-name-and-type-combinations *)
+type dotsuffix =
+  | DSRequires | DSReads
+  | DSId  of id
+  | DSDig of int (* NOTE: natural number*)
+[@@deriving show, eq]
 
 module AST (M : MetaData) = struct
-  type tp =
-    | TpId  of id * tp list
-    | TpTup of tp list
-  [@@deriving show]
 
-  type entity_attr =
-    | EntAttrOpaque
-    | EntAttrTransparent
-  [@@deriving show]
+  (** Types
+      https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-types
+  *)
+  module Type = struct
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-type *)
+    type name_seg = TpIdSeg of {id: id; gen_inst: t list }
+    [@@deriving show, eq]
 
-  type arith =
-    | Add           of expr * expr
-    | Sub           of expr * expr
-    | Mult          of expr * expr
-    | Div           of expr * expr
-    | Mod           of expr * expr
+    (* NOTE: no function types *)
+    and t =
+      | TpName of name_seg NonEmptyList.t
+      (* NOTE: this representation allows singleton tuples *)
+      | TpTup  of t list
+    [@@deriving show, eq]
 
-  and boolean =
-    | And           of expr * expr
-    | Or            of expr * expr
+    let simple_generic (id: id) (gen_inst: t list) =
+      TpName (NonEmptyList.singleton
+                (TpIdSeg {id = id; gen_inst = gen_inst}))
 
-  and cmp = 
-    | Eq            of expr * expr
-    | Neq           of expr * expr
-    | Lt            of expr * expr
-    | Lte           of expr * expr
-    | Gt            of expr * expr
-    | Gte           of expr * expr
-    | In            of expr * expr
-    | NotIn         of expr * expr
+    let simple (id: id): t = simple_generic id []
 
-  and expr_implies = 
-    (* expr <==> expr *)
-    | ImpliesBoth   of expr * expr
+    let int    = simple "int"
+    let bool   = simple "bool"
+    let nat    = simple "nat"
+    let string = simple "string"
 
-    (* expr ==> expr *)
-    | ImpliesL      of expr * expr
+    let seq (elem: t) = simple_generic "seq" [elem]
+    let set (elem: t) = simple_generic "set" [elem]
+    let map (k: t) (v: t) = simple_generic "map" [k;v]
 
-    (* expr <== expr *)
-    | ImpliesR      of expr * expr
+  end
 
-  and q_var = 
-  (*
-    * forall QVar :: expr
-    * exists QVar :: expr    
+  (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-augmented-dot-suffix
+     NOTE: no hash calls *)
+  type augmented_dotsuffix = dotsuffix * Type.t list
+  [@@deriving show, eq]
+
+  (** Expressions
+      https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-expressions
+  *)
+  module Expr = struct
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-literal-expression
+       TODO: decimal literals *)
+    type lit_t =
+      | True | False | Null
+      | Nat     of int
+      | Char    of char
+      | String  of string
+    [@@deriving eq, show]
+
+    type quantifier_t = Forall | Exists
+    [@@deriving show, eq]
+
+    type uop_t = Neg | Not
+    [@@deriving show, eq]
+
+    type bop_t =
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-multiplication-expression *)
+      | Mul | Div | Mod
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-addition-expression *)
+      | Add | Sub
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-relational-expression
+         NOTE: no hash calls *)
+      | Eq | Neq | Lt | Gt | Lte | Gte | In | Nin | Disjoint
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-logical-expression *)
+      | And | Or
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-implies-expression *)
+      | Implies (* | Explies *) (* NOTE: treat explies as syntactic sugar *)
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-equivalence-expression *)
+      | Equiv
+    [@@deriving show, eq]
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-name-segment
+       https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-name-segment
+
+       NOTE: no hash calls; if we add them, note we need ((Type.t
+       NonEmptyList.t, hash_call) Either.t) option
     *)
-    | QVar          of expr list
+    type name_seg = id * Type.t list
+    [@@deriving show, eq]
 
-  and expr_qtfier = 
-    | QForall       of q_var * expr list * expr
-    | QExists       of q_var * expr
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-case-pattern
+       TODO: possibly *negated* literal expression
+       NOTE: if we support disjunctive patterns, rename to
+       "single_extended_pattern" *)
+    type extended_pattern =
+      | EPatLit  of lit_t
+      | EPatVar  of id * Type.t option
+      (* NOTE: PatCtor (None, pats) means a tuple *)
+      (* TODO: can the constructor identifier be qualified? *)
+      | EPatCtor of id option * extended_pattern list
+    [@@deriving eq, show]
 
-  and expr_bin_op = 
-    | Arith         of arith
-    | Bool          of boolean
-    | Cmp           of cmp
-    (* expr.expr *)
-    | Attribute     of expr * expr
-  (*
-    * expr.(iassign, iassign, ... )
-    * x.(a := 1, b := 2)
+    type pattern =
+      | PatVar  of id * Type.t option
+      | PatCtor of id option * pattern list
+    [@@deriving eq, show]
+
+    type t =
+      (* primary expressions:
+         https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-primary-expression *)
+      | Suffixed of t * suffix
+      (*  - name segment expressions **)
+      | NameSeg of name_seg
+
+      (* - lambda expressions
+           https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-lambda-expression
+           TODO: lambda_spec? *)
+      | Lambda  of (id * Type.t option) list * t
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-map-display-expression
+         NOTE: no imap *)
+      | MapDisplay of (t * t) list
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-seq-comprehension *)
+      | SeqDisplay of seq_display
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-set-display-expression
+         NOTE: no multiset, multiset from sequence *)
+      | SetDisplay of t list
+
+      (* primary: endless
+         https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-endless-expression *)
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-if-expression
+         NOTE: no binding guards*)
+      | If of t * t * t
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-match-expression *)
+      | Match of t * case_expr list
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-quantifier-expression
+         NOTE: Dafny 3 does not support per-variable quantifier ranges, so we
+         aren't either *)
+      | Quantifier of
+          { qt : quantifier_t
+          ; qdom : qdom
+          ; qbody : t }
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-set-comprehension-expression
+         NOTE: no support for iset
+         NOTE: no per-variable quantifier ranges *)
+      | SetComp of qdom * t option
+      (* TODO: StmtInExpr https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-statement-in-an-expression
+         This would require making expr and stmt mutually recursive *)
+    (* | ... *)
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-let-expression
+         NOTE: no let-fail, assign-such-that *)
+      | Let of
+          { ghost: bool
+          ; pats: pattern NonEmptyList.t
+          ; def: t NonEmptyList.t
+          ; body: t}
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-map-comprehension-expression
+         NOTE: imap not supported *)
+      | MapComp of { qdom: qdom; key: t option; valu: t }
+    (* const atom expressions: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-atomic-expression
+       NOTE: no fresh, allocated, unchanged, old *)
+      | Lit  of lit_t
+      | This
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-cardinality-expression
+         NOTE: previously ExprLen *)
+      | Cardinality of t
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-parenthesized-expression
+         NOTE: no ghost components, no by-name bindings
+         NOTE: this should never be a singleton list (but it could be empty) *)
+      | Tuple of t list
+
+    (* unary expressions: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-unary-expression *)
+      | Unary of uop_t * t
+    (* NOTE: the following are unsupported
+       - as/is: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-as-is-expression
+       - bitvector: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-bitvector-expression
     *)
-    | AUpdate       of expr * iassign list
+      | Binary of bop_t * t * t
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-top-level-expression *)
+      | Lemma of {lem: t; e: t}
+    [@@deriving show, eq]
 
-  and map_ctor = 
-  (*
-    * { iassign, iassign, ... ... }
-    * { 1 := 1, x := 2 }
+    (** Suffixes
+        https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-suffix
     *)
-    | MapCtorSpec   of iassign list
-  (*
-    * map expr | expr :: expr    
-    * map opn | opn in votes && opn >= log_truncation_point :: votes[opn]
-    *)
-    | MapCtorItor   of expr * expr * expr
+    and suffix =
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-augmented-dot-suffix *)
+      | AugDot   of augmented_dotsuffix
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-datatype-update-suffix *)
+      | DataUpd  of member_binding_upd NonEmptyList.t
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-subsequence-suffix *)
+      | Subseq   of {lb: t option; ub: t option}
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-subsequence-slices-suffix *)
+      | SliceLen of {sublens: t NonEmptyList.t; to_end: bool }
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-sequence-update-suffix
+         NOTE: The grammar says there's only one update, but the example shows
+         multiple *)
+      | SeqUpd   of {idx: t; v: t}
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-selection-suffix
+         NOTE: multiple indices (for multi-dimensional arrays) not (yet?) supported *)
+      | Sel      of t
+      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-argument-list-suffix *)
+      | ArgList  of t list
+    [@@deriving show, eq]
 
-  and seq_ctor = 
-  (*
-    * [expr, expr, expr ... ...]    
-    *)
-    | SeqCtorSpec   of expr list
-  (*
-    * seq(expr, expr => expr)
-    * seq(|c.all.config.replica_ids|, idx => 0)
-    *)
-    | SeqCtorItor   of expr * expr * expr
+    and member_binding_upd = (id, int) Either.t * t
 
-  and set_ctor =
-  (*
-    * { expr, expr, expr }
-    * { 1, 2, x, a + b   }
-    *)
-    | SetCtorSpec   of expr list
-    | SetCtorItor   of expr * expr
-    | SetCtorItorSuchThat
-      of id list * expr * expr
+    and seq_display =
+      | SeqEnumerate of t list
+      | SeqTabulate  of
+          { gen_inst: Type.t list
+          ; len: t
+          ; func: t
+          }
 
-  and expr_coll_ctor = 
-    | MapCtor       of map_ctor
-    | SeqCtor       of seq_ctor
-    | SetCtor       of set_ctor
+    and attribute = string * t list
 
-  and expr_slice = 
-    (* ..expr *)
-    | SliceNoL      of expr
-    (* expr.. *)
-    | SliceNoR      of expr
-    (* expr..expr *)
-    | SliceLR       of expr * expr
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-case-pattern
+       NOTE: disjunctive patterns unsupported *)
+    and case_expr = Case of attribute list * extended_pattern * t
 
-  and iassign = 
-    (* expr := expr *)
-    | IAssign       of expr * expr
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-quantifier-expression *)
+    and qvar_decl =
+      QVar of id * Type.t option * t option * attribute list
 
-  and assigned =
-    (* (id, id, id) *)
-    | AssignedTpl   of id list
-    (* id *)
-    | AssignedId    of id
+    and qdom =
+      QDom of {qvars: qvar_decl list; qrange: t option}
 
-  and stmt = 
-  (*
-    * (id, id, id) := expr
-    * id := expr  
-    *)
-    | StmtAssign    of assigned * expr
+    let foldr1 (f: t -> t -> t) (es: t list): t =
+      match es with
+      | [] -> assert false      (* TODO: better error handling (integrate with parser (option)) *)
+      | _ :: _ ->
+        let l = List.length es in
+        List.fold_right f
+          (List.take (l - 1) es)
+          (List.nth es (l - 1))
 
-  (*
-    * var (id, id, id) := expr
-    * var id := expr 
-    *)
-    | StmtVAssign   of assigned * expr
-
-  (*
-    * assert expr ; 
-    *)
-    | StmtAssert    of expr
-
-  (*
-    * id(expr, expr, expr);
-    *)
-    | StmtCall      of id * expr list
-
-  (*
-    * { stmt; stmt; stmt; }
-    *)
-    | StmtsBraced   of stmt list
-
-  (*
-    * if expr {stmt}  
-    *)
-    | StmtIf        of expr * stmt
-
-  (*
-    * StmtIf else {stmt}  
-    * if x { ... } -> StmtIf |  else { ... } -> Stmt
-      StmtIfElse = Stmt(StmtIf) * Stmt
-                  = Stmt * Stmt
-    *)
-    | StmtIfElse    of stmt * stmt 
-
-    (* StmtIfElse {stmt} *)
-    | StmtIfElif    of stmt * stmt
-
-
-  and case = 
-    | Case          of expr * expr
-
-  and expr = 
-    (* id(expr, expr, expr) *)
-    | ExprCall      of id * expr list
-
-    (*  This is the same as the iassign defined above
-      * This is a tempral solution for a grammar conflict
-      * Can be removed later
-    *)
-    | ExprIAssignForCall 
-      of expr * expr
-
-    (* id *)
-    | ExprId        of id
-
-    (* 1 *)
-    | ExprInt       of int
-
-    (* ( expr ) *)
-    | PExpr         of expr
-
-    | ExprBinOp     of expr_bin_op
-
-    (* expr[expr] *)
-    | ExprScpt      of expr * expr
-
-    (* if expr then expr else expr *)
-    | ExprIf        of expr * expr * expr
-
-    (* | expr | *)
-    | ExprLen       of expr
-
-    | ExprCollCtor  of expr_coll_ctor
-
-    (* a.b.c ? *)
-    | ExprQuestionM of expr
-
-    (* StmtVAssign; expr | var x := 1; expr *)
-    | ExprLetBind   of stmt * expr
-
-    (* expr[expr := expr, expr := expr, ...] *)
-    | ExprCollAUpdate  
-      of expr * iassign list
-    | ExprImplies   of expr_implies
-    | ExprQtfier    of expr_qtfier
-    (* (expr, expr, expr) *)
-    | ExprTuple     of expr list
-    (* ! expr *)
-    | ExprNot       of expr
-    | ExprSlice     of expr_slice (* s[1..2] *)
-    | ExprMatch     of expr * case list
-    | ExprBlank
-
-  and formal = 
-    (* x : tp *)
-    | Formal        of id * tp 
-
-  and datatype_ctor = 
-    (* X(a : tp, b : tp) *)
-    | DatatypeCtor  of id * formal list
-
-  and ctst = 
-    | Requires      of expr
-    | Ensures       of expr
-    | Decreases     of expr
-
-
-  and module_item = 
-    | Import        of id
-    | DatatypeDef   of id * datatype_ctor list
-    | Predicate     of M.predicate_t * id * formal list * ctst list * expr
-    | Function      of entity_attr list * id * formal list * tp * ctst list * expr
-    | FuncMethod    of id * formal list * tp * ctst list * expr
-    | Method        of id * formal list * tp * ctst list * stmt list
-    | Lemma         of id * formal list * ctst list * stmt list
-    | Alias         of id * tp
-
-  and module_items = module_item list
-
-  and file_level = 
-    | Include       of id
-    | Module        of id * module_items
-  [@@deriving show]
+    let foldl1 (f: t -> t -> t) (es: t list): t =
+      match es with
+      | [] -> assert false      (* TODO: better error handling (integrate with parser (option)) *)
+      | init :: es ->
+        List.fold_left f init es
+  end
 end
 
 module ParserPass = AST (TrivMetaData)
