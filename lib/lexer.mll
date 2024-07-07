@@ -4,7 +4,7 @@
 }
 
 let white = [' ' '\t' '\r']
-let id    = ['a'-'z' 'A'-'Z' '_' '\'' '`'] ['a'-'z' 'A'-'Z' '0'-'9' '_' '\'' '`']*
+let id    = ['a'-'z' 'A'-'Z' '_' '\'' '`'] ['a'-'z' 'A'-'Z' '0'-'9' '_' '\'' '`' '?']*
 let num   = ['0'-'9']+
 
 rule lexeme = parse
@@ -20,16 +20,17 @@ rule lexeme = parse
   | "opened"        { Parser.OPENED                         }
   | "datatype"      { Parser.DATATYPE                       }
   | "predicate"     { Parser.PREDICATE                      }
+  | "this"          { Parser.THIS                           }
   | "set"           { Parser.SET                            }
   | "map"           { Parser.MAP                            }
+  | "seq"           { Parser.SEQ                            }
   | "forall"        { Parser.FORALL                         }
   | "exists"        { Parser.EXISTS                         }
-  | ":trigger"      { Parser.TRIGGER                        }
-  | ":opaque"       { Parser.OPAQUE                         }
-  | ":transparent"  { Parser.TRANSPARENT                    }
   | "if"            { Parser.IF                             }
   | "else"          { Parser.ELSE                           }
   | "then"          { Parser.THEN                           }
+  | "match"         { Parser.MATCH                          }
+  | "case"          { Parser.CASE                           }
   | "var"           { Parser.VAR                            }
   | "requires"      { Parser.REQUIRES                       }
   | "ensures"       { Parser.ENSURES                        }
@@ -37,20 +38,25 @@ rule lexeme = parse
   | "assert"        { Parser.ASSERT                         }
   | "function"      { Parser.FUNCTION                       }
   | "lemma"         { Parser.LEMMA                          }
-  | "type"          { Parser.TYPE                           }
 
-  | "."             { Parser.ATTRIBUTE                      }
-  | "?"             { Parser.QUESTIONM                      }
+  | "type"          { Parser.TYPE                           }
+  | "true"          { Parser.TRUE                           }
+  | "false"         { Parser.FALSE                          }
+  | "null"          { Parser.NULL                           }
+
+  | "."             { Parser.DOT                            }
   | "!"             { Parser.NOT                            }
   | "="             { Parser.SGEQ                           }
-  
+
   | ":="            { Parser.ASSIGN                         }
   | ".."            { Parser.SLICE                          }
 
-  | "==>"           { Parser.IMPLIESL                       }
-  | "<=="           { Parser.IMPLIESR                       }
-  | "<==>"          { Parser.IMPLIESBOTH                    }
-  | "::"            { Parser.SUCHTHAT                       }
+  | "==>"           { Parser.IMPLIES                        }
+  | "<=="           { Parser.EXPLIES                        }
+  | "<==>"          { Parser.EQUIV                          }
+  | "<-"            { Parser.QVAR_DOM_COLL                  }
+  | "=>"            { Parser.ARROW                          }
+  | "::"            { Parser.QUANTIFY_SEP                   }
 
   | "+"             { Parser.ADD                            }
   | "-"             { Parser.SUB                            }
@@ -70,6 +76,7 @@ rule lexeme = parse
 
   | ','             { Parser.COMMA                          }
   | '{'             { Parser.LBRACE                         }
+  | "{:"            { Parser.LBRACECOLON                    }
   | '}'             { Parser.RBRACE                         }
   | '('             { Parser.LPAREN                         }
   | ')'             { Parser.RPAREN                         }
