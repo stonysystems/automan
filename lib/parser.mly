@@ -79,7 +79,9 @@
 
 %start file_level
 %type <Syntax.ParserPass.FileLevel.t option> file_level
-// %type <Syntax.ParserPass.Expr.t> expr
+%type <Syntax.ParserPass.Prog.expr_t>        expr
+%type <Syntax.ParserPass.Prog.expr_t>        match_expr
+// %type <Syntax.ParserPass.Prog.t> expr
 
 %%
 
@@ -90,23 +92,23 @@
 expr:
   | e = equiv_expr { e }
   /* | es = separated_nonempty_list(SEMI, equiv_expr) */
-  /*   { Syntax.ParserPass.Expr.( */
+  /*   { Syntax.ParserPass.Prog.( */
   /*       foldr1 (fun x y -> Lemma {lem = x; e = y}) es) */
   /*   } */
 
 equiv_expr:
   | es = separated_nonempty_list(EQUIV, implies_explies_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         assoc_right_bop Equiv (Internal.NonEmptyList.coerce es))
     }
 
 implies_explies_expr:
   | e = logic_expr; es = nonempty_list(implies_before_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         assoc_right_bop Implies (Internal.NonEmptyList.(e :: es)))
     }
   | e = logic_expr; es = nonempty_list(explies_before_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         assoc_right_bop
           Implies
           (Internal.NonEmptyList.coerce (List.rev (e :: es)))
@@ -119,19 +121,19 @@ explies_before_expr: EXPLIES; e = logic_expr { e }
 
 logic_expr:
   | es = nonempty_list(and_before_rel_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         assoc_right_bop And (Internal.NonEmptyList.coerce es))
     }
   | e = rel_expr; es = nonempty_list(and_before_rel_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         assoc_right_bop And (Internal.NonEmptyList.(::) (e, es)))
     }
   | es = nonempty_list(or_before_rel_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         assoc_right_bop Or (Internal.NonEmptyList.coerce es))
     }
   | e = rel_expr; es = nonempty_list(or_before_rel_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         assoc_right_bop Or (Internal.NonEmptyList.(::) (e, es)))
     }
   | e = rel_expr { e }
@@ -142,20 +144,20 @@ or_before_rel_expr: OR; e = rel_expr   { e }
 
 /* BEGIN: relational operator symbols */
 rel_op_lt_lte:
-  | LTE    { Syntax.ParserPass.Expr.Lte }
-  | LANGLE { Syntax.ParserPass.Expr.Lt }
+  | LTE    { Syntax.ParserPass.Prog.Lte }
+  | LANGLE { Syntax.ParserPass.Prog.Lt }
 
 rel_op_gt_gte:
-  | GTE    { Syntax.ParserPass.Expr.Lte }
-  | RANGLE { Syntax.ParserPass.Expr.Lt }
+  | GTE    { Syntax.ParserPass.Prog.Lte }
+  | RANGLE { Syntax.ParserPass.Prog.Lt }
 
 /* NOTE: In Dafny, NEQ is allowed to appear inside a chain of equalities. We
    don't support this (yet?)
 */
 rel_op_nonchaining:
-  | NEQ   { Syntax.ParserPass.Expr.Neq }
-  | IN    { Syntax.ParserPass.Expr.In  }
-  | NOTIN { Syntax.ParserPass.Expr.Nin }
+  | NEQ   { Syntax.ParserPass.Prog.Neq }
+  | IN    { Syntax.ParserPass.Prog.In  }
+  | NOTIN { Syntax.ParserPass.Prog.Nin }
 /* END: relational operator symbols */
 
 /* NOTE: use "shift_term" between rel_expr and term_expr
@@ -167,29 +169,29 @@ rel_expr:
   | e = rel_expr_chain_eq     { e }
   | e1 = term_expr;
     o  = rel_op_nonchaining;
-    e2 = term_expr;           { Syntax.ParserPass.Expr.(Binary (o, e1, e2)) }
+    e2 = term_expr;           { Syntax.ParserPass.Prog.(Binary (o, e1, e2)) }
   | e = term_expr             { e }
 
 rel_expr_chain_lte_lt:
   | e1 = term_expr; es = nonempty_list(o = rel_op_lt_lte; e = term_expr { (o, e) })
-    { Syntax.ParserPass.Expr.chain_bop e1 es }
+    { Syntax.ParserPass.Prog.chain_bop e1 es }
 
 rel_expr_chain_gte_gt:
   | e1 = term_expr; es = nonempty_list(o = rel_op_gt_gte; e = term_expr { (o, e) })
-    { Syntax.ParserPass.Expr.chain_bop e1 es }
+    { Syntax.ParserPass.Prog.chain_bop e1 es }
 
 rel_expr_chain_eq:
-  | e1 = term_expr; es = nonempty_list(EQ; e = term_expr { (Syntax.ParserPass.Expr.Eq, e ) })
-    { Syntax.ParserPass.Expr.chain_bop e1 es }
+  | e1 = term_expr; es = nonempty_list(EQ; e = term_expr { (Syntax.ParserPass.Prog.Eq, e ) })
+    { Syntax.ParserPass.Prog.chain_bop e1 es }
 
 term_op:
-  | ADD { Syntax.ParserPass.Expr.Add }
-  | SUB { Syntax.ParserPass.Expr.Sub }
+  | ADD { Syntax.ParserPass.Prog.Add }
+  | SUB { Syntax.ParserPass.Prog.Sub }
 
 term_expr:
   |   e = factor_expr
     ; es = list(term_op_before_factor_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         List.fold_left
           (fun x y ->
             let (top, y') = y in
@@ -200,14 +202,14 @@ term_expr:
 term_op_before_factor_expr: top = term_op; e2 = factor_expr { (top, e2) }
 
 factor_op:
-  | MULT { Syntax.ParserPass.Expr.Mul }
-  | DIV  { Syntax.ParserPass.Expr.Div }
-  | MOD  { Syntax.ParserPass.Expr.Mod }
+  | MULT { Syntax.ParserPass.Prog.Mul }
+  | DIV  { Syntax.ParserPass.Prog.Div }
+  | MOD  { Syntax.ParserPass.Prog.Mod }
 
 factor_expr:
   |   e = unary_expr
     ; es = list(factor_op_before_expr)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         List.fold_left
           (fun x y ->
             let (top, y') = y in
@@ -219,11 +221,11 @@ factor_op_before_expr: top = factor_op; e2 = unary_expr { (top, e2) }
 
 unary_expr:
   | SUB; e = unary_expr
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         Unary (Neg, e))
     }
   | NOT; e = unary_expr
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         Unary (Not, e))}
   | e = primary_expr
     { e }
@@ -231,7 +233,7 @@ unary_expr:
 /* - primary expressions */
 primary_expr:
   | e = name_seg; suffs = list(suffix)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         List.fold_left
           (fun x y -> Suffixed (x, y))
           e suffs)
@@ -239,19 +241,19 @@ primary_expr:
   | e = lambda_expr
     { e }
   | e = map_disp_expr; suffs = list(suffix)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         List.fold_left
           (fun x y -> Suffixed (x, y))
           e suffs)
     }
   | e = seq_disp_expr; suffs = list(suffix)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         List.fold_left
           (fun x y -> Suffixed (x, y))
           (SeqDisplay e) suffs)
     }
   | e = set_disp_expr; suffs = list(suffix)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         List.fold_left
           (fun x y -> Suffixed (x, y))
           e suffs)
@@ -259,7 +261,7 @@ primary_expr:
   | e = endless_expr
     { e }
   | e = constatom_expr; suffs = list(suffix)
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         List.fold_left
           (fun x y -> Suffixed (x, y))
           e suffs)
@@ -269,7 +271,7 @@ primary_expr:
 comparison */
 name_seg:
   | x = ID /* ; tps = gen_inst */
-    { Syntax.ParserPass.Expr.NameSeg (x, []) }
+    { Syntax.ParserPass.Prog.NameSeg (x, []) }
 
 id_type_optional:
   | x = ID; COLON; tp = tp { (x, Some tp) }
@@ -285,34 +287,34 @@ lambda_formals:
 /* NOTE: no lambda spec */
 lambda_expr:
   | xs = lambda_formals; ARROW; bod = expr
-    { Syntax.ParserPass.Expr.Lambda (xs, bod) }
+    { Syntax.ParserPass.Prog.Lambda (xs, bod) }
 
 seq_disp_expr:
   | LSQBRAC; es = separated_list(COMMA, expr); RSQBRAC
-    { Syntax.ParserPass.Expr.SeqEnumerate es }
+    { Syntax.ParserPass.Prog.SeqEnumerate es }
   | SEQ; tps = gen_inst; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN
-    { Syntax.ParserPass.Expr.SeqTabulate { gen_inst = tps; len = e1; func = e2 }}
+    { Syntax.ParserPass.Prog.SeqTabulate { gen_inst = tps; len = e1; func = e2 }}
 
 map_literal_expression:
   | e1 = expr; ASSIGN; e2 = expr { (e1, e2) }
 
 map_disp_expr:
   |  MAP; es = delimited(LSQBRAC, separated_list(COMMA, map_literal_expression), RSQBRAC)
-    { Syntax.ParserPass.Expr.MapDisplay es }
+    { Syntax.ParserPass.Prog.MapDisplay es }
 
 set_disp_expr:
   | LBRACE; es = separated_list(COMMA, expr); RBRACE
-    { Syntax.ParserPass.Expr.SetDisplay es }
+    { Syntax.ParserPass.Prog.SetDisplay es }
 
 endless_expr:
   | IF; c = expr; THEN; t = expr; ELSE; e = expr
-    { Syntax.ParserPass.Expr.If (c, t, e) }
+    { Syntax.ParserPass.Prog.If (c, t, e) }
   | e = match_expr
     { e }
   | e = quantifier_expr
     { e }
   | SET; qd = qvar_dom; e = option(QUANTIFY_SEP; e = expr { e })
-    { Syntax.ParserPass.Expr.SetComp (qd, e) }
+    { Syntax.ParserPass.Prog.SetComp (qd, e) }
   /* let
      NOTE: no ghost, let-fail, assign-such-that */
   |   VAR
@@ -321,7 +323,7 @@ endless_expr:
     ; vs = separated_nonempty_list(COMMA, equiv_expr)
     ; SEMI
     ; bod = expr
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         Let
           { ghost = false
           ; pats = Internal.NonEmptyList.coerce pats
@@ -333,7 +335,7 @@ endless_expr:
     ; QUANTIFY_SEP
     ; e1 = expr
     ; e2 = option(ASSIGN; e = expr { e })
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         match e2 with
         | None -> MapComp { qdom = qd; key = None; valu = e1}
         | Some e2 ->
@@ -343,17 +345,17 @@ endless_expr:
 
 case_pattern:
   | x = ID; tp = option(COLON; tp = tp { tp })
-    { Syntax.ParserPass.Expr.PatVar (x, tp) }
+    { Syntax.ParserPass.Prog.PatVar (x, tp) }
   | x = option(ID); LPAREN; pats = separated_list(COMMA, case_pattern); RPAREN
-    { Syntax.ParserPass.Expr.PatCtor (x, pats) }
+    { Syntax.ParserPass.Prog.PatCtor (x, pats) }
 
 extended_pattern:
   | l = lit
-    { Syntax.ParserPass.Expr.EPatLit l }
+    { Syntax.ParserPass.Prog.EPatLit l }
   | x = ID; tp = option(COLON; tp = tp { tp })
-    { Syntax.ParserPass.Expr.EPatVar (x, tp) }
+    { Syntax.ParserPass.Prog.EPatVar (x, tp) }
   | x = option(ID); LPAREN; pats = separated_list(COMMA, extended_pattern); RPAREN
-    { Syntax.ParserPass.Expr.EPatCtor (x, pats) }
+    { Syntax.ParserPass.Prog.EPatCtor (x, pats) }
 
 case_expr:
   |   CASE
@@ -361,7 +363,7 @@ case_expr:
     ; pat = extended_pattern
     ; ARROW
     ; bod = expr
-    { Syntax.ParserPass.Expr.Case (attrs, pat, bod) }
+    { Syntax.ParserPass.Prog.Case (attrs, pat, bod) }
 
 /* NOTE: we force case trees to have curly braces to avoid a shift/reduce conflict */
 case_tree:
@@ -372,13 +374,13 @@ case_tree:
 
 match_expr:
   | MATCH; e = expr; tree = case_tree
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         Match (e, tree))
     }
 
 quantifier:
-  | FORALL { Syntax.ParserPass.Expr.Forall }
-  | EXISTS { Syntax.ParserPass.Expr.Exists }
+  | FORALL { Syntax.ParserPass.Prog.Forall }
+  | EXISTS { Syntax.ParserPass.Prog.Exists }
 
 qvar_dom_coll: QVAR_DOM_COLL; e = expr { e }
 
@@ -386,27 +388,27 @@ qvar_dom_range: PIPE; e = expr { e }
 
 qvar_decl:
   | xtp = id_type_optional; cdom = option(qvar_dom_coll); attrs = list(attribute)
-    { let (x , tp) = xtp in Syntax.ParserPass.Expr.QVar (x, tp, cdom, attrs) }
+    { let (x , tp) = xtp in Syntax.ParserPass.Prog.QVar (x, tp, cdom, attrs) }
 
 qvar_dom:
   |   qvs = separated_nonempty_list(COMMA, qvar_decl)
     ; r = option(qvar_dom_range)
-    { Syntax.ParserPass.Expr.QDom { qvars = qvs; qrange = r }}
+    { Syntax.ParserPass.Prog.QDom { qvars = qvs; qrange = r }}
 
 quantifier_expr:
   | q = quantifier; qd = qvar_dom; QUANTIFY_SEP; e = expr
-    { Syntax.ParserPass.Expr.Quantifier { qt = q; qdom = qd; qbody = e } }
+    { Syntax.ParserPass.Prog.Quantifier { qt = q; qdom = qd; qbody = e } }
 
 constatom_expr:
   | e = lit
-    { Syntax.ParserPass.Expr.Lit e }
+    { Syntax.ParserPass.Prog.Lit e }
   | THIS
-    { Syntax.ParserPass.Expr.This }
+    { Syntax.ParserPass.Prog.This }
   | e = delimited(PIPE, expr, PIPE)
-    { Syntax.ParserPass.Expr.(Cardinality e)}
+    { Syntax.ParserPass.Prog.(Cardinality e)}
   | LPAREN; es = list(expr); RPAREN
     {
-      Syntax.ParserPass.Expr.(
+      Syntax.ParserPass.Prog.(
         match es with
         | [e] -> e
         | _   -> Tuple es
@@ -415,25 +417,25 @@ constatom_expr:
 
 suffix:
   | s = dotsuffix; tps = gen_inst
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         AugDot (s, tps))
     }
   |   DOT
     ; LPAREN
     ; upds = separated_nonempty_list(COMMA, member_binding_upd)
     ; RPAREN
-    { Syntax.ParserPass.Expr.(
+    { Syntax.ParserPass.Prog.(
         DataUpd (Internal.NonEmptyList.coerce upds))
     }
   | LSQBRAC; lb = option(expr); SLICE; ub = option(expr); RSQBRAC
-    { Syntax.ParserPass.Expr.Subseq { lb = lb; ub = ub }}
+    { Syntax.ParserPass.Prog.Subseq { lb = lb; ub = ub }}
   /* TODO: slices by length */
   | LSQBRAC; idx = expr; ASSIGN; valu = expr; RSQBRAC
-    { Syntax.ParserPass.Expr.SeqUpd {idx = idx; v = valu }}
+    { Syntax.ParserPass.Prog.SeqUpd {idx = idx; v = valu }}
   | LSQBRAC; e = expr; RSQBRAC
-    { Syntax.ParserPass.Expr.Sel e }
+    { Syntax.ParserPass.Prog.Sel e }
   | args = delimited(LPAREN, separated_list(COMMA, expr), RPAREN)
-    { Syntax.ParserPass.Expr.ArgList args }
+    { Syntax.ParserPass.Prog.ArgList args }
 
 /* TODO: add requires, reads */
 dotsuffix:
@@ -445,11 +447,11 @@ member_binding_upd:
   | n = NUM; ASSIGN; e = expr { (Either.Right n, e) }
 
 lit: /* TODO: character literals */
-  | TRUE  { Syntax.ParserPass.Expr.True }
-  | FALSE { Syntax.ParserPass.Expr.False}
-  | NULL  { Syntax.ParserPass.Expr.Null }
-  | x = STRING { Syntax.ParserPass.Expr.String x }
-  | n = NUM    { Syntax.ParserPass.Expr.Nat n }
+  | TRUE  { Syntax.ParserPass.Prog.True }
+  | FALSE { Syntax.ParserPass.Prog.False}
+  | NULL  { Syntax.ParserPass.Prog.Null }
+  | x = STRING { Syntax.ParserPass.Prog.String x }
+  | n = NUM    { Syntax.ParserPass.Prog.Nat n }
 
 /* Types  */
 tp_prim:
