@@ -22,8 +22,12 @@ rule lexeme = parse
   | "predicate"     { Parser.PREDICATE                      }
   | "this"          { Parser.THIS                           }
   | "set"           { Parser.SET                            }
-  | "map"           { Parser.MAP                            }
   | "seq"           { Parser.SEQ                            }
+  | "map"           { Parser.MAP                            }
+  | "int"           { Parser.INT                            }
+  | "bool"          { Parser.BOOL                           }
+  | "nat"           { Parser.NAT                            }
+  | "string"        { Parser.STR                            }
   | "forall"        { Parser.FORALL                         }
   | "exists"        { Parser.EXISTS                         }
   | "if"            { Parser.IF                             }

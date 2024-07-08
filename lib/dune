@@ -4,6 +4,7 @@
  (preprocess (pps ppx_deriving.show ppx_deriving.eq)))
 
 (menhir
-  (modules parser))
+  (modules parser)
+  (flags :standard --trace --dump))
 
 (ocamllex lexer)

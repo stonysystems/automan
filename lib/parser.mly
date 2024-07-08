@@ -19,7 +19,7 @@
 %token SLICE
 %token ASSIGN
 %token IF THEN ELSE MATCH CASE
-%token SET MAP SEQ
+%token SET MAP SEQ INT BOOL NAT STR
 %token ADD SUB MULT DIV MOD
 
 %token AND OR
@@ -61,7 +61,6 @@
 %left  PIPE
 
 %left  AND OR
-%left  EQ NEQ LTE GTE IN NOTIN
 
 %left  LSQBRAC
 
@@ -78,72 +77,110 @@
 %left  NOT
 %left  DOT
 
-%start expr
-// %type <Syntax.ParserPass.file_level option> file
-%type <Syntax.ParserPass.Expr.t> expr
+%start file_level
+%type <Syntax.ParserPass.FileLevel.t option> file_level
+// %type <Syntax.ParserPass.Expr.t> expr
 
 %%
 
 /* expressions */
+/* TODO: we need attributes to support lemma calls
+   https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-top-level-expression
+*/
 expr:
-  | es = separated_nonempty_list(SEMI, equiv_expr)
-    { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Lemma {lem = x; e = y}) es)
-    }
+  | e = equiv_expr { e }
+  /* | es = separated_nonempty_list(SEMI, equiv_expr) */
+  /*   { Syntax.ParserPass.Expr.( */
+  /*       foldr1 (fun x y -> Lemma {lem = x; e = y}) es) */
+  /*   } */
 
 equiv_expr:
   | es = separated_nonempty_list(EQUIV, implies_explies_expr)
     { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Binary (Equiv, x, y))) es
+        assoc_right_bop Equiv (Internal.NonEmptyList.coerce es))
     }
 
 implies_explies_expr:
-  | e = logic_expr; es = nonempty_list(IMPLIES; e = logic_expr { e })
+  | e = logic_expr; es = nonempty_list(implies_before_expr)
     { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Binary (Implies, x, y)) (e :: es))
+        assoc_right_bop Implies (Internal.NonEmptyList.(e :: es)))
     }
-  | e = logic_expr; es = nonempty_list(EXPLIES; e = logic_expr { e })
+  | e = logic_expr; es = nonempty_list(explies_before_expr)
     { Syntax.ParserPass.Expr.(
-        foldl1 (fun x y -> Binary (Implies, y, x)) (e :: es)
+        assoc_right_bop
+          Implies
+          (Internal.NonEmptyList.coerce (List.rev (e :: es)))
       )}
   | e = logic_expr { e }
 
+implies_before_expr: IMPLIES; e = logic_expr { e }
+
+explies_before_expr: EXPLIES; e = logic_expr { e }
+
 logic_expr:
-  | es = nonempty_list(AND; e = rel_expr { e })
+  | es = nonempty_list(and_before_rel_expr)
     { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Binary (And, x, y)) es)
+        assoc_right_bop And (Internal.NonEmptyList.coerce es))
     }
-  | e = rel_expr; es = nonempty_list(AND; e = rel_expr { e })
+  | e = rel_expr; es = nonempty_list(and_before_rel_expr)
     { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Binary (And, x, y)) (e :: es))
+        assoc_right_bop And (Internal.NonEmptyList.(::) (e, es)))
     }
-  | es = nonempty_list(OR; e = rel_expr { e })
+  | es = nonempty_list(or_before_rel_expr)
     { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Binary (Or, x, y)) es)
+        assoc_right_bop Or (Internal.NonEmptyList.coerce es))
     }
-  | e = rel_expr; es = nonempty_list(OR; e = rel_expr { e })
+  | e = rel_expr; es = nonempty_list(or_before_rel_expr)
     { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Binary (Or, x, y)) (e :: es))
+        assoc_right_bop Or (Internal.NonEmptyList.(::) (e, es)))
     }
   | e = rel_expr { e }
 
-rel_op:
-  | EQ     { Syntax.ParserPass.Expr.Eq }
-  | NEQ    { Syntax.ParserPass.Expr.Eq }
-  | LTE    { Syntax.ParserPass.Expr.Lte }
-  | GTE    { Syntax.ParserPass.Expr.Gte }
-  | LANGLE { Syntax.ParserPass.Expr.Lt }
-  | RANGLE { Syntax.ParserPass.Expr.Gt }
+and_before_rel_expr: AND; e = rel_expr { e }
 
-/* NOTE: chaining not supported!
-   NOTE: use "shift_term" between rel_expr and term_expr
-         if bitwise ops are to be added
+or_before_rel_expr: OR; e = rel_expr   { e }
+
+/* BEGIN: relational operator symbols */
+rel_op_lt_lte:
+  | LTE    { Syntax.ParserPass.Expr.Lte }
+  | LANGLE { Syntax.ParserPass.Expr.Lt }
+
+rel_op_gt_gte:
+  | GTE    { Syntax.ParserPass.Expr.Lte }
+  | RANGLE { Syntax.ParserPass.Expr.Lt }
+
+/* NOTE: In Dafny, NEQ is allowed to appear inside a chain of equalities. We
+   don't support this (yet?)
+*/
+rel_op_nonchaining:
+  | NEQ   { Syntax.ParserPass.Expr.Neq }
+  | IN    { Syntax.ParserPass.Expr.In  }
+  | NOTIN { Syntax.ParserPass.Expr.Nin }
+/* END: relational operator symbols */
+
+/* NOTE: use "shift_term" between rel_expr and term_expr
+   if bitwise ops are to be added
 */
 rel_expr:
-  | e1 = term_expr; rop = rel_op; e2 = term_expr
-    { Syntax.ParserPass.Expr.(
-        Binary (rop, e1, e2))
-    }
+  | e = rel_expr_chain_lte_lt { e }
+  | e = rel_expr_chain_gte_gt { e }
+  | e = rel_expr_chain_eq     { e }
+  | e1 = term_expr;
+    o  = rel_op_nonchaining;
+    e2 = term_expr;           { Syntax.ParserPass.Expr.(Binary (o, e1, e2)) }
+  | e = term_expr             { e }
+
+rel_expr_chain_lte_lt:
+  | e1 = term_expr; es = nonempty_list(o = rel_op_lt_lte; e = term_expr { (o, e) })
+    { Syntax.ParserPass.Expr.chain_bop e1 es }
+
+rel_expr_chain_gte_gt:
+  | e1 = term_expr; es = nonempty_list(o = rel_op_gt_gte; e = term_expr { (o, e) })
+    { Syntax.ParserPass.Expr.chain_bop e1 es }
+
+rel_expr_chain_eq:
+  | e1 = term_expr; es = nonempty_list(EQ; e = term_expr { (Syntax.ParserPass.Expr.Eq, e ) })
+    { Syntax.ParserPass.Expr.chain_bop e1 es }
 
 term_op:
   | ADD { Syntax.ParserPass.Expr.Add }
@@ -151,7 +188,7 @@ term_op:
 
 term_expr:
   |   e = factor_expr
-    ; es = list(top = term_op; e2 = factor_expr { (top, e2) })
+    ; es = list(term_op_before_factor_expr)
     { Syntax.ParserPass.Expr.(
         List.fold_left
           (fun x y ->
@@ -159,6 +196,8 @@ term_expr:
             Binary (top, x, y'))
           e es)
     }
+
+term_op_before_factor_expr: top = term_op; e2 = factor_expr { (top, e2) }
 
 factor_op:
   | MULT { Syntax.ParserPass.Expr.Mul }
@@ -167,7 +206,7 @@ factor_op:
 
 factor_expr:
   |   e = unary_expr
-    ; es = list(top = factor_op; e2 = unary_expr { (top, e2) })
+    ; es = list(factor_op_before_expr)
     { Syntax.ParserPass.Expr.(
         List.fold_left
           (fun x y ->
@@ -175,6 +214,8 @@ factor_expr:
             Binary (top, x, y'))
           e es)
     }
+
+factor_op_before_expr: top = factor_op; e2 = unary_expr { (top, e2) }
 
 unary_expr:
   | SUB; e = unary_expr
@@ -224,17 +265,22 @@ primary_expr:
           e suffs)
     }
 
+/* TODO: the usual problem with using <> for generic instantiation and < for
+comparison */
 name_seg:
-  | x = ID; tps = gen_inst { Syntax.ParserPass.Expr.NameSeg (x, tps) }
+  | x = ID /* ; tps = gen_inst */
+    { Syntax.ParserPass.Expr.NameSeg (x, []) }
+
+id_type_optional:
+  | x = ID; COLON; tp = tp { (x, Some tp) }
+  | x = ID                 { (x, None)    }
+
+lambda_delimited_formals:
+  | xs = delimited(LPAREN, separated_list(COMMA, id_type_optional), RPAREN) { xs }
 
 lambda_formals:
-  | x = ID { [(x, None)] }
-  |   LPAREN
-    ; xs = separated_nonempty_list
-        (COMMA
-        , x = ID; tp = option(COLON; tp = tp { tp }) { (x, tp) })
-    ; RPAREN
-    { xs }
+  | x = ID                        { [(x, None)] }
+  | xs = lambda_delimited_formals { xs }
 
 /* NOTE: no lambda spec */
 lambda_expr:
@@ -247,13 +293,11 @@ seq_disp_expr:
   | SEQ; tps = gen_inst; LPAREN; e1 = expr; COMMA; e2 = expr; RPAREN
     { Syntax.ParserPass.Expr.SeqTabulate { gen_inst = tps; len = e1; func = e2 }}
 
+map_literal_expression:
+  | e1 = expr; ASSIGN; e2 = expr { (e1, e2) }
+
 map_disp_expr:
-  |   MAP
-    ; LSQBRAC
-    ; es = separated_nonempty_list
-      (COMMA
-      , e1 = expr; ASSIGN; e2 = expr
-        { (e1, e2) })
+  |  MAP; es = delimited(LSQBRAC, separated_list(COMMA, map_literal_expression), RSQBRAC)
     { Syntax.ParserPass.Expr.MapDisplay es }
 
 set_disp_expr:
@@ -336,16 +380,17 @@ quantifier:
   | FORALL { Syntax.ParserPass.Expr.Forall }
   | EXISTS { Syntax.ParserPass.Expr.Exists }
 
+qvar_dom_coll: QVAR_DOM_COLL; e = expr { e }
+
+qvar_dom_range: PIPE; e = expr { e }
+
 qvar_decl:
-  |   x = ID
-    ; typ = option(COLON; typ = tp { typ })
-    ; cdom = option(QVAR_DOM_COLL; e = expr { e })
-    ; attrs = list(attribute)
-    { Syntax.ParserPass.Expr.QVar (x, typ, cdom, attrs) }
+  | xtp = id_type_optional; cdom = option(qvar_dom_coll); attrs = list(attribute)
+    { let (x , tp) = xtp in Syntax.ParserPass.Expr.QVar (x, tp, cdom, attrs) }
 
 qvar_dom:
   |   qvs = separated_nonempty_list(COMMA, qvar_decl)
-    ; r = option(PIPE; e = expr { e })
+    ; r = option(qvar_dom_range)
     { Syntax.ParserPass.Expr.QDom { qvars = qvs; qrange = r }}
 
 quantifier_expr:
@@ -357,7 +402,7 @@ constatom_expr:
     { Syntax.ParserPass.Expr.Lit e }
   | THIS
     { Syntax.ParserPass.Expr.This }
-  | PIPE; e = expr; PIPE
+  | e = delimited(PIPE, expr, PIPE)
     { Syntax.ParserPass.Expr.(Cardinality e)}
   | LPAREN; es = list(expr); RPAREN
     {
@@ -387,13 +432,13 @@ suffix:
     { Syntax.ParserPass.Expr.SeqUpd {idx = idx; v = valu }}
   | LSQBRAC; e = expr; RSQBRAC
     { Syntax.ParserPass.Expr.Sel e }
-  | LPAREN; args = separated_list(COMMA, expr); RPAREN
+  | args = delimited(LPAREN, separated_list(COMMA, expr), RPAREN)
     { Syntax.ParserPass.Expr.ArgList args }
 
 /* TODO: add requires, reads */
 dotsuffix:
-  | x = ID  { Syntax.DSId x }
-  | n = NUM { Syntax.DSDig n }
+  | DOT; x = ID  { Syntax.DSId x }
+  | DOT; n = NUM { Syntax.DSDig n }
 
 member_binding_upd:
   | x = ID; ASSIGN; e = expr  { (Either.Left x, e) }
@@ -404,29 +449,42 @@ lit: /* TODO: character literals */
   | FALSE { Syntax.ParserPass.Expr.False}
   | NULL  { Syntax.ParserPass.Expr.Null }
   | x = STRING { Syntax.ParserPass.Expr.String x }
+  | n = NUM    { Syntax.ParserPass.Expr.Nat n }
 
 /* Types  */
-tp_id:
-  | SET     { "set" }
-  | MAP     { "map" }
-  | SEQ     { "seq" }
-  | x = ID  { x     }
+tp_prim:
+  | SET; LANGLE; t = tp; RANGLE
+    { Syntax.ParserPass.Type.set t }
+  | SEQ; LANGLE; t = tp; RANGLE
+    { Syntax.ParserPass.Type.seq t }
+  | MAP; LANGLE; t1 = tp; COMMA; t2 = tp; RANGLE
+    { Syntax.ParserPass.Type.map t1 t2 }
+  | INT
+    { Syntax.ParserPass.Type.int }
+  | BOOL
+    { Syntax.ParserPass.Type.bool }
+  | NAT
+    { Syntax.ParserPass.Type.nat }
+  | STR
+    { Syntax.ParserPass.Type.bool }
+
+tp_tup:
+  | LPAREN; RPAREN { Syntax.ParserPass.Type.unit }
+  | LPAREN; t1 = tp; COMMA; ts = nonempty_list(COMMA; t = tp { t })
+    { Syntax.ParserPass.Type.TpTup (t1 :: ts) }
+
+tp_name_seg:
+  | x = ID; ts = gen_inst;
+    { Syntax.ParserPass.Type.TpIdSeg { id = x; gen_inst = ts }}
 
 tp:
-  | LPAREN; es = separated_nonempty_list(COMMA, tp); RPAREN
-    { Syntax.ParserPass.Type.(
-        TpTup es)
-    }
-  | ns = separated_nonempty_list
-      (DOT
-      ,   x = tp_id
-        ; tps = gen_inst
-          { Syntax.ParserPass.Type.TpIdSeg { id = x; gen_inst = tps } })
-    { Syntax.ParserPass.Type.TpName (Internal.NonEmptyList.coerce ns) }
+  | t = tp_prim { t }
+  | t = tp_tup  { t }
+  | nss = separated_nonempty_list(DOT, tp_name_seg)
+    { Syntax.ParserPass.Type.TpName (Internal.NonEmptyList.coerce nss) }
 
 gen_inst:
-  | LANGLE; tps = separated_nonempty_list(COMMA, tp); RANGLE
-    { tps }
+  | tps = delimited(LANGLE, separated_nonempty_list(COMMA, tp), RANGLE) { tps }
   | /* empty */
     { [] }
 
@@ -435,15 +493,48 @@ attribute:
   | LBRACECOLON; a = ID; args = separated_list(COMMA, expr); RBRACE
     { (a, args) }
 
-/*
-  | e1 = logic_expr; IMPLIES; e2 = implies_expr
-    { Syntax.ParserPass.Expr.(
-        Binary (Implies, e1, e2))
-    }
-  | e1 = logic_expr; es = separated_nonempty_list(EXPLILES, logic_expr)
-    { Syntax.ParserPass.Expr.(
-        foldr1 (fun x y -> Binary (Implies, y, x)) (e1 :: es))
-    }
-  | e = logic_expr
-    { e }
-*/
+/* module declarations */
+formal:
+  | x = ID; COLON; t = tp
+    { Syntax.ParserPass.ModuleItem.Formal (x, t) }
+
+/* TODO: parallel pipes? (like &&, ||) */
+datatype_ctor:
+  | c = ID; LPAREN; fs = separated_list(COMMA, formal); RPAREN
+    { Syntax.ParserPass.ModuleItem.DatatypeCtor (c, fs) }
+
+datatype_ctors:
+  | cs = separated_list(PIPE, datatype_ctor) { cs }
+
+function_spec:
+  | REQUIRES; e = expr
+    { Syntax.ParserPass.ModuleItem.Requires e }
+  /* | READS; e = expr */
+  /*   { Syntax.ParserPass.ModuleItem.Reads e } */
+  | ENSURES; e = expr
+    { Syntax.ParserPass.ModuleItem.Ensures e }
+  | DECREASES; e = expr
+    { Syntax.ParserPass.ModuleItem.Decreases e }
+
+
+module_item:
+  | IMPORT; OPENED; m = ID
+    { Syntax.ParserPass.ModuleItem.Import m }
+  | DATATYPE; d = ID; SGEQ; cs = datatype_ctors;
+    { Syntax.ParserPass.ModuleItem.DatatypeDef (d, cs) }
+  | PREDICATE; p = ID;
+    fs = delimited(LPAREN, separated_list(COMMA, formal), RPAREN);
+    specs = list(function_spec);
+    e = delimited(LBRACE, expr, RBRACE);
+    { Syntax.ParserPass.ModuleItem.Predicate (p, fs, specs, e) }
+  | TYPE; n = ID; SGEQ; t = tp
+    { Syntax.ParserPass.ModuleItem.Alias (n, t) }
+
+/* file-level directives */
+file_level:
+  | INCLUDE; fp = STRING
+    { Some (Syntax.ParserPass.FileLevel.Include fp) }
+  | MODULE; m = ID; LBRACE; ds = list(module_item); RBRACE
+    { Some (Syntax.ParserPass.FileLevel.Module (m, ds)) }
+  | EOF
+    { None }

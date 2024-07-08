@@ -4,6 +4,8 @@ let curry (f: ('a * 'b) -> 'c) (x: 'a) (y: 'b) =
 module List : sig
   include module type of List
   val take: int -> 'a list -> 'a list
+  val unsnoc: 'a list -> 'a list * 'a
+
 end = struct
   include List
 
@@ -15,6 +17,11 @@ end = struct
     in
     if n < 0 then invalid_arg "List.take";
     aux n l
+
+  let unsnoc xs =
+    match (rev xs) with
+    | [] -> invalid_arg "List.unsnoc"
+    | (last :: sx) -> (rev sx, last)
 end
 
 module NonEmptyList = struct
@@ -25,8 +32,28 @@ module NonEmptyList = struct
 
   let coerce (xs: 'a list): 'a t =
     match xs with
-    | [] -> assert false
+    | [] -> invalid_arg "NonEmptyList.coerce: arg is empty"
     | x :: xs' -> (::) (x, xs')
+
+  let as_list (xs: 'a t): 'a list =
+    let ( :: ) (x, xs) = xs in
+    x :: xs
+
+  let unsnoc (xs: 'a t): 'a list * 'a =
+    List.unsnoc (as_list xs)
+
+  let fold_left_1 (f: 'a -> 'a -> 'a) (xs: 'a t) =
+    let ( :: ) (h, t) = xs in
+    List.fold_left f h t
+
+  let fold_right_1 (f: 'a -> 'a -> 'a) (xs: 'a t) =
+    let rec aux (y: 'a) (ys: 'a list) =
+      match ys with
+      | [] -> y
+      | y1 :: ys -> f y (aux y1 ys)
+    in
+    let ( :: ) (x, xs) = xs in
+    aux x xs
 end
 
 module Either : sig

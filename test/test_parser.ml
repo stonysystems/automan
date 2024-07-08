@@ -8,7 +8,7 @@ let print_position outx lexbuf =
     pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
 let parse_with_error lexbuf =
-  try Parser.file Lexer.lexeme lexbuf with
+  try Parser.file_level Lexer.lexeme lexbuf with
   | Lexer.SyntaxError msg ->
     fprintf stderr "%a: %s\n" print_position lexbuf msg;
     None
@@ -19,7 +19,7 @@ let parse_with_error lexbuf =
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some x ->
-    printf "%s\n" Syntax.ParserPass.(show_file_level x);
+    printf "%s\n" Syntax.ParserPass.FileLevel.(show x);
     parse_and_print lexbuf
   | None -> ()
 

@@ -50,6 +50,7 @@ module AST (M : MetaData) = struct
     let bool   = simple "bool"
     let nat    = simple "nat"
     let string = simple "string"
+    let unit   = TpTup []
 
     let seq (elem: t) = simple_generic "seq" [elem]
     let set (elem: t) = simple_generic "set" [elem]
@@ -242,20 +243,60 @@ module AST (M : MetaData) = struct
     and qdom =
       QDom of {qvars: qvar_decl list; qrange: t option}
 
-    let foldr1 (f: t -> t -> t) (es: t list): t =
+    (** `should only be called with relational operators that support chaining,
+        and can be chained together *)
+    let rec chain_bop (e1: t) (es: (bop_t * t) list): t =
       match es with
-      | [] -> assert false      (* TODO: better error handling (integrate with parser (option)) *)
-      | _ :: _ ->
-        let l = List.length es in
-        List.fold_right f
-          (List.take (l - 1) es)
-          (List.nth es (l - 1))
+      | [] -> e1
+      | [(o, e2)] -> Binary (o, e1, e2)
+      | (o, e2) :: es ->
+        let res = chain_bop e2 es in
+        Binary (And, Binary (o, e1, e2), res)
+
+    let assoc_right_bop (o: bop_t) (es: t NonEmptyList.t): t =
+      NonEmptyList.fold_right_1 (fun x y -> Binary (o, x, y)) es
+
+    (* let assoc_left_bop (o: bop_t) (es: t NonEmptyList.t): t = *)
+    (*   NonEmptyList.fold_left_1 (fun x y ) *)
 
     let foldl1 (f: t -> t -> t) (es: t list): t =
       match es with
       | [] -> assert false      (* TODO: better error handling (integrate with parser (option)) *)
       | init :: es ->
         List.fold_left f init es
+  end
+
+  module ModuleItem = struct
+    type formal = Formal of id * Type.t
+    [@@deriving show, eq]
+
+    type datatype_ctor = DatatypeCtor of id * formal list
+    [@@deriving show, eq]
+
+    type function_spec =
+      | Requires    of Expr.t
+      | Reads       of Expr.t
+      | Ensures     of Expr.t
+      | Decreases   of Expr.t
+    [@@deriving show, eq]
+
+    type t =
+      | Import        of id
+      | DatatypeDef   of id * datatype_ctor list
+      | Predicate     of id * formal list * function_spec list * Expr.t
+      | Function      of id * formal list * Type.t * function_spec list * Expr.t
+      | FuncMethod    of id * formal list * Type.t * function_spec list * Expr.t
+      (* | Method        of id * formal list * return_mthd * ctst list * stmt list *)
+      (* | Lemma         of id * formal list * ctst list * stmt list *)
+      | Alias         of id * Type.t
+    [@@deriving show, eq]
+  end
+
+  module FileLevel = struct
+    type t =
+      | Include of id
+      | Module  of id * ModuleItem.t list
+    [@@deriving show, eq]
   end
 end
 
