@@ -494,6 +494,40 @@ attribute:
     { (a, args) }
 
 /* module declarations */
+qualified_module_name:
+  | xs = separated_nonempty_list(DOT, ID)
+    { Internal.NonEmptyList.coerce xs }
+
+/* NOTE: misnomer, the `export` part refers to export sets, which we don't
+         support */
+qualified_module_export:
+  | x = qualified_module_name { x }
+
+import_mod_ref:
+  | x = ID; DOT; xs = qualified_module_name
+    { (None, Internal.NonEmptyList.cons x xs) }
+  | x = ID; SGEQ; xs = qualified_module_name
+    { Syntax.ParserPass.ModuleItem.(
+        (Some (Concrete, x), xs))
+    }
+  | x = ID; COLON; xs = qualified_module_name
+    { Syntax.ParserPass.ModuleItem.(
+        (Some (Abstract, x), xs))
+    }
+  | x = ID
+    { (None, Internal.NonEmptyList.singleton x) }
+
+import:
+  | IMPORT;
+    op = option(OPENED);
+    r = import_mod_ref;
+    { let (rf, tgt) = r in
+      Syntax.ParserPass.ModuleItem.(
+        { opened = Option.is_some op
+        ; mref = rf
+        ; tgt = tgt })
+    }
+
 formal:
   | x = ID; COLON; t = tp
     { Syntax.ParserPass.ModuleItem.Formal (x, t) }
@@ -518,8 +552,8 @@ function_spec:
 
 
 module_item:
-  | IMPORT; OPENED; m = ID
-    { Syntax.ParserPass.ModuleItem.Import m }
+  | i = import
+    { Syntax.ParserPass.ModuleItem.Import i }
   | DATATYPE; d = ID; SGEQ; cs = datatype_ctors;
     { Syntax.ParserPass.ModuleItem.DatatypeDef (d, cs) }
   | PREDICATE; p = ID;

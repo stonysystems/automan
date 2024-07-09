@@ -338,7 +338,22 @@ module AST (M : MetaData) = struct
         List.fold_left f init es
   end
 
+  type module_qualified_name_t = id_t NonEmptyList.t
+  [@@deriving show, eq]
+
   module ModuleItem = struct
+    (** Imports  *)
+    type module_reference_t = Concrete | Abstract
+    [@@deriving show, eq]
+
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-importing-modules *)
+    type import_t =
+      { opened: bool
+      ; mref: (module_reference_t * id_t) option
+      ; tgt: module_qualified_name_t
+      }
+    [@@deriving show, eq]
+
     type formal_t = Formal of id_t * Type.t
     [@@deriving show, eq]
 
@@ -362,7 +377,7 @@ module AST (M : MetaData) = struct
     [@@deriving eq, show]
 
     type t =
-      | Import        of id_t
+      | Import        of import_t
       | DatatypeDef   of id_t * datatype_ctor_t list
       | Predicate     of id_t * formal_t list * function_spec_t list * Prog.expr_t
       | Function      of id_t * formal_t list * Type.t * function_spec_t list * Prog.expr_t

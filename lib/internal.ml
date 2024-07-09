@@ -39,6 +39,10 @@ module NonEmptyList = struct
     let ( :: ) (x, xs) = xs in
     x :: xs
 
+  let cons (x: 'a) (xs: 'a t): 'a t =
+    let ( :: ) (x', xs') = xs in
+    (::) (x, x' :: xs')
+
   let unsnoc (xs: 'a t): 'a list * 'a =
     List.unsnoc (as_list xs)
 
