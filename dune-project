@@ -6,9 +6,10 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github cwjnkins/automan))
 
 (authors "Christa Jenkins" "Ti Zhou" "Omar Chowdhurry")
+(maintainers "Christa Jenkins" "Ti Zhou")
 
 (license LICENSE)
 
