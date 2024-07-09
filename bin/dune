@@ -1,4 +1,4 @@
 (executable
- (public_name ballast)
+ (public_name automan)
  (name main)
- (libraries ballast))
+ (libraries automan))

@@ -352,13 +352,24 @@ module AST (M : MetaData) = struct
       | Decreases   of Prog.expr_t
     [@@deriving show, eq]
 
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-method-declaration
+       NOTE: see MethodKeyword_
+       NOTE: Dafny 4 obsolesced "function method", but we are targetting
+             Dafny 3
+       TODO: support for constructor, twostate lemma, least/greatest
+             lemma *)
+    type method_decl_t = Method | Lemma
+    [@@deriving eq, show]
+
     type t =
       | Import        of id_t
       | DatatypeDef   of id_t * datatype_ctor_t list
       | Predicate     of id_t * formal_t list * function_spec_t list * Prog.expr_t
       | Function      of id_t * formal_t list * Type.t * function_spec_t list * Prog.expr_t
       | FuncMethod    of id_t * formal_t list * Type.t * function_spec_t list * Prog.expr_t
-      (* | Method        of id * formal list * return_mthd * ctst list * stmt list *)
+      (* lemma, method *)
+      | Method        of method_decl_t *
+                         id_t * formal_t list * formal_t list * function_spec_t list * Prog.stmt_t list
       (* | Lemma         of id * formal list * ctst list * stmt list *)
       | Alias         of id_t * Type.t
     [@@deriving show, eq]

@@ -1,4 +1,4 @@
-open Ballast
+open Automan
 open Core
 open Lexing
 

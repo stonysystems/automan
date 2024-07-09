@@ -1,5 +1,5 @@
 (library
- (name ballast)
+ (name automan)
  (libraries core str)
  (preprocess (pps ppx_deriving.show ppx_deriving.eq)))
 

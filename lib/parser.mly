@@ -79,8 +79,6 @@
 
 %start file_level
 %type <Syntax.ParserPass.FileLevel.t option> file_level
-%type <Syntax.ParserPass.Prog.expr_t>        expr
-%type <Syntax.ParserPass.Prog.expr_t>        match_expr
 // %type <Syntax.ParserPass.Prog.t> expr
 
 %%
@@ -500,7 +498,7 @@ formal:
   | x = ID; COLON; t = tp
     { Syntax.ParserPass.ModuleItem.Formal (x, t) }
 
-/* TODO: parallel pipes? (like &&, ||) */
+/* TODO: parallel pipes for constructors? (like &&, ||) */
 datatype_ctor:
   | c = ID; LPAREN; fs = separated_list(COMMA, formal); RPAREN
     { Syntax.ParserPass.ModuleItem.DatatypeCtor (c, fs) }
@@ -529,6 +527,7 @@ module_item:
     specs = list(function_spec);
     e = delimited(LBRACE, expr, RBRACE);
     { Syntax.ParserPass.ModuleItem.Predicate (p, fs, specs, e) }
+
   | TYPE; n = ID; SGEQ; t = tp
     { Syntax.ParserPass.ModuleItem.Alias (n, t) }
 

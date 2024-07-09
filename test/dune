@@ -1,9 +1,9 @@
 (test
- (name test_ballast)
- (modules test_ballast)
- (libraries core core_unix.command_unix async_unix ballast))
+ (name test_automan)
+ (modules test_automan)
+ (libraries core core_unix.command_unix async_unix automan))
 
 (test
   (name test_parser)
   (modules test_parser)
-  (libraries core core_unix.command_unix async_unix ballast))
+  (libraries core core_unix.command_unix async_unix automan))
