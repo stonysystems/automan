@@ -10,7 +10,7 @@
 %token EXISTS
 %token VAR
 %token REQUIRES ENSURES DECREASES
-%token ASSERT
+%token ASSERT ASSUME
 %token FUNCTION
 %token LEMMA
 %token TYPE
@@ -306,6 +306,7 @@ set_disp_expr:
   | LBRACE; es = separated_list(COMMA, expr); RBRACE
     { Syntax.ParserPass.Prog.SetDisplay es }
 
+/* TODO: StmtInExpr */
 endless_expr:
   | IF; c = expr; THEN; t = expr; ELSE; e = expr
     { Syntax.ParserPass.Prog.If (c, t, e) }
@@ -490,12 +491,89 @@ gen_inst:
   | /* empty */
     { [] }
 
+/* statements */
+stmt:
+  | s = stmt_assert { s }
+  | s = stmt_assume { s }
+  | s = stmt_block  { s }
+  /* NOTE: I don't see how we can parse a case branch without curly braces around
+  the tree... */
+  | MATCH; scrut = expr; tr = delimited(LBRACE, list(stmt_case), RBRACE)
+    { Syntax.ParserPass.Prog.(
+        SMatch (e, tr))
+    }
+
+stmt_assert:
+  | ASSERT; attrs = list(attribute); /* option label */
+    e = expr;
+    by = endrule(SEMI { [] } | xs = stmt_block {xs});
+    { Syntax.ParserPass.Prog.(
+        SAssert (attrs, e, by)
+    )}
+
+stmt_assume:
+  | ASSUME; attrs = list(attribute); e = expr; SEMI
+    { Syntax.ParserPass.Prog.(
+        SAssume (attrs, e))}
+
+stmt_block: xs = delimited(LBRACE, list(stmt), RBRACE) { xs }
+
+stmt_if:
+  | IF; g = expr; t = stmt_block; e = option(stmt_if_footer)
+    { Syntax.ParserPass.Prog.(
+        SIf {guard = g, then_br = t; footer = e}
+    )}
+
+stmt_if_footer:
+  | ELSE; elif = stmt_if
+    { Syntax.ParserPass.Prog.ElseIf elif }
+  | ELSE; e = stmt_block
+    { Syntax.ParserPass.Prog.ElseBlock e }
+
+stmt_case:
+  | CASE; p = extended_pattern; ARROW; br = list(stmt)
+   { (p, br) }
+
 /* misc */
 attribute:
   | LBRACECOLON; a = ID; args = separated_list(COMMA, expr); RBRACE
     { (a, args) }
 
 /* module declarations */
+qualified_module_name:
+  | xs = separated_nonempty_list(DOT, ID)
+    { Internal.NonEmptyList.coerce xs }
+
+/* NOTE: misnomer, the `export` part refers to export sets, which we don't
+         support */
+qualified_module_export:
+  | x = qualified_module_name { x }
+
+import_mod_ref:
+  | x = ID; DOT; xs = qualified_module_name
+    { (None, Internal.NonEmptyList.cons x xs) }
+  | x = ID; SGEQ; xs = qualified_module_name
+    { Syntax.ParserPass.ModuleItem.(
+        (Some (Concrete, x), xs))
+    }
+  | x = ID; COLON; xs = qualified_module_name
+    { Syntax.ParserPass.ModuleItem.(
+        (Some (Abstract, x), xs))
+    }
+  | x = ID
+    { (None, Internal.NonEmptyList.singleton x) }
+
+import:
+  | IMPORT;
+    op = boption(OPENED);
+    r = import_mod_ref;
+    { let (rf, tgt) = r in
+      Syntax.ParserPass.ModuleItem.(
+        { opened = op
+        ; mref = rf
+        ; tgt = tgt })
+    }
+
 formal:
   | x = ID; COLON; t = tp
     { Syntax.ParserPass.ModuleItem.Formal (x, t) }
@@ -520,8 +598,8 @@ function_spec:
 
 
 module_item:
-  | IMPORT; OPENED; m = ID
-    { Syntax.ParserPass.ModuleItem.Import m }
+  | i = import
+    { Syntax.ParserPass.ModuleItem.Import i }
   | DATATYPE; d = ID; SGEQ; cs = datatype_ctors;
     { Syntax.ParserPass.ModuleItem.DatatypeDef (d, cs) }
   | PREDICATE; p = ID;

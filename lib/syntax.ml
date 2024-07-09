@@ -236,15 +236,15 @@ module AST (M : MetaData) = struct
       | Assert of stmt_assert_t
       | Assume of stmt_assume_t
 
-    and stmt_assert_t = attribute_t list * (* label_name * *) expr_t * stmt_block_t option
+    and stmt_assert_t = attribute_t list * (* label_name * *) expr_t * stmt_block_t
     and stmt_assume_t = attribute_t list * expr_t
     and stmt_block_t  = stmt_t list
 
     (* NOTE: no alternative block, binding guard *)
     and stmt_if_t = { guard: expr_t; then_br: stmt_block_t; footer: stmt_if_footer_t option }
     and stmt_if_footer_t =
-      | ElseIf of stmt_if_t
-      | Block  of stmt_block_t
+      | ElseIf    of stmt_if_t
+      | ElseBlock of stmt_block_t
       (* | AlternativeBlock *)
 
     and stmt_case_t = extended_pattern_t * stmt_t list
@@ -338,7 +338,23 @@ module AST (M : MetaData) = struct
         List.fold_left f init es
   end
 
+  type module_qualified_name_t = id_t NonEmptyList.t
+  [@@deriving show, eq]
+
   module ModuleItem = struct
+    (** Imports  *)
+    type module_reference_t = Concrete | Abstract
+    [@@deriving show, eq]
+
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-importing-modules
+       NOTE: no export sets *)
+    type import_t =
+      { opened: bool
+      ; mref: (module_reference_t * id_t) option
+      ; tgt: module_qualified_name_t
+      }
+    [@@deriving show, eq]
+
     type formal_t = Formal of id_t * Type.t
     [@@deriving show, eq]
 
@@ -362,7 +378,8 @@ module AST (M : MetaData) = struct
     [@@deriving eq, show]
 
     type t =
-      | Import        of id_t
+      (* NOTE: no export sets *)
+      | Import        of import_t
       | DatatypeDef   of id_t * datatype_ctor_t list
       | Predicate     of id_t * formal_t list * function_spec_t list * Prog.expr_t
       | Function      of id_t * formal_t list * Type.t * function_spec_t list * Prog.expr_t
