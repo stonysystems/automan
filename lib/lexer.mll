@@ -40,6 +40,7 @@ rule lexeme = parse
   | "ensures"       { Parser.ENSURES                        }
   | "decreases"     { Parser.DECREASES                      }
   | "assert"        { Parser.ASSERT                         }
+  | "assume"        { Parser.ASSUME                         }
   | "function"      { Parser.FUNCTION                       }
   | "lemma"         { Parser.LEMMA                          }
 
