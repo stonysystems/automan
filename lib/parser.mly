@@ -88,11 +88,13 @@
    https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-top-level-expression
 */
 expr:
-  | e = equiv_expr { e }
-  /* | es = separated_nonempty_list(SEMI, equiv_expr) */
-  /*   { Syntax.ParserPass.Prog.( */
-  /*       foldr1 (fun x y -> Lemma {lem = x; e = y}) es) */
-  /*   } */
+  /* | e = equiv_expr { e } */
+  | es = separated_nonempty_list(SEMI, equiv_expr)
+    { Syntax.ParserPass.Prog.(
+        Internal.NonEmptyList.fold_left_1
+          (fun x y -> Lemma {lem = x; e = y})
+          (Internal.NonEmptyList.coerce es))
+    }
 
 equiv_expr:
   | es = separated_nonempty_list(EQUIV, implies_explies_expr)
