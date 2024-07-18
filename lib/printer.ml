@@ -15,6 +15,9 @@ module PrettyPrinter = struct
     in
     "\n" ^ (aux "" n)
 
+  (* let type_t x = 
+    "" *)
+
   let module_item (x : ParserPass.ModuleItem.t) (idnt_lvl : int) = 
     let idnt_str = (get_indt_str idnt_lvl) in
     match x with
@@ -28,15 +31,24 @@ module PrettyPrinter = struct
         NonEmptyList.fold_left_1 (fun x y -> x ^ "." ^ y) i.tgt in
       match i.mref with
       | Some (m_rf_t, rf_str) -> (
-        match m_rf_t with
-        | Concrete -> 
-          Printf.sprintf "%simport %s=%s%s" idnt_str rf_str op_str tgt_str
-        | Abstract -> 
-          Printf.sprintf "%simport %s:%s%s" idnt_str rf_str op_str tgt_str
+        let marker = 
+          match m_rf_t with
+          | Concrete -> "="
+          | Abstract -> ":"
+        in
+          Printf.sprintf "%simport %s%s%s%s" idnt_str rf_str marker op_str tgt_str
       )
       | None -> Printf.sprintf "%simport %s%s" idnt_str op_str tgt_str
     )
-    | _ -> "\n" ^ idnt_str ^ "Hasn't been implemented in Printer yet"
+    | Predicate (p, fs, specs, e) -> (
+      let _ = fs in
+      let _ = specs in 
+      let _ = e in
+      Printf.sprintf 
+        "\n%spredicate %s() %s{%s}" 
+          idnt_str p idnt_str idnt_str
+    )
+    | _ -> "\n" ^ idnt_str ^ "[ Hasn't been implemented in Printer yet ]"
 
   let file_level (x : ParserPass.FileLevel.t) = 
     match x with
@@ -46,5 +58,4 @@ module PrettyPrinter = struct
       let ds_str = String.concat "" ds_str_lst in
       Printf.sprintf "\nmodule %s \n{%s\n}" m ds_str
     )
-
 end
