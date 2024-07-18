@@ -19,7 +19,7 @@ let parse_with_error lexbuf =
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some x ->
-    printf "%s\n" Printer.PrettyPrinter.(file_level x);
+    printf "%s\n" Printer.PrettyPrinter.(FileLevel.print_t x);
     parse_and_print lexbuf
   | None -> ()
 
