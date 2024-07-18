@@ -450,7 +450,9 @@ module AST (M : MetaData) = struct
 
     (* Functions/Predicates START
        https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-function-declaration
-       NOTE: no twostate, least/greatest on predicates, ktype *)
+       NOTE: no twostate, least/greatest on predicates
+       NOTE: Dafny 4 obsolesced "function method", but we are targetting
+             Dafny 3 *)
     type function_spec_t =
       | Requires    of Prog.expr_t
       | Reads       of Prog.expr_t
@@ -502,7 +504,6 @@ module AST (M : MetaData) = struct
       ; spec: method_spec_t
       ; body: Prog.stmt_block_t }
     [@@deriving show, eq]
-
     (* Method/Lemma END *)
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-top-level-declaration *)
@@ -510,10 +511,10 @@ module AST (M : MetaData) = struct
     [@@deriving show, eq]
 
     (* NOTE: no ClassDecl, NewtypeDecl, SynonymTypeDecl(OpaqueTypeDecl_),
-       ModuleExport, field or constant *)
+       ModuleExport, class field or constant *)
     and t' =
-      | ModuleDef       of module_def_t
       | ModuleImport    of import_t
+      | ModuleDef       of module_def_t
       (* | ClassDecl *)
       | DatatypeDecl    of datatype_t
       | SynonymTypeDecl of synonym_type_t
