@@ -21,7 +21,9 @@ module PrettyPrinter = struct
       let (id, gen_inst) = (tp_id_seg.id, tp_id_seg.gen_inst) in
       let gen_inst_str_lst = List.map print_t gen_inst in
       let gen_inst_str = String.concat "," gen_inst_str_lst in
-      Printf.sprintf "%s<%s>" id gen_inst_str
+      match gen_inst_str = "" with
+      | true -> id
+      | false -> Printf.sprintf "%s<%s>" id gen_inst_str
 
     and print_t (x : ParserPass.Type.t) = 
       let aux (x : ParserPass.Type.t list) = 
@@ -61,36 +63,43 @@ module PrettyPrinter = struct
   end
 
   module ModuleItem = struct
+
+  let print_import_t (x : ParserPass.ModuleItem.import_t) =
+    let op_str = 
+      match x.opened with 
+      | true -> "opened "
+      | false -> ""
+    in
+    let tgt_str = 
+      NonEmptyList.fold_left_1 (fun x y -> x ^ "." ^ y) x.tgt in
+    match x.mref with
+    | Some (m_rf_t, rf_str) -> (
+      let marker = 
+        match m_rf_t with
+        | Concrete -> "="
+        | Abstract -> ":"
+      in
+        Printf.sprintf 
+          "import %s%s%s%s" rf_str marker op_str tgt_str
+    )
+    | None -> Printf.sprintf "import %s%s" op_str tgt_str
+
+  let print_formal_t (x : ParserPass.ModuleItem.formal_t) =
+    match x with Formal (id, tp) ->
+    Printf.sprintf "%s : %s" id (Type.print_t tp)
+
   let print_t (x : ParserPass.ModuleItem.t) (idnt_lvl : int) = 
     let idnt_str = (get_indt_str idnt_lvl) in
     match x with
-    | Import i -> (
-      let op_str = 
-        match i.opened with 
-        | true -> "opened "
-        | false -> ""
-      in
-      let tgt_str = 
-        NonEmptyList.fold_left_1 (fun x y -> x ^ "." ^ y) i.tgt in
-      match i.mref with
-      | Some (m_rf_t, rf_str) -> (
-        let marker = 
-          match m_rf_t with
-          | Concrete -> "="
-          | Abstract -> ":"
-        in
-          Printf.sprintf 
-            "%simport %s%s%s%s" idnt_str rf_str marker op_str tgt_str
-      )
-      | None -> Printf.sprintf "%simport %s%s" idnt_str op_str tgt_str
-    )
+    | Import i -> idnt_str ^ (print_import_t i)
     | Predicate (p, fs, specs, e) -> (
-      let _ = fs in
+      let fs_str_lst = List.map print_formal_t fs in
+      let fs_str = String.concat ", " fs_str_lst in
       let _ = specs in 
       let _ = e in
       Printf.sprintf 
-        "\n%spredicate %s() %s{%s}" 
-          idnt_str p idnt_str idnt_str
+        "\n%spredicate %s(%s) %s{%s}" 
+          idnt_str p fs_str idnt_str idnt_str
     )
     | _ -> "\n" ^ idnt_str ^ "[ Hasn't been implemented in Printer yet ]"
   end
