@@ -62,12 +62,63 @@ module PrettyPrinter = struct
       )
   end
 
+  module Prog = struct
+    let print_lit_t (x : ParserPass.Prog.lit_t) =
+      match x with
+      | True      -> "true"
+      | False     -> "false"
+      | Null      -> "null"
+      | Nat d     -> string_of_int d
+      | Char d    -> String.make 1 d
+      | String d  -> d
+
+    let print_quantifier_t (x : ParserPass.Prog.quantifier_t) = 
+      match x with
+      | Forall -> "forall"
+      | Exists -> "exists"
+
+    let print_uop_t (x : ParserPass.Prog.uop_t) = 
+      match x with
+      | Neg -> "-"
+      | Not -> "!"
+
+    let print_bop_t (x : ParserPass.Prog.bop_t) = 
+      match x with 
+      | Mul       ->  "*"
+      | Div       ->  "/"
+      | Mod       ->  "%"
+      | Add       ->  "+"
+      | Sub       ->  "-"
+      | Eq        ->  "=="
+      | Neq       ->  "!="
+      | Lt        ->  "<"
+      | Gt        ->  ">"
+      | Lte       ->  "<="
+      | Gte       ->  ">="
+      | In        ->  "in"
+      | Nin       ->  "!in"
+      | Disjoint  ->  "!!"
+      | And       ->  "&&"
+      | Or        ->  "||"
+      | Implies   ->  "==>"
+      | Equiv     ->  "<==>"
+      
+    let print_name_seg_t (x : ParserPass.Prog.name_seg_t) = 
+      let (id, tp_lst) = x in
+      let tp_lst_str_lst = List.map Type.print_t tp_lst in
+      let tp_lst_str = String.concat ", " tp_lst_str_lst in
+      match tp_lst_str = "" with
+      | true  -> id
+      | false -> Printf.sprintf "%s<%s>" id tp_lst_str
+
+  end
+
   module ModuleItem = struct
 
   let print_import_t (x : ParserPass.ModuleItem.import_t) =
     let op_str = 
       match x.opened with 
-      | true -> "opened "
+      | true  -> "opened "
       | false -> ""
     in
     let tgt_str = 
