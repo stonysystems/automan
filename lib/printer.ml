@@ -4,6 +4,14 @@ open Syntax
 open Str
 open Internal
 
+
+let print_dotsuffix_t (x : dotsuffix_t) = 
+  match x with
+  | DSRequires -> "requires"
+  | DSReads    -> "reads"
+  | DSId id    -> id
+  | DSDig i    -> string_of_int i
+
 module PrettyPrinter = struct
   let remove_newlines_and_tabs s =
     global_replace (regexp "[\n\t]") "" s
@@ -19,11 +27,8 @@ module PrettyPrinter = struct
     let rec print_name_seg_t (x : ParserPass.Type.name_seg_t) = 
       match x with | TpIdSeg tp_id_seg ->
       let (id, gen_inst) = (tp_id_seg.id, tp_id_seg.gen_inst) in
-      let gen_inst_str_lst = List.map print_t gen_inst in
-      let gen_inst_str = String.concat "," gen_inst_str_lst in
-      match gen_inst_str = "" with
-      | true -> id
-      | false -> Printf.sprintf "%s<%s>" id gen_inst_str
+      let gen_inst_str = print_and_join_t gen_inst in
+      id ^ gen_inst_str
 
     and print_t (x : ParserPass.Type.t) = 
       let aux (x : ParserPass.Type.t list) = 
@@ -60,7 +65,18 @@ module PrettyPrinter = struct
         let t_lst_str = String.concat "" t_lst_str_lst in
         Printf.sprintf "(%s)" t_lst_str
       )
+
+    and print_and_join_t (x : ParserPass.Type.t list) = 
+      let x' = List.map print_t x in
+      let x'' = String.concat ", " x' in
+      match x'' with
+      | "" -> x''
+      | _  -> Printf.sprintf "<%s>" x''
   end
+
+  let print_augmented_dotsuffix_t (x : ParserPass.augmented_dotsuffix_t) = 
+    let (x_dotsuffix_t, tp_t_lst) = x in
+    (print_dotsuffix_t x_dotsuffix_t) ^ (Type.print_and_join_t tp_t_lst)
 
   module Prog = struct
     let print_lit_t (x : ParserPass.Prog.lit_t) =
@@ -103,14 +119,65 @@ module PrettyPrinter = struct
       | Implies   ->  "==>"
       | Equiv     ->  "<==>"
       
-    let print_name_seg_t (x : ParserPass.Prog.name_seg_t) = 
+    let rec print_name_seg_t (x : ParserPass.Prog.name_seg_t) = 
       let (id, tp_lst) = x in
-      let tp_lst_str_lst = List.map Type.print_t tp_lst in
-      let tp_lst_str = String.concat ", " tp_lst_str_lst in
-      match tp_lst_str = "" with
-      | true  -> id
-      | false -> Printf.sprintf "%s<%s>" id tp_lst_str
+      id ^ (Type.print_and_join_t tp_lst)
+  
+    and print_suffx_t (x : ParserPass.Prog.suffix_t) = 
+      match x with
+      | AugDot x -> "." ^ (print_augmented_dotsuffix_t x)
+      | DataUpd x -> (
+        let x = Internal.NonEmptyList.as_list x in
+        let x' = List.map print_member_binding_upd_t x in
+        Printf.sprintf ".(%s)" (String.concat ", " x')
+      )
+      | Subseq x -> (
+        let lb, ub = x.lb, x.ub in
+        let aux (x : ParserPass.Prog.expr_t option) = 
+          match x with
+          | None -> ""
+          | Some x -> print_expr_t x 0
+        in
+        Printf.sprintf "[%s : %s]" (aux lb) (aux ub)
+      )
+      | SliceLen x -> (
+        let sublens, to_end = x.sublens, x.to_end in
+        let sublens = Internal.NonEmptyList.as_list sublens in
+        let sublens' = List.map print_expr_t_wrapper sublens in
+        let sublens'' = String.concat " : " sublens' in
+        Printf.sprintf "[%s]" sublens'' ^
+          match to_end with
+          | true -> ":"
+          | false -> ""
+      )
+      | SeqUpd x -> (
+        let idx, v = x.idx, x.v in
+        Printf.sprintf "[%s := %s]" 
+          (print_expr_t_wrapper idx) (print_expr_t_wrapper v)  
+      )
+      | Sel x -> Printf.sprintf "[%s]" (print_expr_t_wrapper x)
+      | ArgList x -> (
+        let x' = List.map print_expr_t_wrapper x in
+        Printf.sprintf "(%s)" (String.concat ", " x')
+      )
 
+    and print_expr_t (x : ParserPass.Prog.expr_t) (idnt_lvl : int) = 
+      let idnt_str = (get_indt_str idnt_lvl) in
+      match x with
+      | Suffixed (x_expr_t, x_suffix_t) -> (
+        idnt_str ^ (print_expr_t x_expr_t 0) ^ (print_suffx_t x_suffix_t)
+      )
+      | _ -> ""
+
+    and print_member_binding_upd_t (x : ParserPass.Prog.member_binding_upd_t) = 
+      let (either_t, x_expr_t) = x in
+      match either_t with
+      | Left id -> id 
+      | Right i -> string_of_int i
+      ^ " := " ^ (print_expr_t x_expr_t 0)
+
+    and print_expr_t_wrapper x = 
+      print_expr_t x 0
   end
 
   module ModuleItem = struct
