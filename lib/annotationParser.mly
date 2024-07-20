@@ -1,17 +1,17 @@
 %start toplevel
-%type <Syntax.AutoMan.toplevel_t> toplevel
+%type <Syntax.Annotation.toplevel_t> toplevel
 
 %%
 
 mode:
-  | ADD { Syntax.AutoMan.Input  }
-  | SUB { Syntax.AutoMan.Output }
+  | ADD { Syntax.Annotation.Input  }
+  | SUB { Syntax.Annotation.Output }
 
 item:
   | MODULE; n = ID; xs = delimited(LBRACE, list(item), RBRACE)
-    { Syntax.AutoMan.Module (n, xs) }
+    { Syntax.Annotation.Module (n, xs) }
   | n = ID; xs = delimited(LPAREN, separated_list(COMMA, mode), RPAREN); SEMI
-    { Syntax.AutoMan.Function (n, xs) }
+    { Syntax.Annotation.Function (n, xs) }
 
 toplevel:
   | xs = list(item); EOF { xs }

@@ -17,7 +17,7 @@ type id_t   = string
 [@@deriving show, eq]
 
 (* AutoMan annotations *)
-module AutoMan = struct
+module Annotation = struct
   type mode_t = Input | Output
   [@@deriving show, eq]
 
@@ -360,57 +360,6 @@ module AST (M : MetaData) = struct
   type module_qualified_name_t = id_t NonEmptyList.t
   [@@deriving show, eq]
 
-  module ModuleItem = struct
-    (** Imports  *)
-    type module_reference_t = Concrete | Abstract
-    [@@deriving show, eq]
-
-    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-importing-modules
-       NOTE: no export sets *)
-    type import_t =
-      { opened: bool
-      ; mref: (module_reference_t * id_t) option
-      ; tgt: module_qualified_name_t
-      }
-    [@@deriving show, eq]
-
-    type formal_t = Formal of id_t * Type.t
-    [@@deriving show, eq]
-
-    type datatype_ctor_t = DatatypeCtor of id_t * formal_t list
-    [@@deriving show, eq]
-
-    type function_spec_t =
-      | Requires    of Prog.expr_t
-      | Reads       of Prog.expr_t
-      | Ensures     of Prog.expr_t
-      | Decreases   of Prog.expr_t
-    [@@deriving show, eq]
-
-    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-method-declaration
-       NOTE: see MethodKeyword_
-       NOTE: Dafny 4 obsolesced "function method", but we are targetting
-             Dafny 3
-       TODO: support for constructor, twostate lemma, least/greatest
-             lemma *)
-    type method_decl_t = Method | Lemma
-    [@@deriving eq, show]
-
-    type t =
-      (* NOTE: no export sets *)
-      | Import        of import_t
-      | DatatypeDef   of id_t * datatype_ctor_t list
-      | Predicate     of id_t * formal_t list * function_spec_t list * Prog.expr_t
-      | Function      of id_t * formal_t list * Type.t * function_spec_t list * Prog.expr_t
-      | FuncMethod    of id_t * formal_t list * Type.t * function_spec_t list * Prog.expr_t
-      (* lemma, method *)
-      | Method        of method_decl_t *
-                         id_t * formal_t list * formal_t list * function_spec_t list * Prog.stmt_t list
-      (* | Lemma         of id * formal list * ctst list * stmt list *)
-      | Alias         of id_t * Type.t
-    [@@deriving show, eq]
-  end
-
   module TopDecl = struct
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-declaration-modifier *)
     type modifier_t =
@@ -438,7 +387,7 @@ module AST (M : MetaData) = struct
        NOTE: constructor argument names required *)
     (* corresponds to DatatypeMemberDecl *)
     type datatype_ctor_t =
-      Prog.attribute_t list * id_t * formal_t list
+      DataCtor of Prog.attribute_t list * id_t * formal_t list
     [@@deriving show, eq]
 
     type datatype_t =
@@ -543,12 +492,12 @@ module AST (M : MetaData) = struct
     (*                                         ^ module_qualified_name_t *)
   end
 
-  module FileLevel = struct
-    type t =
-      | Include of id_t
-      | Module  of id_t * ModuleItem.t list
-    [@@deriving show, eq]
-  end
+  type t =
+    | Dafny of
+        { includes: id_t list
+        ; decls: TopDecl.t list
+        }
+  [@@deriving show, eq]
 end
 
 module ParserPass = AST (TrivMetaData)

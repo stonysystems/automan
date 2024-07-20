@@ -9,10 +9,10 @@ let print_position outx lexbuf =
     pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
 let parse_dafny_with_error lexbuf =
-  try DafnyParser.file_level Lexer.lexeme lexbuf with
+  try DafnyParser.dafny Lexer.lexeme lexbuf with
   | Lexer.SyntaxError msg ->
     fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    None
+    exit (-1)
   | DafnyParser.Error ->
     fprintf stderr "%a: syntax error\n"  print_position lexbuf;
     exit (-1)
@@ -26,16 +26,13 @@ let parse_annotations_with_error lexbuf =
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
     exit (-1)
 
-let rec parse_dafny_and_print lexbuf =
-  match parse_dafny_with_error lexbuf with
-  | Some x ->
-    printf "%s\n" Syntax.ParserPass.FileLevel.(show x);
-    parse_dafny_and_print lexbuf
-  | None -> ()
+let parse_dafny_and_print lexbuf =
+  let x = parse_dafny_with_error lexbuf in
+  printf "%s\n" Syntax.ParserPass.(show x)
 
 let parse_annotations_and_print lexbuf =
   let x = parse_annotations_with_error lexbuf in
-  printf "%s\n" (Syntax.AutoMan.show_toplevel_t x)
+  printf "%s\n" (Syntax.Annotation.show_toplevel_t x)
 
 let loop filename () =
   let inx = In_channel.create filename in

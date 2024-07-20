@@ -1,6 +1,10 @@
 
-%start file_level
-%type <Syntax.ParserPass.FileLevel.t option> file_level
+%start dafny
+/* NOTE: OCaml gets confused and fully qualifies the type name generic_params_t,
+   which makes Dune think there is a circular dependency
+*/
+%type <Syntax.ParserPass.Type.generic_params_t> gen_params %type
+<Syntax.ParserPass.t> dafny
 // %type <Syntax.ParserPass.Prog.t> expr
 
 %%
@@ -422,6 +426,12 @@ gen_inst:
   | /* empty */
     { [] }
 
+gen_params:
+  | tps = delimited(LANGLE, separated_nonempty_list(COMMA, ID), RANGLE)
+    { tps }
+  |                             /* empty */
+    { [] }
+
 /* statements */
 stmt:
   | s = stmt_assert { s }
@@ -484,11 +494,11 @@ import_mod_ref:
   | x = ID; DOT; xs = qualified_module_name
     { (None, Internal.NonEmptyList.cons x xs) }
   | x = ID; SGEQ; xs = qualified_module_name
-    { Syntax.ParserPass.ModuleItem.(
+    { Syntax.ParserPass.TopDecl.(
         (Some (Concrete, x), xs))
     }
   | x = ID; COLON; xs = qualified_module_name
-    { Syntax.ParserPass.ModuleItem.(
+    { Syntax.ParserPass.TopDecl.(
         (Some (Abstract, x), xs))
     }
   | x = ID
@@ -499,54 +509,106 @@ import:
     op = boption(OPENED);
     r = import_mod_ref;
     { let (rf, tgt) = r in
-      Syntax.ParserPass.ModuleItem.(
-        { opened = op
-        ; mref = rf
-        ; tgt = tgt })
+      { opened = op
+      ; mref = rf
+      ; tgt = tgt }
     }
 
 formal:
   | x = ID; COLON; t = tp
-    { Syntax.ParserPass.ModuleItem.Formal (x, t) }
+    { Syntax.ParserPass.TopDecl.Formal (x, t) }
 
-/* TODO: parallel pipes for constructors? (like &&, ||) */
+formals:
+  | ps = delimited(LPAREN, separated_list(COMMA, formal), RPAREN);
+    { ps }
+
+/* TODO: parallel pipes for constructors? (like &&, ||)
+   TODO: optional ids for datatype constructor's formal parameters
+*/
 datatype_ctor:
-  | c = ID; LPAREN; fs = separated_list(COMMA, formal); RPAREN
-    { Syntax.ParserPass.ModuleItem.DatatypeCtor (c, fs) }
+  | attrs = list(attribute); c = ID;
+    ps = loption(formals)
+    { Syntax.ParserPass.TopDecl.DataCtor (attrs, c, ps) }
 
 datatype_ctors:
   | cs = separated_list(PIPE, datatype_ctor) { cs }
 
 function_spec:
   | REQUIRES; e = expr(NOLEM)
-    { Syntax.ParserPass.ModuleItem.Requires e }
+    { Syntax.ParserPass.TopDecl.Requires e }
   /* | READS; e = expr */
   /*   { Syntax.ParserPass.ModuleItem.Reads e } */
   | ENSURES; e = expr(NOLEM)
-    { Syntax.ParserPass.ModuleItem.Ensures e }
+    { Syntax.ParserPass.TopDecl.Ensures e }
   | DECREASES; e = expr(NOLEM)
-    { Syntax.ParserPass.ModuleItem.Decreases e }
+    { Syntax.ParserPass.TopDecl.Decreases e }
 
 
-module_item:
-  | i = import
-    { Syntax.ParserPass.ModuleItem.Import i }
-  | DATATYPE; d = ID; SGEQ; cs = datatype_ctors;
-    { Syntax.ParserPass.ModuleItem.DatatypeDef (d, cs) }
-  | PREDICATE; p = ID;
-    fs = delimited(LPAREN, separated_list(COMMA, formal), RPAREN);
+/* Dafny file */
+/* NOTE: `include` is an OCaml keyword */
+includ:
+  | INCLUDE; fp = STRING { fp }
+
+/* TODO: Just aliases for now */
+synonym_type_decl:
+  | TYPE; attrs = list(attribute); n = ID;
+    params = gen_params; SGEQ;
+    tp = tp
+    { Syntax.ParserPass.TopDecl.(
+        { attrs = attrs
+        ; id = n
+        ; params = params
+        ; rhs = Synonym tp
+        })
+    }
+
+predfun_decl:
+  | PREDICATE; attrs = list(attribute); p = ID;
+    gen_ps = gen_params; ps = formals;
     specs = list(function_spec);
     e = delimited(LBRACE, expr(yeslem), RBRACE);
-    { Syntax.ParserPass.ModuleItem.Predicate (p, fs, specs, e) }
+    { Syntax.ParserPass.TopDecl.(
+        Predicate (false, attrs, p, gen_ps, ps, specs, e)
+      )
+    }
 
-  | TYPE; n = ID; SGEQ; t = tp
-    { Syntax.ParserPass.ModuleItem.Alias (n, t) }
+datatype_decl:
+  | DATATYPE; attrs = list(attribute);
+    d = ID; tp_ps = gen_params;
+    SGEQ;
+    ctors = datatype_ctors;
+    { (attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
 
-/* file-level directives */
-file_level:
-  | INCLUDE; fp = STRING
-    { Some (Syntax.ParserPass.FileLevel.Include fp) }
-  | MODULE; m = ID; LBRACE; ds = list(module_item); RBRACE
-    { Some (Syntax.ParserPass.FileLevel.Module (m, ds)) }
-  | EOF
-    { None }
+top_decl:
+  | i = import
+    { Syntax.ParserPass.TopDecl.(
+        ([], ModuleImport i)
+      )
+    }
+  | data_decl = datatype_decl;
+    { Syntax.ParserPass.TopDecl.(
+        ([], DatatypeDecl data_decl)
+      )
+    }
+  | pf = predfun_decl
+    { Syntax.ParserPass.TopDecl.(
+        ([], PredFunDecl pf)
+      )
+    }
+  | tpd = synonym_type_decl
+    { Syntax.ParserPass.TopDecl.(
+        ([], SynonymTypeDecl tpd)
+      )
+    }
+  /* TODO: declaration modifiers (abstract, ghost, static, opaque) */
+  | MODULE; attrs = list(attribute); m = ID;
+    ds = delimited(LBRACE, list(top_decl), RBRACE);
+    { Syntax.ParserPass.TopDecl.(
+        ([], ModuleDef (attrs, m, ds)))
+    }
+
+dafny:
+  | includes = list(includ); decls = list(top_decl); EOF
+    { Syntax.ParserPass.(
+        Dafny {includes = includes; decls = decls })
+    }
