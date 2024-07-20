@@ -3,8 +3,23 @@
  (libraries core str)
  (preprocess (pps ppx_deriving.show ppx_deriving.eq)))
 
-(menhir
-  (modules parser)
-  (flags :standard --trace --dump))
-
 (ocamllex lexer)
+
+(menhir
+ (modules tokens)
+ (flags --only-tokens)
+ (explain false))
+
+(menhir
+ (modules tokens dafnyParser)
+ (merge_into dafnyParser)
+  (flags
+    :standard
+    --external-tokens Tokens
+    --trace --dump))
+
+(menhir
+  (modules tokens annotationParser)
+  (merge_into annotationParser)
+  (flags
+    :standard --external-tokens Tokens))

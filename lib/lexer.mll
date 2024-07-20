@@ -14,92 +14,92 @@ rule lexeme = parse
   | "/*"            { comments 0 lexbuf                     }
   | "//"            { single_comment lexbuf                 }
 
-  | "include"       { Parser.INCLUDE                        }
-  | "module"        { Parser.MODULE                         }
-  | "import"        { Parser.IMPORT                         }
-  | "opened"        { Parser.OPENED                         }
-  | "datatype"      { Parser.DATATYPE                       }
-  | "predicate"     { Parser.PREDICATE                      }
-  | "this"          { Parser.THIS                           }
-  | "set"           { Parser.SET                            }
-  | "seq"           { Parser.SEQ                            }
-  | "map"           { Parser.MAP                            }
-  | "int"           { Parser.INT                            }
-  | "bool"          { Parser.BOOL                           }
-  | "nat"           { Parser.NAT                            }
-  | "string"        { Parser.STR                            }
-  | "forall"        { Parser.FORALL                         }
-  | "exists"        { Parser.EXISTS                         }
-  | "if"            { Parser.IF                             }
-  | "else"          { Parser.ELSE                           }
-  | "then"          { Parser.THEN                           }
-  | "match"         { Parser.MATCH                          }
-  | "case"          { Parser.CASE                           }
-  | "var"           { Parser.VAR                            }
-  | "requires"      { Parser.REQUIRES                       }
-  | "ensures"       { Parser.ENSURES                        }
-  | "decreases"     { Parser.DECREASES                      }
-  | "assert"        { Parser.ASSERT                         }
-  | "assume"        { Parser.ASSUME                         }
-  | "function"      { Parser.FUNCTION                       }
-  | "lemma"         { Parser.LEMMA                          }
+  | "include"       { Tokens.INCLUDE                        }
+  | "module"        { Tokens.MODULE                         }
+  | "import"        { Tokens.IMPORT                         }
+  | "opened"        { Tokens.OPENED                         }
+  | "datatype"      { Tokens.DATATYPE                       }
+  | "predicate"     { Tokens.PREDICATE                      }
+  | "this"          { Tokens.THIS                           }
+  | "set"           { Tokens.SET                            }
+  | "seq"           { Tokens.SEQ                            }
+  | "map"           { Tokens.MAP                            }
+  | "int"           { Tokens.INT                            }
+  | "bool"          { Tokens.BOOL                           }
+  | "nat"           { Tokens.NAT                            }
+  | "string"        { Tokens.STR                            }
+  | "forall"        { Tokens.FORALL                         }
+  | "exists"        { Tokens.EXISTS                         }
+  | "if"            { Tokens.IF                             }
+  | "else"          { Tokens.ELSE                           }
+  | "then"          { Tokens.THEN                           }
+  | "match"         { Tokens.MATCH                          }
+  | "case"          { Tokens.CASE                           }
+  | "var"           { Tokens.VAR                            }
+  | "requires"      { Tokens.REQUIRES                       }
+  | "ensures"       { Tokens.ENSURES                        }
+  | "decreases"     { Tokens.DECREASES                      }
+  | "assert"        { Tokens.ASSERT                         }
+  | "assume"        { Tokens.ASSUME                         }
+  | "function"      { Tokens.FUNCTION                       }
+  | "lemma"         { Tokens.LEMMA                          }
 
-  | "type"          { Parser.TYPE                           }
-  | "true"          { Parser.TRUE                           }
-  | "false"         { Parser.FALSE                          }
-  | "null"          { Parser.NULL                           }
+  | "type"          { Tokens.TYPE                           }
+  | "true"          { Tokens.TRUE                           }
+  | "false"         { Tokens.FALSE                          }
+  | "null"          { Tokens.NULL                           }
 
-  | "."             { Parser.DOT                            }
-  | "!"             { Parser.NOT                            }
-  | "="             { Parser.SGEQ                           }
+  | "."             { Tokens.DOT                            }
+  | "!"             { Tokens.NOT                            }
+  | "="             { Tokens.SGEQ                           }
 
-  | ":="            { Parser.ASSIGN                         }
-  | ".."            { Parser.SLICE                          }
+  | ":="            { Tokens.ASSIGN                         }
+  | ".."            { Tokens.SLICE                          }
 
-  | "==>"           { Parser.IMPLIES                        }
-  | "<=="           { Parser.EXPLIES                        }
-  | "<==>"          { Parser.EQUIV                          }
-  | "<-"            { Parser.QVAR_DOM_COLL                  }
-  | "=>"            { Parser.ARROW                          }
-  | "::"            { Parser.QUANTIFY_SEP                   }
+  | "==>"           { Tokens.IMPLIES                        }
+  | "<=="           { Tokens.EXPLIES                        }
+  | "<==>"          { Tokens.EQUIV                          }
+  | "<-"            { Tokens.QVAR_DOM_COLL                  }
+  | "=>"            { Tokens.ARROW                          }
+  | "::"            { Tokens.QUANTIFY_SEP                   }
 
-  | "+"             { Parser.ADD                            }
-  | "-"             { Parser.SUB                            }
-  | "*"             { Parser.MULT                           }
-  | "/"             { Parser.DIV                            }
-  | "%"             { Parser.MOD                            }
+  | "+"             { Tokens.ADD                            }
+  | "-"             { Tokens.SUB                            }
+  | "*"             { Tokens.MULT                           }
+  | "/"             { Tokens.DIV                            }
+  | "%"             { Tokens.MOD                            }
 
-  | "=="            { Parser.EQ                             }
-  | "!="            { Parser.NEQ                            }
-  | "<="            { Parser.LTE                            }
-  | ">="            { Parser.GTE                            }
-  | "in"            { Parser.IN                             }
-  | "!in"           { Parser.NOTIN                          }
+  | "=="            { Tokens.EQ                             }
+  | "!="            { Tokens.NEQ                            }
+  | "<="            { Tokens.LTE                            }
+  | ">="            { Tokens.GTE                            }
+  | "in"            { Tokens.IN                             }
+  | "!in"           { Tokens.NOTIN                          }
 
-  | "&&"            { Parser.AND                            }
-  | "||"            { Parser.OR                             }
+  | "&&"            { Tokens.AND                            }
+  | "||"            { Tokens.OR                             }
 
-  | ','             { Parser.COMMA                          }
-  | '{'             { Parser.LBRACE                         }
-  | "{:"            { Parser.LBRACECOLON                    }
-  | '}'             { Parser.RBRACE                         }
-  | '('             { Parser.LPAREN                         }
-  | ')'             { Parser.RPAREN                         }
-  | "["             { Parser.LSQBRAC                        }
-  | "]"             { Parser.RSQBRAC                        }
-  | "<"             { Parser.LANGLE                         }
-  | ">"             { Parser.RANGLE                         }
-  | ':'             { Parser.COLON                          }
-  | ';'             { Parser.SEMI                           }
-  | '|'             { Parser.PIPE                           }
+  | ','             { Tokens.COMMA                          }
+  | '{'             { Tokens.LBRACE                         }
+  | "{:"            { Tokens.LBRACECOLON                    }
+  | '}'             { Tokens.RBRACE                         }
+  | '('             { Tokens.LPAREN                         }
+  | ')'             { Tokens.RPAREN                         }
+  | "["             { Tokens.LSQBRAC                        }
+  | "]"             { Tokens.RSQBRAC                        }
+  | "<"             { Tokens.LANGLE                         }
+  | ">"             { Tokens.RANGLE                         }
+  | ':'             { Tokens.COLON                          }
+  | ';'             { Tokens.SEMI                           }
+  | '|'             { Tokens.PIPE                           }
 
-  | id as x         { Parser.ID(x)                          }
-  | num as x        { Parser.NUM(int_of_string x)           }
+  | id as x         { Tokens.ID(x)                          }
+  | num as x        { Tokens.NUM(int_of_string x)           }
   | '"'             { read_string (Buffer.create 17) lexbuf }
 
   | _               { raise (SyntaxError 
                         ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
-  | eof             { Parser.EOF                            }
+  | eof             { Tokens.EOF                            }
 
 
 and read_string buf =
