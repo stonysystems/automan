@@ -5,6 +5,9 @@ open Str
 open Internal
 
 
+let holder (x : string) = 
+  Printf.sprintf "[Printer for %s hasn't been implemented.]" x
+
 let print_dotsuffix_t (x : dotsuffix_t) = 
   match x with
   | DSRequires -> "requires"
@@ -27,7 +30,7 @@ module PrettyPrinter = struct
     let rec print_name_seg_t (x : ParserPass.Type.name_seg_t) = 
       match x with | TpIdSeg tp_id_seg ->
       let (id, gen_inst) = (tp_id_seg.id, tp_id_seg.gen_inst) in
-      let gen_inst_str = print_and_join_t gen_inst in
+      let gen_inst_str = print_gen_inst gen_inst in
       id ^ gen_inst_str
 
     and print_t (x : ParserPass.Type.t) = 
@@ -66,7 +69,7 @@ module PrettyPrinter = struct
         Printf.sprintf "(%s)" t_lst_str
       )
 
-    and print_and_join_t (x : ParserPass.Type.t list) = 
+    and print_gen_inst (x : ParserPass.Type.t list) = 
       let x' = List.map print_t x in
       let x'' = String.concat ", " x' in
       match x'' with
@@ -76,7 +79,7 @@ module PrettyPrinter = struct
 
   let print_augmented_dotsuffix_t (x : ParserPass.augmented_dotsuffix_t) = 
     let (x_dotsuffix_t, tp_t_lst) = x in
-    (print_dotsuffix_t x_dotsuffix_t) ^ (Type.print_and_join_t tp_t_lst)
+    (print_dotsuffix_t x_dotsuffix_t) ^ (Type.print_gen_inst tp_t_lst)
 
   module Prog = struct
     let print_lit_t (x : ParserPass.Prog.lit_t) =
@@ -121,7 +124,7 @@ module PrettyPrinter = struct
       
     let rec print_name_seg_t (x : ParserPass.Prog.name_seg_t) = 
       let (id, tp_lst) = x in
-      id ^ (Type.print_and_join_t tp_lst)
+      id ^ (Type.print_gen_inst tp_lst)
   
     and print_suffx_t (x : ParserPass.Prog.suffix_t) = 
       match x with
@@ -163,11 +166,52 @@ module PrettyPrinter = struct
 
     and print_expr_t (x : ParserPass.Prog.expr_t) (idnt_lvl : int) = 
       let idnt_str = (get_indt_str idnt_lvl) in
+      idnt_str ^
       match x with
       | Suffixed (x_expr_t, x_suffix_t) -> (
-        idnt_str ^ (print_expr_t x_expr_t 0) ^ (print_suffx_t x_suffix_t)
+         (print_expr_t x_expr_t 0) ^ (print_suffx_t x_suffix_t)
+      )
+      | NameSeg x -> print_name_seg_t x
+      | Lambda (inputs, x_expr_t) -> (
+        let inputs' = List.map (
+          fun h -> 
+            let (id, tp_option) = h in
+              match tp_option with
+              | Some tp -> Printf.sprintf "%s : %s" id (Type.print_t tp)
+              | None -> id
+        ) inputs in
+        Printf.sprintf "(%s) => %s" 
+          (String.concat ", " inputs')
+          (print_expr_t_wrapper x_expr_t)
+      )
+      | MapDisplay x_lst -> (
+        let x_lst' = List.map (
+          fun h ->
+            let (e1, e2) = h in
+            ((print_expr_t_wrapper e1) ^ ": " ^ (print_expr_t_wrapper e2))
+        ) x_lst in
+        Printf.sprintf "map[%s]" (String.concat ", " x_lst')
+      )
+      | SetDisplay x_lst -> (
+        let x_lst' = List.map print_expr_t_wrapper x_lst in
+        Printf.sprintf "{%s}" (String.concat ", " x_lst')
+      )
+      | If (e1, e2, e3) -> (
+        Printf.sprintf "if %s then %s else %s"
+            (print_expr_t_wrapper e1)
+            (print_expr_t_wrapper e2)
+            (print_expr_t_wrapper e3)
+      )
+      | Match _ -> holder "ExprMatch"
+      | Quantifier x -> (
+        let qt, qdom, qbody = x.qt, x.qdom, x.qbody in
+        ""
       )
       | _ -> ""
+
+    and print_expr_t_wrapper x = 
+      let res = print_expr_t x 0 in
+      remove_newlines_and_tabs res
 
     and print_member_binding_upd_t (x : ParserPass.Prog.member_binding_upd_t) = 
       let (either_t, x_expr_t) = x in
@@ -176,8 +220,40 @@ module PrettyPrinter = struct
       | Right i -> string_of_int i
       ^ " := " ^ (print_expr_t x_expr_t 0)
 
-    and print_expr_t_wrapper x = 
-      print_expr_t x 0
+    and print_seq_display_t (x : ParserPass.Prog.seq_display_t) = 
+      match x with
+      | SeqEnumerate input -> (
+        let input' = List.map print_expr_t_wrapper input in
+        Printf.sprintf "[%s]" (String.concat ", " input')
+      )
+      | SeqTabulate input -> (
+        let gen_inst, len, func = input.gen_inst, input.len, input.func in
+        Printf.sprintf "seq%s(%s, %s)" 
+          (Type.print_gen_inst gen_inst)
+          (print_expr_t_wrapper len)
+          (print_expr_t_wrapper func)
+      )
+    
+    (*
+      {:id expr, expr, expr} 
+      *)
+    and print_attribute_t (x : ParserPass.Prog.attribute_t) = 
+      let id, markers = x in
+      let markers' = List.map print_expr_t_wrapper markers in
+      Printf.sprintf "{:%s %s}" id (String.concat ", " markers')
+    
+    (*
+      x : int [<- expr]
+      *)
+    and print_qvar_decl_t (x : ParserPass.Prog.qvar_decl_t) = 
+      match x with QVar (x, tp, cdom, attrs) ->
+        ""
+
+    and print_qdom_t (x : ParserPass.Prog.qdom_t) = 
+      match x with QDom x ->
+      let qvars, qrange = x.qvars, x.qrange in
+      ""
+
   end
 
   module ModuleItem = struct
