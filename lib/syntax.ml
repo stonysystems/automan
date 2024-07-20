@@ -16,6 +16,20 @@ end
 type id_t   = string
 [@@deriving show, eq]
 
+(* AutoMan annotations *)
+module AutoMan = struct
+  type mode_t = Input | Output
+  [@@deriving show, eq]
+
+  type t =
+    | Module   of id_t * t list
+    | Function of id_t * mode_t list
+  [@@deriving show, eq]
+
+  type toplevel_t = t list
+  [@@deriving show, eq]
+end
+
 (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#172753-basic-name-and-type-combinations *)
 type dotsuffix_t =
   | DSRequires | DSReads
