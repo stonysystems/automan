@@ -4,13 +4,13 @@ open Internal
 
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
-  type predicate_t [@@deriving show]
+  type formal_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
-  with type predicate_t = unit
+  with type formal_t = unit
 = struct
-  type predicate_t = unit [@@deriving show]
+  type formal_t = unit  [@@deriving show, eq]
 end
 
 type id_t   = string
@@ -23,19 +23,85 @@ module Annotation = struct
 
   type t =
     | Module   of id_t * t list
-    | Function of id_t * mode_t list
+    | Predicate of id_t * mode_t list
   [@@deriving show, eq]
 
   type toplevel_t = t list
   [@@deriving show, eq]
 end
 
-(* https://dafny.org/dafny/DafnyRef/DafnyRef.html#172753-basic-name-and-type-combinations *)
-type dotsuffix_t =
-  | DSRequires | DSReads
-  | DSId  of id_t
-  | DSDig of int (* NOTE: natural number*)
-[@@deriving show, eq]
+module AnnotationMetaData : MetaData
+  with type formal_t = Annotation.mode_t
+= struct
+  type formal_t = Annotation.mode_t [@@deriving show, eq]
+end
+
+(* Data that does not change during the different passes *)
+module Common = struct
+  (* Literals *)
+  (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-literal-expression
+     TODO: decimal literals *)
+  type lit_t =
+    | True | False | Null
+    | Nat     of int
+    | Char    of char
+    | String  of string
+  [@@deriving eq, show]
+
+  (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#172753-basic-name-and-type-combinations *)
+  type dotsuffix_t =
+    | DSRequires | DSReads
+    | DSId  of id_t
+    | DSDig of int (* NOTE: natural number*)
+  [@@deriving show, eq]
+
+  type uop_t = Neg | Not
+  [@@deriving show, eq]
+
+  type bop_t =
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-multiplication-expression *)
+    | Mul | Div | Mod
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-addition-expression *)
+    | Add | Sub
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-relational-expression
+       NOTE: no hash calls *)
+    | Eq | Neq | Lt | Gt | Lte | Gte | In | Nin | Disjoint
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-logical-expression *)
+    | And | Or
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-implies-expression *)
+    | Implies (* | Explies *) (* NOTE: treat explies as syntactic sugar *)
+    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-equivalence-expression *)
+    | Equiv
+  [@@deriving show, eq]
+
+  (* Quantifiers *)
+  type quantifier_t = Forall | Exists
+  [@@deriving show, eq]
+
+  (* Topdecls (general) *)
+  (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-declaration-modifier *)
+  type topdecl_modifier_t =
+    | Abstract | Ghost | Static | Opaque
+  [@@deriving show, eq]
+
+  (* Modules *)
+  type module_reference_t =
+    | Concrete | Abstract
+  [@@deriving show, eq]
+
+  type module_qualified_name_t = id_t NonEmptyList.t
+  [@@deriving show, eq]
+
+  (* Imports
+     https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-importing-modules
+     NOTE: no export sets *)
+  type import_t =
+    { opened: bool
+    ; mref: (module_reference_t * id_t) option
+    ; tgt: module_qualified_name_t
+    }
+  [@@deriving show, eq]
+end
 
 module AST (M : MetaData) = struct
 
@@ -79,43 +145,13 @@ module AST (M : MetaData) = struct
 
   (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-augmented-dot-suffix
      NOTE: no hash calls *)
-  type augmented_dotsuffix_t = dotsuffix_t * Type.t list
+  type augmented_dotsuffix_t = Common.dotsuffix_t * Type.t list
   [@@deriving show, eq]
 
   (** Expressions
       https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-expressions
   *)
   module Prog = struct
-    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-literal-expression
-       TODO: decimal literals *)
-    type lit_t =
-      | True | False | Null
-      | Nat     of int
-      | Char    of char
-      | String  of string
-    [@@deriving eq, show]
-
-    type quantifier_t = Forall | Exists
-    [@@deriving show, eq]
-
-    type uop_t = Neg | Not
-    [@@deriving show, eq]
-
-    type bop_t =
-      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-multiplication-expression *)
-      | Mul | Div | Mod
-      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-addition-expression *)
-      | Add | Sub
-      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-relational-expression
-         NOTE: no hash calls *)
-      | Eq | Neq | Lt | Gt | Lte | Gte | In | Nin | Disjoint
-      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-logical-expression *)
-      | And | Or
-      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-implies-expression *)
-      | Implies (* | Explies *) (* NOTE: treat explies as syntactic sugar *)
-      (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-equivalence-expression *)
-      | Equiv
-    [@@deriving show, eq]
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-name-segment
        https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-name-segment
 
@@ -130,16 +166,16 @@ module AST (M : MetaData) = struct
        NOTE: if we support disjunctive patterns, rename to
        "single_extended_pattern" *)
     type extended_pattern_t =
-      | EPatLit  of lit_t
+      | EPatLit  of Common.lit_t
       | EPatVar  of id_t * Type.t option
       (* NOTE: PatCtor (None, pats) means a tuple *)
       (* TODO: can the constructor identifier be qualified? *)
       | EPatCtor of id_t option * extended_pattern_t list
     [@@deriving eq, show]
 
-    type pattern =
+    type pattern_t =
       | PatVar  of id_t * Type.t option
-      | PatCtor of id_t option * pattern list
+      | PatCtor of id_t option * pattern_t list
     [@@deriving eq, show]
 
     type expr_t =
@@ -173,7 +209,7 @@ module AST (M : MetaData) = struct
          NOTE: Dafny 3 does not support per-variable quantifier ranges, so we
          aren't either *)
       | Quantifier of
-          { qt : quantifier_t
+          { qt : Common.quantifier_t
           ; qdom : qdom_t
           ; qbody : expr_t }
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-set-comprehension-expression
@@ -188,15 +224,15 @@ module AST (M : MetaData) = struct
          NOTE: no let-fail, assign-such-that *)
       | Let of
           { ghost: bool
-          ; pats: pattern NonEmptyList.t
-          ; def: expr_t NonEmptyList.t
+          ; pats: pattern_t NonEmptyList.t
+          ; defs: expr_t NonEmptyList.t
           ; body: expr_t }
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-map-comprehension-expression
          NOTE: imap not supported *)
       | MapComp of { qdom: qdom_t; key: expr_t option; valu: expr_t }
       (* const atom expressions: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-atomic-expression
          NOTE: no fresh, allocated, unchanged, old *)
-      | Lit  of lit_t
+      | Lit  of Common.lit_t
       | This
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-cardinality-expression
          NOTE: previously ExprLen *)
@@ -207,12 +243,12 @@ module AST (M : MetaData) = struct
       | Tuple of expr_t list
 
       (* unary expressions: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-unary-expression *)
-      | Unary of uop_t * expr_t
+      | Unary of Common.uop_t * expr_t
       (* NOTE: the following are unsupported
          - as/is: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-as-is-expression
          - bitvector: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-bitvector-expression
       *)
-      | Binary of bop_t * expr_t * expr_t
+      | Binary of Common.bop_t * expr_t * expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-top-level-expression *)
       | Lemma of {lem: expr_t; e: expr_t}
     [@@deriving show, eq]
@@ -305,7 +341,8 @@ module AST (M : MetaData) = struct
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-case-pattern
        NOTE: disjunctive patterns unsupported *)
-    and case_expr_t = Case of attribute_t list * extended_pattern_t * expr_t
+    and case_expr_t =
+        Case of attribute_t list * extended_pattern_t * expr_t
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-quantifier-expression *)
     and qvar_decl_t =
@@ -336,7 +373,7 @@ module AST (M : MetaData) = struct
 
     (** should only be called with relational operators that support chaining,
         and can be chained together *)
-    let rec chain_bop (e1: expr_t) (es: (bop_t * expr_t) list): expr_t =
+    let rec chain_bop (e1: expr_t) (es: (Common.bop_t * expr_t) list): expr_t =
       match es with
       | [] -> e1
       | [(o, e2)] -> Binary (o, e1, e2)
@@ -344,7 +381,7 @@ module AST (M : MetaData) = struct
         let res = chain_bop e2 es in
         Binary (And, Binary (o, e1, e2), res)
 
-    let assoc_right_bop (o: bop_t) (es: expr_t NonEmptyList.t): expr_t =
+    let assoc_right_bop (o: Common.bop_t) (es: expr_t NonEmptyList.t): expr_t =
       NonEmptyList.fold_right_1 (fun x y -> Binary (o, x, y)) es
 
     (* let assoc_left_bop (o: bop_t) (es: t NonEmptyList.t): t = *)
@@ -357,29 +394,12 @@ module AST (M : MetaData) = struct
         List.fold_left f init es
   end
 
-  type module_qualified_name_t = id_t NonEmptyList.t
-  [@@deriving show, eq]
-
   module TopDecl = struct
-    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-declaration-modifier *)
-    type modifier_t =
-      | Abstract | Ghost | Static | Opaque
-    [@@deriving show, eq]
-
-    type module_reference_t = Concrete | Abstract
-    [@@deriving show, eq]
-
-    (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-importing-modules
-       NOTE: no export sets *)
-    type import_t =
-      { opened: bool
-      ; mref: (module_reference_t * id_t) option
-      ; tgt: module_qualified_name_t
-      }
-    [@@deriving show, eq]
 
     (* Formal parameters to constructors/functions/methods *)
     type formal_t = Formal of id_t * Type.t
+    [@@deriving show, eq]
+    type formal_annotated_t = formal_t * M.formal_t
     [@@deriving show, eq]
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-datatype
@@ -399,7 +419,7 @@ module AST (M : MetaData) = struct
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-type-definition
        NOTE: no type parameter characteristics, witness clauses *)
     type synonym_type_rhs_t =
-      | Synonym of Type.t
+    | Synonym of Type.t
       | Subset  of id_t * Type.t option * Prog.expr_t
     [@@deriving show, eq]
 
@@ -427,7 +447,7 @@ module AST (M : MetaData) = struct
       | Predicate of
           bool                  (* method present *)
           * Prog.attribute_t list * id_t
-          * Type.generic_params_t * formal_t list
+          * Type.generic_params_t * formal_annotated_t list
           * function_spec_t list
           * Prog.expr_t
       | Function of
@@ -470,13 +490,13 @@ module AST (M : MetaData) = struct
     (* Method/Lemma END *)
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-top-level-declaration *)
-    type t = modifier_t list * t'
+    type t = Common.topdecl_modifier_t list * t'
     [@@deriving show, eq]
 
     (* NOTE: no ClassDecl, NewtypeDecl, SynonymTypeDecl(OpaqueTypeDecl_),
        ModuleExport, class field or constant *)
     and t' =
-      | ModuleImport    of import_t
+      | ModuleImport    of Common.import_t
       | ModuleDef       of module_def_t
       (* | ClassDecl *)
       | DatatypeDecl    of datatype_t
@@ -500,4 +520,66 @@ module AST (M : MetaData) = struct
   [@@deriving show, eq]
 end
 
-module ParserPass = AST (TrivMetaData)
+module Convert (M1 : MetaData) (M2 : MetaData) = struct
+  module Src = AST (M1)
+  module Tgt = AST (M2)
+
+  type attr_handler_t =
+    Src.Prog.attribute_t list -> Tgt.Prog.attribute_t list
+
+  let rec typ (tp: Src.Type.t): Tgt.Type.t =
+    let aux_ns (ns: Src.Type.name_seg_t): Tgt.Type.name_seg_t =
+      let TpIdSeg {id = id; gen_inst = gen_inst} = ns in
+      TpIdSeg {id = id; gen_inst = List.map typ gen_inst}
+    in
+    match tp with
+    | TpTup tps -> TpTup (List.map typ tps)
+    | TpName nss -> TpName (NonEmptyList.map aux_ns nss)
+
+  let rec extended_pattern (pat: Src.Prog.extended_pattern_t)
+    : Tgt.Prog.extended_pattern_t =
+    match pat with
+    | EPatLit lit -> EPatLit lit
+    | EPatVar (id, tp) ->
+      EPatVar (id, Option.map typ tp)
+    | EPatCtor (id, pats) ->
+      EPatCtor (id, List.map extended_pattern pats)
+
+  let rec pattern (pat: Src.Prog.pattern_t): Tgt.Prog.pattern_t =
+    match pat with
+    | PatVar (id, tp) -> PatVar (id, Option.map typ tp)
+    | PatCtor (id, pats) -> PatCtor (id, List.map pattern pats)
+
+  let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t =
+    let Formal (id, tp) = p in
+    Formal (id, typ tp)
+
+  let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t)
+    : Tgt.TopDecl.datatype_ctor_t =
+    let DataCtor (attrs, id, params) = ctor in
+    DataCtor (attr_handler attrs, id, List.map formal params)
+
+  let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t)
+    : Tgt.TopDecl.datatype_t =
+    let (attrs, id, tpparams, ctors) = d in
+    (attr_handler attrs, id, tpparams
+    , NonEmptyList.map (datatype_ctor attr_handler) ctors)
+
+  let synonym_typ_rhs (rhs: Src.TopDecl.synonym_type_rhs_t)
+    : Tgt.TopDecl.synonym_type_rhs_t =
+    match rhs with
+    | Synonym tp -> Tgt.TopDecl.Synonym (typ tp)
+    | Subset (_, _, _) ->
+      failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs))
+
+  let synonym_type (attr_handler: attr_handler_t) (d: Src.TopDecl.synonym_type_t)
+    : Tgt.TopDecl.synonym_type_t =
+    { attrs = attr_handler d.attrs
+    ; id = d.id
+    ; params = d.params
+    ; rhs = synonym_typ_rhs d.rhs
+    }
+end
+
+module ParserPass     = AST (TrivMetaData)
+module AnnotationPass = AST (AnnotationMetaData)

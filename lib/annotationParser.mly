@@ -11,7 +11,7 @@ item:
   | MODULE; n = ID; xs = delimited(LBRACE, list(item), RBRACE)
     { Syntax.Annotation.Module (n, xs) }
   | n = ID; xs = delimited(LPAREN, separated_list(COMMA, mode), RPAREN); SEMI
-    { Syntax.Annotation.Function (n, xs) }
+    { Syntax.Annotation.Predicate (n, xs) }
 
 toplevel:
   | xs = list(item); EOF { xs }

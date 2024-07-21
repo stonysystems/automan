@@ -3,8 +3,8 @@
 /* NOTE: OCaml gets confused and fully qualifies the type name generic_params_t,
    which makes Dune think there is a circular dependency
 */
-%type <Syntax.ParserPass.Type.generic_params_t> gen_params %type
-<Syntax.ParserPass.t> dafny
+%type <Syntax.ParserPass.Type.generic_params_t> gen_params
+%type <Syntax.ParserPass.t> dafny
 // %type <Syntax.ParserPass.Prog.t> expr
 
 %%
@@ -71,20 +71,20 @@ or_before_rel_expr(LEM): OR; e = rel_expr(LEM)   { e }
 
 /* BEGIN: relational operator symbols */
 rel_op_lt_lte:
-  | LTE    { Syntax.ParserPass.Prog.Lte }
-  | LANGLE { Syntax.ParserPass.Prog.Lt }
+  | LTE    { Syntax.Common.Lte }
+  | LANGLE { Syntax.Common.Lt }
 
 rel_op_gt_gte:
-  | GTE    { Syntax.ParserPass.Prog.Lte }
-  | RANGLE { Syntax.ParserPass.Prog.Lt }
+  | GTE    { Syntax.Common.Lte }
+  | RANGLE { Syntax.Common.Lt }
 
 /* NOTE: In Dafny, NEQ is allowed to appear inside a chain of equalities. We
    don't support this (yet?)
 */
 rel_op_nonchaining:
-  | NEQ   { Syntax.ParserPass.Prog.Neq }
-  | IN    { Syntax.ParserPass.Prog.In  }
-  | NOTIN { Syntax.ParserPass.Prog.Nin }
+  | NEQ   { Syntax.Common.Neq }
+  | IN    { Syntax.Common.In  }
+  | NOTIN { Syntax.Common.Nin }
 /* END: relational operator symbols */
 
 /* NOTE: use "shift_term" between rel_expr and term_expr
@@ -108,12 +108,13 @@ rel_expr_chain_gte_gt(LEM):
     { Syntax.ParserPass.Prog.chain_bop e1 es }
 
 rel_expr_chain_eq(LEM):
-  | e1 = term_expr(LEM); es = nonempty_list(EQ; e = term_expr(LEM) { (Syntax.ParserPass.Prog.Eq, e ) })
+  | e1 = term_expr(LEM);
+    es = nonempty_list(EQ; e = term_expr(LEM) { (Syntax.Common.Eq, e) })
     { Syntax.ParserPass.Prog.chain_bop e1 es }
 
 term_op:
-  | ADD { Syntax.ParserPass.Prog.Add }
-  | SUB { Syntax.ParserPass.Prog.Sub }
+  | ADD { Syntax.Common.Add }
+  | SUB { Syntax.Common.Sub }
 
 term_expr(LEM):
   |   e = factor_expr(LEM)
@@ -129,9 +130,9 @@ term_expr(LEM):
 term_op_before_factor_expr(LEM): top = term_op; e2 = factor_expr(LEM) { (top, e2) }
 
 factor_op:
-  | MULT { Syntax.ParserPass.Prog.Mul }
-  | DIV  { Syntax.ParserPass.Prog.Div }
-  | MOD  { Syntax.ParserPass.Prog.Mod }
+  | MULT { Syntax.Common.Mul }
+  | DIV  { Syntax.Common.Div }
+  | MOD  { Syntax.Common.Mod }
 
 factor_expr(LEM):
   |   e = unary_expr(LEM)
@@ -295,8 +296,8 @@ match_expr(LEM):
     }
 
 quantifier:
-  | FORALL { Syntax.ParserPass.Prog.Forall }
-  | EXISTS { Syntax.ParserPass.Prog.Exists }
+  | FORALL { Syntax.Common.Forall }
+  | EXISTS { Syntax.Common.Exists }
 
 qvar_dom_coll(LEM): QVAR_DOM_COLL; e = expr(LEM) { e }
 
@@ -326,7 +327,7 @@ let_expr(LEM):
         Let
           { ghost = false
           ; pats = Internal.NonEmptyList.coerce pats
-          ; def  = Internal.NonEmptyList.coerce vs
+          ; defs = Internal.NonEmptyList.coerce vs
           ; body = bod})
     }
 
@@ -371,8 +372,8 @@ suffix:
 
 /* TODO: add requires, reads */
 dotsuffix:
-  | DOT; x = ID  { Syntax.DSId x }
-  | DOT; n = NUM { Syntax.DSDig n }
+  | DOT; x = ID  { Syntax.Common.DSId x }
+  | DOT; n = NUM { Syntax.Common.DSDig n }
 
 member_binding_upd:
   | x = ID; ASSIGN; e = expr(yeslem)  { (Either.Left x, e) }
@@ -383,11 +384,11 @@ call_suffix:
     { Syntax.ParserPass.Prog.ArgList args }
 
 lit: /* TODO: character literals */
-  | TRUE  { Syntax.ParserPass.Prog.True }
-  | FALSE { Syntax.ParserPass.Prog.False}
-  | NULL  { Syntax.ParserPass.Prog.Null }
-  | x = STRING { Syntax.ParserPass.Prog.String x }
-  | n = NUM    { Syntax.ParserPass.Prog.Nat n }
+  | TRUE  { Syntax.Common.True }
+  | FALSE { Syntax.Common.False}
+  | NULL  { Syntax.Common.Null }
+  | x = STRING { Syntax.Common.String x }
+  | n = NUM    { Syntax.Common.Nat n }
 
 /* Types  */
 tp_prim:
@@ -494,13 +495,9 @@ import_mod_ref:
   | x = ID; DOT; xs = qualified_module_name
     { (None, Internal.NonEmptyList.cons x xs) }
   | x = ID; SGEQ; xs = qualified_module_name
-    { Syntax.ParserPass.TopDecl.(
-        (Some (Concrete, x), xs))
-    }
+    { (Some (Syntax.Common.Concrete, x), xs) }
   | x = ID; COLON; xs = qualified_module_name
-    { Syntax.ParserPass.TopDecl.(
-        (Some (Abstract, x), xs))
-    }
+    { (Some (Syntax.Common.Abstract, x), xs) }
   | x = ID
     { (None, Internal.NonEmptyList.singleton x) }
 
@@ -521,6 +518,9 @@ formal:
 formals:
   | ps = delimited(LPAREN, separated_list(COMMA, formal), RPAREN);
     { ps }
+
+annotated_formals:
+  | ps = formals { List.map (fun x -> (x, ())) ps }
 
 /* TODO: parallel pipes for constructors? (like &&, ||)
    TODO: optional ids for datatype constructor's formal parameters
@@ -564,7 +564,7 @@ synonym_type_decl:
 
 predfun_decl:
   | PREDICATE; attrs = list(attribute); p = ID;
-    gen_ps = gen_params; ps = formals;
+    gen_ps = gen_params; ps = annotated_formals;
     specs = list(function_spec);
     e = delimited(LBRACE, expr(yeslem), RBRACE);
     { Syntax.ParserPass.TopDecl.(
