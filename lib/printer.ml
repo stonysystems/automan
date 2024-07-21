@@ -203,10 +203,10 @@ module PrettyPrinter = struct
             (print_expr_t_wrapper e3)
       )
       | Match _ -> holder "ExprMatch"
-      | Quantifier x -> (
+      (* | Quantifier x -> (
         let qt, qdom, qbody = x.qt, x.qdom, x.qbody in
         ""
-      )
+      ) *)
       | _ -> ""
 
     and print_expr_t_wrapper x = 
@@ -245,20 +245,20 @@ module PrettyPrinter = struct
     (*
       x : int [<- expr]
       *)
-    and print_qvar_decl_t (x : ParserPass.Prog.qvar_decl_t) = 
+    (* and print_qvar_decl_t (x : ParserPass.Prog.qvar_decl_t) = 
       match x with QVar (x, tp, cdom, attrs) ->
         ""
 
     and print_qdom_t (x : ParserPass.Prog.qdom_t) = 
       match x with QDom x ->
       let qvars, qrange = x.qvars, x.qrange in
-      ""
+      "" *)
 
   end
 
-  module ModuleItem = struct
+  module TopDecl = struct
 
-  let print_import_t (x : ParserPass.ModuleItem.import_t) =
+  let print_import_t (x : ParserPass.TopDecl.import_t) =
     let op_str = 
       match x.opened with 
       | true  -> "opened "
@@ -278,15 +278,14 @@ module PrettyPrinter = struct
     )
     | None -> Printf.sprintf "import %s%s" op_str tgt_str
 
-  let print_formal_t (x : ParserPass.ModuleItem.formal_t) =
+  let print_formal_t (x : ParserPass.TopDecl.formal_t) =
     match x with Formal (id, tp) ->
     Printf.sprintf "%s : %s" id (Type.print_t tp)
 
-  let print_t (x : ParserPass.ModuleItem.t) (idnt_lvl : int) = 
+  let print_function_t (x : ParserPass.TopDecl.function_t) (idnt_lvl : int) = 
     let idnt_str = (get_indt_str idnt_lvl) in
     match x with
-    | Import i -> idnt_str ^ (print_import_t i)
-    | Predicate (p, fs, specs, e) -> (
+    | Predicate (_, _, p, _, fs, specs, e) -> (
       let fs_str_lst = List.map print_formal_t fs in
       let fs_str = String.concat ", " fs_str_lst in
       let _ = specs in 
@@ -295,17 +294,42 @@ module PrettyPrinter = struct
         "\n%spredicate %s(%s) %s{%s}" 
           idnt_str p fs_str idnt_str idnt_str
     )
+    | _ -> ""
+
+  let rec print_t' (x : ParserPass.TopDecl.t') (idnt_lvl : int) = 
+    let idnt_str = (get_indt_str idnt_lvl) in
+    match x with
+    | ModuleImport i -> idnt_str ^ (print_import_t i)
+    | ModuleDef d -> idnt_str ^ (print_module_def_t d idnt_lvl)
+    | PredFunDecl x -> print_function_t x idnt_lvl
     | _ -> "\n" ^ idnt_str ^ "[ Hasn't been implemented in Printer yet ]"
+  
+  and print_t (x : ParserPass.TopDecl.t) (idnt_lvl : int) = 
+    let (_, t') = x in
+      print_t' t' idnt_lvl
+
+  and print_module_def_t 
+    (x : ParserPass.TopDecl.module_def_t) (idnt_lvl : int) = 
+    let (_, id, t_lst) = x in
+    let t_lst' = List.map (fun x -> print_t x (idnt_lvl + 1)) t_lst in
+    Printf.sprintf "\nmodule %s \n{%s\n}" 
+      id (String.concat "" t_lst')
+
   end
 
-  module FileLevel = struct
-  let print_t (x : ParserPass.FileLevel.t) = 
-    match x with
-    | Include fp -> Printf.sprintf "include \"%s\"" fp
-    | Module (m, ds) -> (
-      let ds_str_lst = List.map (fun x -> ModuleItem.print_t x 1) ds in
-      let ds_str = String.concat "" ds_str_lst in
-      Printf.sprintf "\nmodule %s \n{%s\n}" m ds_str
-    )
-  end
+  let print_t (x : ParserPass.t) = 
+    match x with Dafny x ->
+      let includes, decls  = x.includes, x.decls in
+      let includes' = List.map (
+        fun h ->
+          Printf.sprintf "include \"%s\"" h
+      ) includes in
+      let decls' = List.map (
+        fun h ->
+          TopDecl.print_t h 0
+      ) decls in
+      Printf.sprintf "%s\n%s" 
+        (String.concat "\n" includes')
+        (String.concat "\n" decls')
+
 end
