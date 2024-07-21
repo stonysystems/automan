@@ -1,6 +1,5 @@
 open Automan
 open Core
-open Stdlib
 open Lexing
 
 let print_position outx lexbuf =
@@ -38,12 +37,13 @@ let loop filename () =
   let inx = In_channel.create filename in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  if String.ends_with ~suffix:"dfy" filename then
+  if Filename.check_suffix filename ".dfy" then
     parse_dafny_and_print lexbuf
-  else if String.ends_with ~suffix:"automan" filename then
+  else if Filename.check_suffix filename ".automan" then
     parse_annotations_and_print lexbuf
   else
     ();
+  parse_dafny_and_print lexbuf;
   In_channel.close inx
 
 let () =
