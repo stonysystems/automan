@@ -1,11 +1,21 @@
 let curry (f: ('a * 'b) -> 'c) (x: 'a) (y: 'b) =
   f (x, y)
 
+module Result : sig
+  include module type of Result
+  val ( let< ): ('a, 'e) result -> ('a -> ('b, 'e) result) -> ('b, 'e) result
+end = struct
+  include Result
+  let ( let< ) = bind
+end
+
 module List : sig
   include module type of List
   val take: int -> 'a list -> 'a list
   val unsnoc: 'a list -> 'a list * 'a
 
+  (* TODO: Find decent OCaml monad library *)
+  val mapMResult: ('a -> ('b, 'e) Result.t) -> 'a list -> ('b list, 'e) Result.t
 end = struct
   include List
 
@@ -22,6 +32,17 @@ end = struct
     match (rev xs) with
     | [] -> invalid_arg "List.unsnoc"
     | (last :: sx) -> (rev sx, last)
+
+  let mapMResult f xs =
+    let rec aux (accum: 'b list) (xs: 'a list) =
+      match xs with
+      | [] -> Result.Ok accum
+      | x :: xs' ->
+        match f x with
+        | Result.Ok y -> aux (y :: accum) xs'
+        | Result.Error e -> Result.Error e
+    in
+    Result.map List.rev (aux [] xs)
 end
 
 module NonEmptyList = struct
@@ -45,6 +66,10 @@ module NonEmptyList = struct
 
   let unsnoc (xs: 'a t): 'a list * 'a =
     List.unsnoc (as_list xs)
+
+  let map (f: 'a -> 'b) (xs: 'a t): 'b t =
+    let ( :: ) (hd, tl) = xs in
+    f hd :: List.map f tl
 
   let fold_left_1 (f: 'a -> 'a -> 'a) (xs: 'a t) =
     let ( :: ) (h, t) = xs in
