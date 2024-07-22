@@ -5,5 +5,5 @@
 
 (test
   (name test_parser)
-  (modules test_parser)
+  (modules test_common test_parser)
   (libraries core core_unix.command_unix async_unix automan))
