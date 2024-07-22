@@ -258,6 +258,14 @@ module PrettyPrinter = struct
 
   module TopDecl = struct
 
+  let print_modifier_t (x : ParserPass.TopDecl.modifier_t) = 
+    match x with
+    | Abstract  -> "abstract"
+    | Ghost     -> "ghost"
+    | Static    -> "static"
+    | Opaque    -> "opaque"
+    ^ " "
+
   let print_import_t (x : ParserPass.TopDecl.import_t) =
     let op_str = 
       match x.opened with 
@@ -305,16 +313,18 @@ module PrettyPrinter = struct
     | _ -> "\n" ^ idnt_str ^ "[ Hasn't been implemented in Printer yet ]"
   
   and print_t (x : ParserPass.TopDecl.t) (idnt_lvl : int) = 
-    let (_, t') = x in
-      print_t' t' idnt_lvl
+    let (m, t') = x in
+    let m' = List.map print_modifier_t m in
+      Printf.sprintf "%s%s"
+      (String.concat "" m') (print_t' t' idnt_lvl)
 
   and print_module_def_t 
     (x : ParserPass.TopDecl.module_def_t) (idnt_lvl : int) = 
-    let (_, id, t_lst) = x in
+    let (attr, id, t_lst) = x in
     let t_lst' = List.map (fun x -> print_t x (idnt_lvl + 1)) t_lst in
-    Printf.sprintf "\nmodule %s \n{%s\n}" 
-      id (String.concat "" t_lst')
-
+    let attr' = List.map Prog.print_attribute_t attr in
+    Printf.sprintf "\nmodule%s %s \n{%s\n}" 
+      (String.concat "" attr') id (String.concat "" t_lst')
   end
 
   let print_t (x : ParserPass.t) = 
