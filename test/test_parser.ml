@@ -25,7 +25,7 @@ let loop filename () =
   In_channel.close inx
 
 let () =
-  Command.basic_spec ~summary:"Parse and display specifications written in Dafny"
+  Command.basic_spec ~summary:"Parse and display specification ASTs written in Dafny"
     Command.Spec.(empty +> anon ("filename" %: string))
     loop
   |> Command_unix.run

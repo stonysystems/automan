@@ -1,7 +1,10 @@
 module LiveRSL__Acceptor_i {
-    IsLogTruncationPointValid(+,+);
+    IsLogTruncationPointValid(+,+,+);
     RemoveVotesBeforeLogTruncationPoint(+,-,+);
-    LAddVoteAndRemoveOldOnes(+,-,+,+);
+    LAddVoteAndRemoveOldOnes(+,-,+,+,+);
     LAcceptorInit(-,+);
     LAcceptorProcess1a(+,-,+,-);
+    LAcceptorProcess2a(+, -, +, -);
+    LAcceptorProcessHeartbeat(+, -, +);
+    LAcceptorTruncateLog(+, -, +);
 }
