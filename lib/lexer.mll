@@ -41,8 +41,10 @@ rule lexeme = parse
   | "decreases"     { Tokens.DECREASES                      }
   | "assert"        { Tokens.ASSERT                         }
   | "assume"        { Tokens.ASSUME                         }
+  | "return"        { Tokens.RETURN                         }
   | "function"      { Tokens.FUNCTION                       }
   | "lemma"         { Tokens.LEMMA                          }
+  | "method"        { Tokens.METHOD                         }
 
   | "type"          { Tokens.TYPE                           }
   | "true"          { Tokens.TRUE                           }

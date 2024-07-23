@@ -275,13 +275,13 @@ module AST (M : MetaData) = struct
       | SReturn of rhs_t list
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-update-and-call-statement
          Update And Call:
-         - Call variant: expression must end with a (possibly empty) argument list,
-           and might be trailed by attributes
+         TODO: if there's only one lhs, it may come with attributes; otherwise, none have attributes
       *)
-      | SCall of expr_t * expr_t list * attribute_t list
-      (* - Update variant: assignments 1-1, 1-many, many-1, many-many
-           NOTE: no havoc or such-that assignments *)
-      | SUpdAssign of lhs_t NonEmptyList.t * rhs_t NonEmptyList.t
+      | SUpdAndCall of lhs_t NonEmptyList.t * rhs_t list
+      (* | SCall of expr_t * suffix_t list * attribute_t list *)
+      (* (\* - Update variant: assignments 1-1, 1-many, many-1, many-many *)
+      (*      NOTE: no havoc or such-that assignments *\) *)
+      (* | SUpdAssign of lhs_t NonEmptyList.t * rhs_t NonEmptyList.t *)
 
       | SVarDecl of var_decl_t
     [@@deriving show, eq]
@@ -482,9 +482,10 @@ module AST (M : MetaData) = struct
 
     type method_t =
       { sort: method_sort_t
+      ; attrs: Prog.attribute_t list
       ; id: id_t
       ; signature: method_signature_t
-      ; spec: method_spec_t
+      ; spec: method_spec_t list
       ; body: Prog.stmt_block_t }
     [@@deriving show, eq]
     (* Method/Lemma END *)

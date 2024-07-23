@@ -10,9 +10,9 @@
 %token EXISTS
 %token VAR
 %token REQUIRES ENSURES DECREASES
-%token ASSERT ASSUME
+%token ASSERT ASSUME RETURN
 %token FUNCTION
-%token LEMMA
+%token LEMMA METHOD
 %token TYPE
 %token THIS
 

@@ -4,7 +4,9 @@
    which makes Dune think there is a circular dependency
 */
 %type <Syntax.ParserPass.Type.generic_params_t> gen_params
+%type <Syntax.ParserPass.TopDecl.t> top_decl
 %type <Syntax.ParserPass.t> dafny
+%type <Syntax.ParserPass.Prog.var_decl_id_lhs_t> stmt_vardecl_lhs
 // %type <Syntax.ParserPass.Prog.t> expr
 
 %%
@@ -434,16 +436,26 @@ gen_params:
     { [] }
 
 /* statements */
+rhs:
+  | e = expr(NOLEM); attrs = list(attribute)
+    { (e, attrs) }
+
 stmt:
   | s = stmt_assert { s }
   | s = stmt_assume { s }
-  | s = stmt_block  { s }
+  | s = stmt_block  { Syntax.ParserPass.Prog.SBlock s }
+  | s = stmt_if     { Syntax.ParserPass.Prog.SIf s }
   /* NOTE: I don't see how we can parse a case branch without curly braces around
   the tree... */
   | MATCH; scrut = expr(yeslem); tr = delimited(LBRACE, list(stmt_case), RBRACE)
     { Syntax.ParserPass.Prog.(
-        SMatch (e, tr))
+        SMatch (scrut, tr))
     }
+  /* NOTE: only rhs supported is expressions */
+  | RETURN; rets = separated_list(COMMA, rhs)
+    { Syntax.ParserPass.Prog.SReturn rets }
+  | s = stmt_updandcall { s }
+  | s = stmt_vardecl    { s }
 
 stmt_assert:
   | ASSERT; attrs = list(attribute); /* option label */
@@ -458,13 +470,12 @@ stmt_assume:
     { Syntax.ParserPass.Prog.(
         SAssume (attrs, e))}
 
-stmt_block: xs = delimited(LBRACE, list(stmt), RBRACE) { xs }
+stmt_block:
+  | xs = delimited(LBRACE, list(stmt), RBRACE) { xs }
 
 stmt_if:
   | IF; g = expr(yeslem); t = stmt_block; e = option(stmt_if_footer)
-    { Syntax.ParserPass.Prog.(
-        SIf {guard = g, then_br = t; footer = e}
-    )}
+    { { guard = g; then_br = t; footer = e } }
 
 stmt_if_footer:
   | ELSE; elif = stmt_if
@@ -475,6 +486,50 @@ stmt_if_footer:
 stmt_case:
   | CASE; p = extended_pattern; ARROW; br = list(stmt)
    { (p, br) }
+
+lhs:
+  | x = name_seg; suffs = list(suffix);
+    { Syntax.ParserPass.Prog.(
+        List.fold_left
+          (fun x y -> Suffixed (x, y))
+          x suffs)
+    }
+  | e = constatom_expr; suffs = nonempty_list(suffix);
+    { Syntax.ParserPass.Prog.(
+        List.fold_left
+          (fun x y -> Suffixed (x, y))
+          e suffs)
+    }
+
+stmt_updandcall:
+  | lhs = lhs; list(attribute); SEMI;
+    { Syntax.ParserPass.Prog.(
+        SUpdAndCall (Internal.NonEmptyList.singleton lhs, []))
+    }
+  | lhss = midrule(lhss = separated_nonempty_list(COMMA, lhs) { Internal.NonEmptyList.coerce lhss });
+    ASSIGN;
+    rhss = separated_nonempty_list(COMMA, rhs)
+    { Syntax.ParserPass.Prog.(
+        SUpdAndCall (lhss, rhss))
+    }
+
+/* NOTE: no ghost, pattern assignemts */
+stmt_vardecl_lhs:
+  | attrs = list(attribute); x = ID; tp = option(tp);
+    {
+      { id = x; tp = tp; attrs = attrs }
+    }
+  /* | xs = separated_nonempty_list(COMMA, attrs = list(attribute); x = ID; tp = option(tp); { { id = x; tp = tp; attrs = attrs } }); */
+  /*   { xs } */
+
+stmt_vardecl:
+  | VAR;
+    xs = separated_nonempty_list(COMMA, stmt_vardecl_lhs);
+    es = separated_nonempty_list(COMMA, rhs);
+    { Syntax.ParserPass.Prog.(
+        SVarDecl
+          (DeclIds (xs, Assign es)))
+    }
 
 /* misc */
 attribute:
@@ -562,6 +617,8 @@ synonym_type_decl:
         })
     }
 
+/* NOTE: no "predicate method", "function method", or named returns
+   NOTE: bodies are optional (abstract modules/classes?) */
 predfun_decl:
   | PREDICATE; attrs = list(attribute); p = ID;
     gen_ps = gen_params; ps = annotated_formals;
@@ -571,6 +628,14 @@ predfun_decl:
         Predicate (false, attrs, p, gen_ps, ps, specs, e)
       )
     }
+  | FUNCTION; attrs = list(attribute); p = ID;
+    tp_params = gen_params; params = formals; COLON;
+    tp = tp; specs = list(function_spec)
+    bod = delimited(LBRACE, expr(yeslem), RBRACE);
+    { Syntax.ParserPass.TopDecl.(
+        Function (false, attrs, p, tp_params, params, tp, specs, bod)
+      )
+    }
 
 datatype_decl:
   | DATATYPE; attrs = list(attribute);
@@ -578,6 +643,47 @@ datatype_decl:
     SGEQ;
     ctors = datatype_ctors;
     { (attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
+
+/* TODO: declaration modifiers (abstract, ghost, static, opaque) */
+module_decl:
+  | MODULE; attrs = list(attribute); m = ID;
+ds = delimited(LBRACE, list(top_decl), RBRACE);
+    { (attrs, m, ds) }
+
+methlem_keyword:
+  | METHOD { Syntax.ParserPass.TopDecl.Method }
+  | LEMMA  { Syntax.ParserPass.TopDecl.Lemma  }
+
+/* NOTE: modifies clause not supported
+*/
+methlem_spec:
+  | REQUIRES; e = expr(NOLEM)
+    { Syntax.ParserPass.TopDecl.MRequires e }
+  | ENSURES; e = expr(NOLEM)
+    { Syntax.ParserPass.TopDecl.MEnsures e }
+  | DECREASES; e = expr(NOLEM)
+    { Syntax.ParserPass.TopDecl.MDecreases e }
+/* | MODIFIES */
+
+/* NOTE: for constructors, identifier is not present
+** NOTE: no cardinality type (b/c no least, greatest lemmas)
+** NOTE: in general the body is optional (for abstract classes/modules?)
+*/
+methlem_decl:
+  | ml_key = methlem_keyword;
+    attrs = list(attribute); id = ID;
+    tp_params = gen_params; params = formals;
+    spec = list(methlem_spec);
+    body = stmt_block;
+    { { sort = ml_key
+      ; attrs = attrs
+      ; id = id
+      ; signature =
+          { generic_params = tp_params
+          ; params = params }
+      ; spec = spec
+      ; body = body }
+    }
 
 top_decl:
   | i = import
@@ -595,16 +701,18 @@ top_decl:
         ([], PredFunDecl pf)
       )
     }
+  | ml = methlem_decl
+    { Syntax.ParserPass.TopDecl.(
+        ([], MethLemDecl ml))
+    }
   | tpd = synonym_type_decl
     { Syntax.ParserPass.TopDecl.(
         ([], SynonymTypeDecl tpd)
       )
     }
-  /* TODO: declaration modifiers (abstract, ghost, static, opaque) */
-  | MODULE; attrs = list(attribute); m = ID;
-    ds = delimited(LBRACE, list(top_decl), RBRACE);
+  | m = module_decl
     { Syntax.ParserPass.TopDecl.(
-        ([], ModuleDef (attrs, m, ds)))
+        ([], ModuleDef m))
     }
 
 dafny:
