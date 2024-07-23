@@ -5,10 +5,10 @@
 
 (test
   (name test_parser)
-  (modules test_common test_parser)
+  (modules test_parser)
   (libraries core core_unix.command_unix async_unix automan))
 
 (test
   (name test_annotator)
-  (modules test_common test_annotator)
+  (modules test_annotator)
   (libraries core core_unix.command_unix async_unix automan))
