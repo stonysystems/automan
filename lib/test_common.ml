@@ -1,4 +1,3 @@
-open Automan
 open Core
 open Lexing
 
