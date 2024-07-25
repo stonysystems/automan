@@ -7,7 +7,7 @@
 
 (menhir
  (modules tokens)
- (flags --only-tokens)
+ (flags --only-tokens --unused-tokens)
  (explain false))
 
 (menhir
@@ -22,4 +22,4 @@
   (modules tokens annotationParser)
   (merge_into annotationParser)
   (flags
-    :standard --external-tokens Tokens))
+    :standard --external-tokens Tokens --unused-tokens))
