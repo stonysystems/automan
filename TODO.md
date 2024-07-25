@@ -17,3 +17,11 @@
 - [ ] current parser has a number of shift/reduce and 2 reduce/reduce conflicts.
       The two items above are big contributers, but may not be the only source
       of the conflicts
+
+- [ ] Match expressions require curly braces around the case tree.
+
+- [ ] lambda expressions can only be of the form ID => EXPR (there is a parser conflict with parenthesized formal parameters and tuples)
+
+- [ ] Several sorts of statements are not currently parsed (reveal, TODO)
+
+- [ ] `ghost` modifier is not currently parsed
