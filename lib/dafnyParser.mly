@@ -410,9 +410,8 @@ tp_prim:
     { Syntax.ParserPass.Type.bool }
 
 tp_tup:
-  | LPAREN; RPAREN { Syntax.ParserPass.Type.unit }
-  | LPAREN; t1 = tp; COMMA; ts = nonempty_list(COMMA; t = tp { t })
-    { Syntax.ParserPass.Type.TpTup (t1 :: ts) }
+  | tps = delimited(LPAREN, separated_nonempty_list(COMMA, tp), RPAREN)
+    { Syntax.ParserPass.Type.tuple tps }
 
 tp_name_seg:
   | x = ID; ts = gen_inst;

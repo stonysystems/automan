@@ -116,7 +116,8 @@ module AST (M : MetaData) = struct
     (* NOTE: no function types *)
     and t =
       | TpName of name_seg_t NonEmptyList.t
-      (* NOTE: this representation allows singleton tuples *)
+      (* NOTE: this representation allows singleton tuples; use the smart
+         constructor *)
       | TpTup  of t list
     [@@deriving show, eq]
 
@@ -140,6 +141,12 @@ module AST (M : MetaData) = struct
        NOTE: no variance annotations *)
     type generic_params_t = id_t list
     [@@deriving show, eq]
+
+    (* Smart constructor *)
+    let tuple (tps: t list): t =
+      match tps with
+      | tp :: [] -> tp
+      | _ -> TpTup tps
 
   end
 
@@ -370,6 +377,12 @@ module AST (M : MetaData) = struct
     (* NOTE: no update-failure, such-that *)
     and var_decl_ids_rhs_t =
       | Assign of rhs_t list
+
+    (** Smart constructor for Tuple *)
+    let tuple (es: expr_t list): expr_t =
+      match es with
+      | e :: [] -> e
+      | _ -> Tuple es
 
     (** should only be called with relational operators that support chaining,
         and can be chained together *)
