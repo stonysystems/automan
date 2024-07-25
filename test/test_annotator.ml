@@ -1,7 +1,7 @@
 open Automan
 open Core
 open Lexing
-open Test_common
+open TestCommon
 
 let main dafny_fn automan_fn () =
   (* Dafny *)
