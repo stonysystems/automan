@@ -21,7 +21,6 @@ let loop filename () =
     parse_annotations_and_print lexbuf
   else
     ();
-  parse_dafny_and_print lexbuf;
   In_channel.close inx
 
 let () =
