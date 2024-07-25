@@ -207,12 +207,13 @@ id_type_optional:
   | x = ID; COLON; tp = tp { (x, Some tp) }
   | x = ID                 { (x, None)    }
 
-lambda_delimited_formals:
-  | xs = delimited(LPAREN, separated_list(COMMA, id_type_optional), RPAREN) { xs }
+/* TODO: this introduces a reduce/reduce conflict with tuples */
+/* lambda_delimited_formals: */
+/*   | xs = delimited(LPAREN, separated_list(COMMA, id_type_optional), RPAREN) { xs } */
 
 lambda_formals:
   | x = ID                        { [(x, None)] }
-  | xs = lambda_delimited_formals { xs }
+  /* | xs = lambda_delimited_formals { xs } */
 
 /* NOTE: no lambda spec */
 lambda_expr(LEM):
@@ -341,13 +342,9 @@ constatom_expr:
     { Syntax.ParserPass.Prog.This }
   | e = delimited(PIPE, expr(yeslem), PIPE)
     { Syntax.ParserPass.Prog.(Cardinality e)}
-  | LPAREN; es = list(expr(yeslem)); RPAREN
+  | LPAREN; es = separated_list(COMMA, expr(yeslem)); RPAREN
     {
-      Syntax.ParserPass.Prog.(
-        match es with
-        | [e] -> e
-        | _   -> Tuple es
-      )
+      Syntax.ParserPass.Prog.tuple es
     }
 
 /* TODO: generic instantiations in terms currently can't be parsed */
