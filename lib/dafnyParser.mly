@@ -519,13 +519,19 @@ stmt_vardecl_lhs:
   /* | xs = separated_nonempty_list(COMMA, attrs = list(attribute); x = ID; tp = option(tp); { { id = x; tp = tp; attrs = attrs } }); */
   /*   { xs } */
 
+stmt_vardecl_rhs:
+  | ASSIGN; rhss = separated_nonempty_list(COMMA, rhs);
+    { Syntax.ParserPass.Prog.(
+        Assign rhss)
+    }
+
 stmt_vardecl:
   | VAR;
     xs = separated_nonempty_list(COMMA, stmt_vardecl_lhs);
-    es = separated_nonempty_list(COMMA, rhs);
+    rhs = option(stmt_vardecl_rhs);
+    SEMI;
     { Syntax.ParserPass.Prog.(
-        SVarDecl
-          (DeclIds (xs, Assign es)))
+        SVarDecl (DeclIds (xs, rhs)))
     }
 
 /* misc */

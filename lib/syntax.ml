@@ -370,7 +370,7 @@ module AST (M : MetaData) = struct
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-variable-declaration-statement *)
     and var_decl_t =
-      | DeclIds of var_decl_id_lhs_t list * var_decl_ids_rhs_t
+      | DeclIds of var_decl_id_lhs_t list * var_decl_ids_rhs_t option
 
     and var_decl_id_lhs_t = { id: id_t; tp: Type.t option; attrs: attribute_t list }
 
