@@ -350,10 +350,11 @@ constatom_expr:
       )
     }
 
+/* TODO: generic instantiations in terms currently can't be parsed */
 suffix:
-  | s = dotsuffix; tps = gen_inst
+  | s = dotsuffix; /* tps = gen_inst */
     { Syntax.ParserPass.Prog.(
-        AugDot (s, tps))
+        AugDot (s, [] (* tps *)))
     }
   |   DOT
     ; LPAREN
