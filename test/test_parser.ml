@@ -1,7 +1,7 @@
 open Automan
 open Core
 open Lexing
-open Test_common
+open TestCommon
 
 let parse_dafny_and_print lexbuf =
   let x = parse_dafny_with_error lexbuf in
