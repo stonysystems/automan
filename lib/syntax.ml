@@ -22,9 +22,13 @@ module Annotation = struct
   [@@deriving show, eq]
 
   type t =
-    | Module   of id_t * t list
-    | Predicate of id_t * mode_t list
+    | Module    of module_t
+    | Predicate of predicate_t
   [@@deriving show, eq]
+
+  and predicate_t = id_t * mode_t list
+
+  and module_t = id_t * t list
 
   type toplevel_t = t list
   [@@deriving show, eq]

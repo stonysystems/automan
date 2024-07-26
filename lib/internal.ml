@@ -4,9 +4,15 @@ let curry (f: ('a * 'b) -> 'c) (x: 'a) (y: 'b) =
 module Result : sig
   include module type of Result
   val ( let< ): ('a, 'e) result -> ('a -> ('b, 'e) result) -> ('b, 'e) result
+  val map2: ('a -> 'b) -> ('c -> 'd) -> ('a, 'c) t -> ('b, 'd) t
 end = struct
   include Result
   let ( let< ) = bind
+
+  let map2 f g =
+    fold
+      ~ok:(fun x -> Result.Ok (f x))
+      ~error:(fun y -> Result.Error (g y))
 end
 
 module List : sig
