@@ -1,0 +1,3 @@
+module Collections__CountMatches_i {
+    IsNthHighestValueInSequence(+,+,+);
+}
