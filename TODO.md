@@ -20,7 +20,8 @@
 
 - [ ] Match expressions require curly braces around the case tree.
 
-- [ ] lambda expressions can only be of the form ID => EXPR (there is a parser conflict with parenthesized formal parameters and tuples)
+- [ ] lambda expressions can only be of the form ID => EXPR (there is a parser
+      conflict with parenthesized formal parameters and tuples)
 
 - [ ] Several sorts of statements are not currently parsed (reveal, TODO)
 

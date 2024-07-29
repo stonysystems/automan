@@ -55,6 +55,10 @@ module NonEmptyList = struct
   type 'a t = ( :: ) of 'a * 'a list
   [@@deriving show, eq]
 
+  let head (xs: 'a t): 'a =
+    let ( :: ) (hd, _) = xs in
+    hd
+
   let singleton (x: 'a): 'a t = (::) (x, [])
 
   let coerce (xs: 'a list): 'a t =
