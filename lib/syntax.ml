@@ -32,6 +32,20 @@ module Annotation = struct
 
   type toplevel_t = t list
   [@@deriving show, eq]
+
+  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Module (m_id, _) -> m_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Predicate (p_id, _) -> p_id = id
+        | _ -> false)
+      anns
 end
 
 module AnnotationMetaData : MetaData
