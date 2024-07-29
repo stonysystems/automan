@@ -6,7 +6,6 @@ open struct
 end
 
 module Convert  = Syntax.Convert (TrivMetaData) (AnnotationMetaData)
-module Resolver = NameResolution.ParserPass
 
 (* BEGIN expressions
    NOTE: for now, this does nothing
@@ -170,7 +169,9 @@ let rec annotate_topdecl
   (* process *)
   | ParserPass.TopDecl.ModuleDef (m_attrs, m_id, m_decls) ->
     begin
-      let< (_, m_ann) = Resolver.find_topdecl_module_annotation m_id anns in
+      let< (_, m_ann) =
+        NameResolution.TopLevel.find_module
+          (NonEmptyList.singleton m_id) anns in
       let< m_decls' = annotate_topdecls m_ann m_decls in
       Result.Ok
         (AnnotationPass.TopDecl.ModuleDef
@@ -178,7 +179,9 @@ let rec annotate_topdecl
     end
   | ParserPass.TopDecl.PredFunDecl
       (Predicate (method_present, p_attrs, p_id, p_tp_params, p_params, p_specs, p_body)) ->
-    let< (_, p_modes) = Resolver.find_topdecl_predicate_annotation p_id anns in
+    let< (_, p_modes) =
+      NameResolution.TopLevel.find_predicate
+        (NonEmptyList.singleton p_id) anns in
     if List.(length p_params <> length p_modes) then
       Result.Error ("annotator: annotate_topdecl: mismatched arity for predicate " ^ p_id)
     else begin
