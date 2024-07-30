@@ -107,4 +107,74 @@ end = struct
   [@@deriving show, eq]
 end
 
+module State : sig
+  type ('s, 'a) t = 's -> 'a * 's
+
+  val ( let* ) : ('s, 'a) t -> ('a -> ('s, 'b) t) -> ('s, 'b) t
+  val return : 'a -> ('s, 'a) t
+
+  val gets : ('s -> 'a) -> ('s, 'a) t
+  val get  : ('s, 's) t
+  val puts : ('s -> 's) -> ('s, unit) t
+  val put  : 's -> ('s, unit) t
+
+  val run  : ('s, 'a) t -> 's -> 'a
+end = struct
+  type ('s, 'a) t = 's -> 'a * 's
+
+  let ( let* ) f g = fun s ->
+    let (x, s') = f s in
+    g x s'
+
+  let return x = fun s -> (x, s)
+
+  let gets f = fun s -> (f s, s)
+  let get = fun s -> gets (fun x -> x) s
+  let puts f = fun s -> ((), f s)
+  let put s = puts (fun _ -> s)
+
+  let run prog st =
+    let (x, _) = prog st in x
+end
+
+module StateError : sig
+  type ('s, 'e, 'a) t = ('s, ('a, 'e) Result.t) State.t
+  val bind: ('s, 'e, 'a) t -> ('a -> ('s, 'e, 'b) t) -> ('s, 'e, 'b) t
+  val return: 'a -> ('s, 'e, 'a) t
+  val map: ('a -> 'b) -> ('s, 'e, 'a) t -> ('s, 'e, 'b) t
+
+  val error: 'e -> ('s, 'e, 'a) t
+  val map_error: ('e -> 'f) -> ('s, 'e, 'a) t -> ('s, 'f, 'a) t
+
+  val get: ('s, 'e, 's) t
+  val put: 's -> ('s, 'e, unit) t
+  val puts: ('s -> ('s, 'e) Result.t) -> ('s, 'e, unit) t
+end = struct
+  type ('s, 'e, 'a) t = ('s, ('a, 'e) Result.t) State.t
+
+  let bind f g = fun s ->
+    let (scrut, s') = f s in
+    match scrut with
+    | Result.Error msg -> (Result.Error msg, s')
+    | Result.Ok x -> g x s'
+
+  let return x = fun s -> (Result.Ok x, s)
+
+  let map f x = bind x (fun y -> return (f y))
+
+  let error e = fun s ->
+    (Result.Error e, s)
+
+  let map_error err prog = fun s ->
+    let (res, s') = prog s in
+    (Result.map_error err res, s')
+
+  let get = fun s -> (Result.Ok s, s)
+  let put s = fun _ -> (Result.Ok (), s)
+  let puts f = fun s ->
+    match f s with
+    | Result.Ok s' -> (Result.Ok (), s')
+    | Result.Error msg -> (Result.Error msg, s)
+end
+
 ;;

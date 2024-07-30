@@ -94,24 +94,54 @@ module NameSpace = struct
     ; locals: Annotation.toplevel_t
     }
 
+  let qualify_module (m_id: id_t) (ns: t): module_qualified_name_t =
+    let rec aux accum = function
+      | TopLevel -> accum
+      | Module {enclosing = p; m_id = m_id; imports = _; locals = _} ->
+        aux (m_id :: accum) p
+    in
+    NonEmptyList.coerce (aux [] ns @ [m_id])
+
   (* [enter|exit]_module are for name resolution during mode analysis *)
-  let enter_module (ns: t) (m_id: id_t): module_t =
-    { enclosing = ns; m_id = m_id; imports = []; locals = [] }
+  let enter_module (ns: t) (m_id: id_t): t =
+    Module { enclosing = ns; m_id = m_id; imports = []; locals = [] }
 
-  let exit_module (ns: module_t): t =
-    match ns.enclosing with
-    | TopLevel -> TopLevel
-    | Module ns' ->
-      Module
-        { ns' with
-          locals =
-            ns'.locals @ [Annotation.Module (ns.m_id, ns.locals)]
-        }
+  let exit_module (ns: t): (t, string) Result.t =
+    match ns with
+    | TopLevel -> Result.Error ("NameSpace.exit_module: at toplevel")
+    | Module ns ->
+      match ns.enclosing with
+      | TopLevel -> Result.Ok TopLevel
+      | Module ns' -> Result.Ok begin
+        Module
+          { ns' with
+            locals =
+              ns'.locals @ [Annotation.Module (ns.m_id, ns.locals)] }
+      end
 
-  let push_imports (ns: module_t) (imps: Annotation.toplevel_t): module_t =
+  let push_imports (ns: t) (imps: Annotation.toplevel_t)
+    : (t, string) Result.t =
     (* The resolver performs the necessary transformations, e.g., unpacking an
        opened import or renaming on an import alias *)
-    { ns with imports = imps @ ns.imports }
+    match ns with
+    | TopLevel -> Result.Error begin
+        "NameSpace.push_import: cannot import at toplevel"
+        ^ "\n- import: " ^ Annotation.(show_toplevel_t imps)
+      end
+    | Module ns -> Result.Ok begin
+        Module { ns with imports = ns.imports @ imps }
+      end
+
+  let push_locals (ns: t) (locals: Annotation.toplevel_t)
+      : (t, string) Result.t =
+    match ns with
+    | TopLevel -> Result.Error begin
+        "NameSpace.push_locals: cannot make local declaration at toplevel"
+        ^ "\n- locals: " ^ Annotation.(show_toplevel_t locals)
+      end
+    | Module ns -> Result.Ok begin
+        Module { ns with locals = ns.locals @ locals }
+      end
 
   let find_module_local (ns: module_t) (m_id: module_qualified_name_t) =
     (* Search local declarations first, then search local imports *)
@@ -138,12 +168,62 @@ module NameSpace = struct
         find_module ns.enclosing m_id
 end
 
-module Resolver (M: Syntax.MetaData) = struct
-  module AST = Syntax.AST (M)
+module Resolver = struct
+  open Syntax.Common
 
-  (* open struct *)
-  (*   let ( let+ ) = Option.bind *)
-  (* end *)
+  type 'a m = (NameSpace.t, string, 'a) StateError.t
+
+  open struct
+    let ( let< )  = Result.bind
+    let ( let<* ) = StateError.bind
+  end
+
+  let find_module
+      (m_id: module_qualified_name_t) (anns: Annotation.toplevel_t)
+    : Annotation.module_t m =
+    State.gets begin fun ns ->
+      let< m_ann = NameSpace.find_module ns m_id in
+      match m_ann with
+      | Some x -> Result.Ok x
+      | None -> TopLevel.find_module m_id anns
+    end
+
+  let push_import
+      (imp: Syntax.Common.import_t) (anns: Annotation.toplevel_t)
+    : unit m =
+    let<* (m_id, m_anns) =
+      StateError.map_error ((^) "Resolver.push_import:\n")
+        (find_module imp.tgt anns)
+    in
+    let imps1 = if imp.opened then m_anns else [] in
+    let imps2 =
+      match imp.mref with
+      | None -> [Annotation.Module (m_id, m_anns)]
+      | Some (_, m_ref) -> [Annotation.Module (m_ref, m_anns)]
+    in
+    StateError.map_error ((^) "Resolver.push_import:\b") begin
+      StateError.puts (fun ns -> NameSpace.push_imports ns (imps1 @ imps2))
+    end
+
+  let enter_module (m_id: id_t) (anns: Annotation.toplevel_t)
+    : unit m =
+    StateError.puts begin fun ns ->
+      let qm_id = NameSpace.qualify_module m_id ns in
+      let< (_, m_anns) = TopLevel.find_module qm_id anns in
+      let ns1 = NameSpace.enter_module ns m_id in
+      NameSpace.push_locals ns1 m_anns
+    end
+    (* let<* ns = StateError.get in *)
+    (* let qm_id = NameSpace.qualify_module m_id ns in *)
+    (* foo *)
+
+    (* let<* ns = StateError.get in *)
+    (* StateError.put (NameSpace.enter_module ns m_id) *)
+
+  let exit_module: unit m =
+    StateError.puts begin fun ns ->
+      NameSpace.exit_module ns
+    end
 
   (* (\** *)
   (*  * - qpid: the (possibly qualified) name of the predicate to search for *)
@@ -174,4 +254,3 @@ module Resolver (M: Syntax.MetaData) = struct
 
 end
 
-module ParserPass = Resolver (TrivMetaData)
