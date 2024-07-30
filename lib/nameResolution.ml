@@ -166,6 +166,15 @@ module NameSpace = struct
         Result.Ok opt_m_ann
       else
         find_module ns.enclosing m_id
+
+  let find_predicate_local_decl (ns: t) (m_id: id_t)
+    : (Annotation.predicate_t, string) Result.t =
+    match ns with
+    | TopLevel ->
+      Result.Error
+        "NameSpace.find_predicate_local: no local definitions at toplevel"
+    | Module ns' ->
+      TopLevel.find_predicate (NonEmptyList.singleton m_id) ns'.locals
 end
 
 module Resolver = struct
@@ -187,6 +196,9 @@ module Resolver = struct
       | Some x -> Result.Ok x
       | None -> TopLevel.find_module m_id anns
     end
+
+  let find_predicate_local_decl (m_id: id_t): Annotation.predicate_t m =
+    StateError.gets (fun ns -> NameSpace.find_predicate_local_decl ns m_id)
 
   let push_import
       (imp: Syntax.Common.import_t) (anns: Annotation.toplevel_t)

@@ -161,20 +161,11 @@ let rec annotate_topdecl
     let<* () = Resolver.push_import imp anns in
     StateError.return (AnnotationPass.TopDecl.ModuleImport imp)
   | ParserPass.TopDecl.ModuleDef (m_attrs, m_id, m_decls) ->
-    begin
-      let<* () = Resolver.enter_module m_id anns in
-      let<* m_decls' = annotate_topdecls anns m_decls in
-      StateError.return begin
-        AnnotationPass.TopDecl.ModuleDef
-          (attribute_handler m_attrs, m_id, m_decls')
-      end
-      (* let< (_, m_ann) = *)
-      (*   NameResolution.TopLevel.find_module *)
-      (*     (NonEmptyList.singleton m_id) anns in *)
-      (* let< m_decls' = annotate_topdecls m_ann foo m_decls in *)
-      (* Result.Ok *)
-      (*   (AnnotationPass.TopDecl.ModuleDef *)
-      (*      (attribute_handler m_attrs, m_id, m_decls')) *)
+    let<* () = Resolver.enter_module m_id anns in
+    let<* m_decls' = annotate_topdecls anns m_decls in
+    StateError.return begin
+      AnnotationPass.TopDecl.ModuleDef
+        (attribute_handler m_attrs, m_id, m_decls')
     end
 
   (* Declarations that don't modify the namespace
@@ -188,27 +179,29 @@ let rec annotate_topdecl
       (AnnotationPass.TopDecl.SynonymTypeDecl
          (Convert.synonym_type attribute_handler syn))
   | ParserPass.TopDecl.MethLemDecl _ ->
-    failwith ("TODO: methods/lemmas: " ^ ParserPass.TopDecl.(show_t' d))
+    failwith ("annotator: annotate_toplevel: TODO: methods/lemmas: " ^ ParserPass.TopDecl.(show_t' d))
   | ParserPass.TopDecl.PredFunDecl (Function (_, _, id, _, _, _, _, _)) ->
     failwith ("annotator: annotate_toplevel: TODO functions (" ^ id ^ ")")
-  | _ -> foo
-  (* | ParserPass.TopDecl.PredFunDecl *)
-  (*     (Predicate (method_present, p_attrs, p_id, p_tp_params, p_params, p_specs, p_body)) -> *)
-  (*   let< (_, p_modes) = *)
-  (*     NameResolution.TopLevel.find_predicate *)
-  (*       (NonEmptyList.singleton p_id) anns in *)
-  (*   if List.(length p_params <> length p_modes) then *)
-  (*     Result.Error ("annotator: annotate_topdecl: mismatched arity for predicate " ^ p_id) *)
-  (*   else begin *)
-  (*     let p_attrs' = attribute_handler p_attrs in *)
-  (*     let p_params' = List.map2 annotate_formal p_params p_modes in *)
-  (*     Result.Ok *)
-  (*       (AnnotationPass.TopDecl.PredFunDecl *)
-  (*             (Predicate *)
-  (*                (method_present, p_attrs', p_id, p_tp_params *)
-  (*                , p_params', List.map annotate_function_spec p_specs *)
-  (*                , annotate_expr p_body))) *)
-  (*   end *)
+  | ParserPass.TopDecl.PredFunDecl
+      (Predicate (method_present, p_attrs, p_id, p_tp_params, p_params, p_specs, p_body)) ->
+    let<* (_, p_ann_modes) = Resolver.find_predicate_local_decl p_id in
+    if List.(length p_params <> length p_ann_modes) then
+      StateError.error
+        ("annotator: annotate_toplevel: mismatched arity for predicate: "
+         ^ p_id)
+    else begin
+      let p_attrs' = attribute_handler p_attrs in
+      let p_params' = List.map2 annotate_formal p_params p_ann_modes in
+      let p_specs' = List.map annotate_function_spec p_specs in
+      (* TODO: annotate predicate calls in expressions, too *)
+      let p_body' = annotate_expr p_body in
+      StateError.return begin
+        AnnotationPass.TopDecl.PredFunDecl
+          (Predicate
+             ( method_present, p_attrs', p_id, p_tp_params
+             , p_params', p_specs', p_body'))
+      end
+    end
 
 and annotate_topdecls
   (anns: Annotation.toplevel_t) (ds: ParserPass.TopDecl.t list)

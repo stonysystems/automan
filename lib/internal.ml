@@ -147,6 +147,7 @@ module StateError : sig
   val map_error: ('e -> 'f) -> ('s, 'e, 'a) t -> ('s, 'f, 'a) t
 
   val get: ('s, 'e, 's) t
+  val gets: ('s -> ('a, 'e) Result.t) -> ('s, 'e, 'a) t
   val put: 's -> ('s, 'e, unit) t
   val puts: ('s -> ('s, 'e) Result.t) -> ('s, 'e, unit) t
 end = struct
@@ -170,6 +171,7 @@ end = struct
     (Result.map_error err res, s')
 
   let get = fun s -> (Result.Ok s, s)
+  let gets f = fun s -> (f s, s)
   let put s = fun _ -> (Result.Ok (), s)
   let puts f = fun s ->
     match f s with
