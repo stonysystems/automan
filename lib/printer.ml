@@ -196,7 +196,7 @@ module PrettyPrinter = struct
           (print_expr_t_in_one_line idx) (print_expr_t_in_one_line v)  
       )
       | Sel x -> Printf.sprintf "[%s]" (print_expr_t_in_one_line x)
-      | ArgList x -> (
+      | ArgList (x, _) -> (
         let x' = List.map print_expr_t_in_one_line x in
         Printf.sprintf "(%s)" (String.concat ", " x')
       )

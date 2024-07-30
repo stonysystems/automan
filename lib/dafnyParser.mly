@@ -381,7 +381,7 @@ member_binding_upd:
 
 call_suffix:
   | args = delimited(LPAREN, separated_list(COMMA, expr(yeslem)), RPAREN)
-    { Syntax.ParserPass.Prog.ArgList args }
+    { Syntax.ParserPass.Prog.ArgList (args, ()) }
 
 lit: /* TODO: character literals */
   | TRUE  { Syntax.Common.True }
