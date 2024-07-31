@@ -115,8 +115,8 @@ and annotate_suffix = function
       ; v   = annotate_expr v }
   | Sel idx ->
     Sel (annotate_expr idx)
-  | ArgList args ->
-    ArgList (List.map annotate_expr args)
+  | ArgList (args, _) ->
+    ArgList (List.map annotate_expr args, None) (* TODO *)
 
 and annotate_quantifier_domain (qdom: ParserPass.Prog.qdom_t)
   : AnnotationPass.Prog.qdom_t =

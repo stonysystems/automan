@@ -5,12 +5,15 @@ open Internal
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
   type formal_t [@@deriving show, eq]
+  type arglist_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
-  with type formal_t = unit
+  with type formal_t  = unit
+  with type arglist_t = unit
 = struct
-  type formal_t = unit  [@@deriving show, eq]
+  type formal_t  = unit [@@deriving show, eq]
+  type arglist_t = unit [@@deriving show, eq]
 end
 
 type id_t   = string
@@ -35,9 +38,21 @@ module Annotation = struct
 end
 
 module AnnotationMetaData : MetaData
-  with type formal_t = Annotation.mode_t
+  with type formal_t  = Annotation.mode_t
+  with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
 = struct
-  type formal_t = Annotation.mode_t [@@deriving show, eq]
+  type formal_t  = Annotation.mode_t
+  [@@deriving show, eq]
+
+  (** - When this is Option.None, the call is not associated with a known
+        predicate. For now, assume this means all arguments are input moded
+
+      - When this is Option.Some, the mode list this contains has the same
+        length as the argument list suffix, and the expression to which the
+        call is attached is given the qualified identifier
+  *)
+  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+  [@@deriving show, eq]
 end
 
 (* Data that does not change during the different passes *)
@@ -335,7 +350,7 @@ module AST (M : MetaData) = struct
          NOTE: multiple indices (for multi-dimensional arrays) not (yet?) supported *)
       | Sel      of expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-argument-list-suffix *)
-      | ArgList  of expr_t list
+      | ArgList  of expr_t list * M.arglist_t
     [@@deriving show, eq]
 
     and member_binding_upd_t = (id_t, int) Either.t * expr_t
