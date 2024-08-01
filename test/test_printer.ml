@@ -1,54 +1,43 @@
 open Automan
 open Core
 open Lexing
+open Printer
+open TestCommon
 
-let print_position outx lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  fprintf outx "%s:%d:%d" pos.pos_fname
-    pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
+let main dafny_fn automan_fn () =
+  (* Dafny *)
+  let dafny = begin
+    let inx = In_channel.create dafny_fn in
+    let lexbuf = Lexing.from_channel inx in
+    lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = dafny_fn };
+    let dafny = parse_dafny_with_error lexbuf in
+    In_channel.close inx;
+    dafny
+  end in
+  let ann = begin
+    let inx = In_channel.create automan_fn in
+    let lexbuf = Lexing.from_channel inx in
+    lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = automan_fn };
+    let ann = parse_annotations_with_error lexbuf in
+    In_channel.close inx;
+    ann
+  end in
+  match Annotator.annotate ann dafny with
+  | Result.Error msg ->
+    printf "Error: %s\n" msg
+  | Result.Ok    dfy ->
+    let module Printer = PrettyPrinter(Syntax.AnnotationMetaData) in
+    printf "%s" (Printer.(print dfy))
 
-let parse_dafny_with_error lexbuf =
-  try DafnyParser.dafny Lexer.lexeme lexbuf with
-  | Lexer.SyntaxError msg ->
-    fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    exit (-1)
-  | DafnyParser.Error ->
-    fprintf stderr "%a: syntax error\n"  print_position lexbuf;
-    exit (-1)
-
-let parse_annotations_with_error lexbuf =
-  try AnnotationParser.toplevel Lexer.lexeme lexbuf with
-  | Lexer.SyntaxError msg ->
-    fprintf stderr "%a: %s\n" print_position lexbuf msg;
-    exit (-1)
-  | AnnotationParser.Error ->
-    fprintf stderr "%a: syntax error\n" print_position lexbuf;
-    exit (-1)
-
-let parse_dafny_and_print lexbuf =
-  let x = parse_dafny_with_error lexbuf in
-  printf "%s\n" (Printer.PrettyPrinter.print_t x)
-
-let parse_annotations_and_print lexbuf =
-  let x = parse_annotations_with_error lexbuf in
-  printf "%s\n" (Syntax.Annotation.show_toplevel_t x)
-
-let loop filename () =
-  let inx = In_channel.create filename in
-  let lexbuf = Lexing.from_channel inx in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
-  if Filename.check_suffix filename ".dfy" then
-    parse_dafny_and_print lexbuf
-  else if Filename.check_suffix filename ".automan" then
-    parse_annotations_and_print lexbuf
-  else
-    ();
-  parse_dafny_and_print lexbuf;
-  In_channel.close inx
 
 let () =
-  Command.basic_spec ~summary:"Parse and display specifications written in Dafny"
-    Command.Spec.(empty +> anon ("filename" %: string))
-    loop
+  Command.basic_spec
+    ~summary:"Run annotator on Dafny specification and Automan annotation file, printing the resulting AST"
+    Command.Spec.(
+      empty
+      +> anon ("dafnyFilename" %: string)
+      +> anon ("automanFilename" %: string)
+    )
+    main
   |> Command_unix.run
 
