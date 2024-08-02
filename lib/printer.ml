@@ -319,6 +319,13 @@ module PrettyPrinter (M : MetaData) = struct
           | _ -> print_expr_in_one_line expr_r
         )
       )
+      | Tuple (exprs) -> begin
+        Printf.sprintf "(%s)" 
+          begin 
+            let exprs' = List.map print_expr_in_one_line exprs in 
+            String.concat ", " exprs'
+          end
+      end
       | _ -> holder "..."
 
     and print_expr_in_one_line x = 
