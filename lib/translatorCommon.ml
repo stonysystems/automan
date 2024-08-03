@@ -12,41 +12,45 @@ module TranslatorCommon (M : MetaData) = struct
   module AST = AST(M)
   module Printer = PrettyPrinter(M)
 
-  module ExprTypeHelper = struct 
-    let expr_to_suffix (e : AST.Prog.expr_t) = 
-      match e with
-      | Suffixed (x, suffix) -> (x, suffix)
-      | _ -> assert false
+  let expr_to_suffix (e : AST.Prog.expr_t) = 
+    match e with
+    | Suffixed (x, suffix) -> (x, suffix)
+    | _ -> assert false
 
-
-    let suffix_to_dot_id (x : AST.Prog.suffix_t) = 
-      match x with 
-      | AugDot augmented_dotsuffix -> begin
-        let dotsuffix, _ = augmented_dotsuffix in
-        match dotsuffix with 
-        | DSId id -> AST.Prog.NameSeg(id, [])
-        | _ -> assert false
-      end
+  let suffix_to_dot_id (x : AST.Prog.suffix_t) : AST.Prog.expr_t = 
+    match x with 
+    | AugDot augmented_dotsuffix -> begin
+      let dotsuffix, _ = augmented_dotsuffix in
+      match dotsuffix with 
+      | DSId id -> AST.Prog.NameSeg(id, [])
       | _ -> assert false
-    
-    let is_expr_tp_aug_dot (e : AST.Prog.expr_t) = 
-      match e with 
-      | Suffixed (_, suffix) -> begin
-        match suffix with
-        | AugDot _ -> true
-        | _ -> false
-      end
+    end
+    | _ -> assert false
+
+  let suffix_to_data_update (x : AST.Prog.suffix_t) = 
+    match x with 
+    | DataUpd member_binding_upd_lst -> begin
+      NonEmptyList.as_list member_binding_upd_lst
+    end
+    | _ -> assert false
+  
+  let is_expr_tp_aug_dot (e : AST.Prog.expr_t) = 
+    match e with 
+    | Suffixed (_, suffix) -> begin
+      match suffix with
+      | AugDot _ -> true
       | _ -> false
-    
-    let is_expr_tp_data_update (e : AST.Prog.expr_t) = 
-      match e with 
-      | Suffixed (_, suffix) -> begin
-        match suffix with
-        | DataUpd _ -> true
-        | _ -> false
-      end
+    end
+    | _ -> false
+  
+  let is_expr_tp_data_update (e : AST.Prog.expr_t) = 
+    match e with 
+    | Suffixed (_, suffix) -> begin
+      match suffix with
+      | DataUpd _ -> true
       | _ -> false
-  end
+    end
+    | _ -> false
 
   let str_of_expr (e : AST.Prog.expr_t) : string = 
     Printer.Prog.(print_expr_in_one_line e)
@@ -93,13 +97,13 @@ module TranslatorCommon (M : MetaData) = struct
         )
     end lst
   
-  (* Here the expr occured can only be id *)  
+  (* The expr occured can only be id *)  
   let convert_dot_expr_to_expr_lst (x : AST.Prog.expr_t) = 
     let rec aux x = 
-      match ExprTypeHelper.is_expr_tp_aug_dot x with
+      match is_expr_tp_aug_dot x with
       | true -> begin
-        let x, suffix = ExprTypeHelper.expr_to_suffix(x) in
-        (aux x) @ [ExprTypeHelper.suffix_to_dot_id suffix]
+        let x, suffix = expr_to_suffix(x) in
+        (aux x) @ [suffix_to_dot_id suffix]
       end
       | false -> begin
         let _ = expr_to_id x in

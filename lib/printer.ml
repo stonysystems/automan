@@ -328,7 +328,7 @@ module PrettyPrinter (M : MetaData) = struct
       end
       | _ -> holder "..."
 
-    and print_expr_in_one_line x = 
+    and print_expr_in_one_line (x) = 
       let res = print_expr x 0 in
       remove_newlines_and_tabs res
 

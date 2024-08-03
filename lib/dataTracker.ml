@@ -134,15 +134,31 @@ object (self)
     TranslatorCommon.convert_expr_lst_to_dot_expr prefix_list in
   let rec replace_dot_expr_starts_with_s' 
     (e : AST.Prog.expr_t) : AST.Prog.expr_t = 
-    if (TranslatorCommon.ExprTypeHelper.is_expr_tp_aug_dot e) then
+    if (TranslatorCommon.is_expr_tp_aug_dot e) then
       let e_lst = TranslatorCommon.convert_dot_expr_to_expr_lst e in
       let e_lst = NonEmptyList.coerce e_lst in 
       let rest, h = NonEmptyList.unsnoc e_lst in
       match (TranslatorCommon.is_expr_eq h s') with
       | true -> root_entry#query_member_wrapper (s :: rest)
       | false -> e
-    else if (TranslatorCommon.ExprTypeHelper.is_expr_tp_data_update e) then
-      e
+    else if (TranslatorCommon.is_expr_tp_data_update e) then
+      let x, suffix = TranslatorCommon.expr_to_suffix e in
+      let member_binding_upd_lst = 
+        TranslatorCommon.suffix_to_data_update suffix in
+      let rec aux lst = 
+        match lst with
+        | [] -> []
+        | h :: rest -> begin 
+            [
+              let assignee, v = h in
+              (assignee, replace_dot_expr_starts_with_s' v)
+            ] @ aux rest
+        end
+      in
+      let member_binding_upd_lst' = aux member_binding_upd_lst in
+      let member_binding_upd_lst' = 
+        NonEmptyList.coerce member_binding_upd_lst' in
+      AST.Prog.Suffixed(x, DataUpd(member_binding_upd_lst'))
     else
       e
   in
@@ -150,6 +166,7 @@ object (self)
   | [] -> begin
     assert (TranslatorCommon.is_expr_blank data_update);
     this <- prefix_expr;
+    data_update <- replace_dot_expr_starts_with_s' value;
   end
   | h :: _ -> begin 
     (* checking *)
