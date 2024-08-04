@@ -150,6 +150,9 @@ module StateError : sig
   val gets: ('s -> ('a, 'e) Result.t) -> ('s, 'e, 'a) t
   val put: 's -> ('s, 'e, unit) t
   val puts: ('s -> ('s, 'e) Result.t) -> ('s, 'e, unit) t
+
+  val mapM: ('a -> ('s, 'e, 'b) t) -> 'a list -> (('s, 'e, 'b list) t)
+  val mapM_option: ('a -> ('s, 'e, 'b) t) -> 'a option -> (('s, 'e, 'b option) t)
 end = struct
   type ('s, 'e, 'a) t = ('s, ('a, 'e) Result.t) State.t
 
@@ -177,6 +180,17 @@ end = struct
     match f s with
     | Result.Ok s' -> (Result.Ok (), s')
     | Result.Error msg -> (Result.Error msg, s)
+
+  let rec mapM f = function
+    | [] -> return []
+    | x :: xs ->
+      bind (f x) (fun y ->
+        bind (mapM f xs) (fun ys -> return (y :: ys)))
+
+  let mapM_option f = function
+    | None -> return None
+    | Some x ->
+      bind (f x) (fun y -> return (Some y))
 end
 
 ;;
