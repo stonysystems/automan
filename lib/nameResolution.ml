@@ -37,7 +37,7 @@ module TopLevel = struct
     let< opt_m = maybe_find_module id anns in
     Option.fold
       ~none:(Result.Error
-               ("module not found: " ^ (NonEmptyList.show pp_id_t id)))
+               ("TopLevel.find_module: not found: " ^ (NonEmptyList.show pp_id_t id)))
       ~some:Result.ok
       opt_m
 
@@ -175,6 +175,22 @@ module NameSpace = struct
         "NameSpace.find_predicate_local: no local definitions at toplevel"
     | Module ns' ->
       TopLevel.find_predicate (NonEmptyList.singleton m_id) ns'.locals
+
+  let rec maybe_find_predicate (ns: t) (qm_id: id_t NonEmptyList.t)
+      : (Annotation.predicate_t option, string) Result.t =
+    match ns with
+    | TopLevel ->
+      Result.Ok None
+    | Module ns' ->
+      let< p_local = TopLevel.maybe_find_predicate qm_id ns'.locals in
+      match p_local with
+      | Some _ -> Result.Ok p_local
+      | None ->
+        let< p_import = TopLevel.maybe_find_predicate qm_id ns'.imports in
+        match p_import with
+        | Some _ -> Result.Ok p_import
+        | None ->
+          maybe_find_predicate ns'.enclosing qm_id
 end
 
 module Resolver = struct
@@ -187,34 +203,66 @@ module Resolver = struct
     let ( let<* ) = StateError.bind
   end
 
+  let maybe_find_module
+      (m_id: module_qualified_name_t) (anns: Annotation.toplevel_t)
+    : Annotation.module_t option m =
+    StateError.map_error ((^) "Resolver.maybe_find_module:\n") begin
+      State.gets begin fun ns ->
+        let< m_ann = NameSpace.find_module ns m_id in
+        match m_ann with
+        | Some x -> Result.Ok (Some x)
+        | None -> TopLevel.maybe_find_module m_id anns
+      end
+    end
+
   let find_module
       (m_id: module_qualified_name_t) (anns: Annotation.toplevel_t)
     : Annotation.module_t m =
-    State.gets begin fun ns ->
-      let< m_ann = NameSpace.find_module ns m_id in
-      match m_ann with
-      | Some x -> Result.Ok x
-      | None -> TopLevel.find_module m_id anns
-    end
+    let<* m_ann =
+      StateError.map_error ((^) "Resolver.find_module:\n")
+        (maybe_find_module m_id anns)
+    in
+    match m_ann with
+    | None ->
+      StateError.error
+        ("Resolver.find_module: not found: "
+         ^ NonEmptyList.(show pp_id_t m_id))
+    | Some m_ann ->
+      StateError.return m_ann
 
   let find_predicate_local_decl (m_id: id_t): Annotation.predicate_t m =
     StateError.gets (fun ns -> NameSpace.find_predicate_local_decl ns m_id)
 
+  let maybe_find_predicate
+      (qp_id: id_t NonEmptyList.t) (anns: Annotation.toplevel_t)
+    : Annotation.predicate_t option m =
+    let<* p_ann =
+      StateError.gets (fun ns -> NameSpace.maybe_find_predicate ns qp_id) in
+    match p_ann with
+    | Some _ -> StateError.return p_ann
+    | None ->
+      State.return (TopLevel.maybe_find_predicate qp_id anns)
+
+  (** Returns `true` if the import is found, `false` otherwise *)
   let push_import
       (imp: Syntax.Common.import_t) (anns: Annotation.toplevel_t)
-    : unit m =
-    let<* (m_id, m_anns) =
-      StateError.map_error ((^) "Resolver.push_import:\n")
-        (find_module imp.tgt anns)
-    in
-    let imps1 = if imp.opened then m_anns else [] in
-    let imps2 =
-      match imp.mref with
-      | None -> [Annotation.Module (m_id, m_anns)]
-      | Some (_, m_ref) -> [Annotation.Module (m_ref, m_anns)]
-    in
-    StateError.map_error ((^) "Resolver.push_import:\b") begin
-      StateError.puts (fun ns -> NameSpace.push_imports ns (imps1 @ imps2))
+    : bool m =
+    StateError.map_error ((^) "Resolver.push_import:\n") begin
+      let<* m_ann = maybe_find_module imp.tgt anns in
+      match m_ann with
+      | None ->
+        StateError.return false
+      | Some (m_id, m_anns) ->
+        let imps1 = (if imp.opened then m_anns else []) in
+        let imps2 = (match imp.mref with
+          | None -> [Annotation.Module (m_id, m_anns)]
+          | Some (_, m_ref) -> [Annotation.Module (m_ref, m_anns)])
+        in
+        let<* () =
+          StateError.puts (fun ns ->
+              NameSpace.push_imports ns (imps1 @ imps2))
+        in
+        StateError.return true
     end
 
   let enter_module (m_id: id_t) (anns: Annotation.toplevel_t)
@@ -225,44 +273,19 @@ module Resolver = struct
       let ns1 = NameSpace.enter_module ns m_id in
       NameSpace.push_locals ns1 m_anns
     end
-    (* let<* ns = StateError.get in *)
-    (* let qm_id = NameSpace.qualify_module m_id ns in *)
-    (* foo *)
-
-    (* let<* ns = StateError.get in *)
-    (* StateError.put (NameSpace.enter_module ns m_id) *)
 
   let exit_module: unit m =
     StateError.puts begin fun ns ->
       NameSpace.exit_module ns
     end
 
-  (* (\** *)
-  (*  * - qpid: the (possibly qualified) name of the predicate to search for *)
-  (*  * - anns: the annotations to search *)
-  (*  * - m_id: id of the module within which the predicate is invoked *)
-  (*  * - imports: the import directives preceding the invoked predicate *)
-  (* *\) *)
-  (* let rec find_qualified_predicate_annotation *)
-  (*     (qp_id: Syntax.Common.module_qualified_name_t) *)
-  (*     (anns: Annotation.toplevel_t) *)
-  (*     (m_id: id_t list) *)
-  (*     (imports: Syntax.Common.import_t list) *)
-  (*   : Annotation.predicate_t option = *)
-  (*   match anns with *)
-  (*   | [] -> None *)
-  (*   | Predicate (p'_id, p'_modes) :: anns -> *)
-  (*     let qp'_id = NonEmptyList.(p'_id :: []) in *)
-  (*     if (NonEmptyList.(equal ( = ) qp'_id qp_id)) then *)
-  (*       Option.Some (p'_id, p'_modes) *)
-  (*     else *)
-  (*       find_qualified_predicate_annotation qp_id anns m_id imports *)
-  (*   | Module (m'_id, m'_anns) :: anns -> *)
-  (*     (\* For qp_id to be defined in m'_ann, one of the following must hold *)
-  (*     - m'_id = head m_id,  and qp_id is in m'_anns (with tail m_id) *)
-  (*     - m'_id = head qp_id, and tail qp_id is in  *)
-  (*     *\) *)
-  (*     foo2 *)
+  let within_module
+      (m_id: id_t) (anns: Annotation.toplevel_t) (p: 'a m)
+    : 'a m =
+    let<* () = enter_module m_id anns in
+    let<* ret = p in
+    let<* () = exit_module in
+    StateError.return ret
 
 end
 
