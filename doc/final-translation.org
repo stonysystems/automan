@@ -1,0 +1,215 @@
+* Predicate bodies
+
+- Input:
+  - expression to translate
+  - input variables (a list of identifiers)
+  - output variables (a more bespoke datatype that records not only what the
+    output variables are, but also what if any solutions have been found for
+    them or their members or members' members, etc. Initially no solutions)
+
+
+- *Terminology*
+  - *functionalizing translation* (or just *functionalization*) is the main work
+    we are performing: turning a relation into a functional implementation
+  - *remapping translation* (or just *remapping*) straightforwardly renames the
+    types, datatype constructors, etc of the specificational expression to their
+    implementation versions but otherwise closely preserves the semantics of the
+    original expression
+
+    Expressions are *remappable* only when they do not contain output-moded
+    variables or invocations of predicates to be functionalized
+** =functionalize_expr=
+
+Pattern match on the expression
+- *let expressions* =Let {ghost = ghost; pats = pats; defs = defs; body = body}=
+
+  - *assume* ghost is false
+  - *assume* =pats= is a well-typed lhs for =defs= in the original specification
+    (in particular, =defs= gives an instantiation to all variables of =pats=)
+  - *assume* that each expression comprising =defs= is remappable
+
+    *NOTE:* a reasonable extension to the translator that violates this
+    assumption would be to permit aliases for output-moded variables, e.g. =var
+    max_bal = s'.max_bal; body=. For this first implementation of the
+    translator, we will not support this.
+
+  - *recursively functionalize* =body= with the same input/output variable sets
+
+    *NOTE:* if we allow let bound variables to alias output-moded parameters,
+    then we will need to track the local variables, their modes, and (if
+    output-moded) what they alias. For now, *assume* variables not tracked by
+    the input/output sets were locally defined and treat them as input-moded.
+
+  - *functionalize* the current let expression by remapping =pats= (to
+    recursively rename constructors in the patterns; this will not be the same
+    remapping function as for expressions) and =defs=, producing a new =let= expression
+
+- *StmtInExpr* and *Lemma* will receive future support, throw an exception if encountered
+  (an earlier mode analysis pass should catch it)
+
+- *catchall:*
+  - convert the expression to a list of conjuncts and invoke
+    *functionalize_conjunct* on each, in order, propagating solutions to output-moded variables
+
+    Subsequent conjucts may depend on preceding conjucts for solutions
+
+  - return the output variable sets with solutions (function body will be
+    generated when we process top-level declarations like predicates)
+** =functionalize_expr_conjunct=
+
+- =Suffixed (prefix, suff)=
+  Match on suff:
+  - if an arglist, check that meta-data (wrapped in an option) is present
+    - if it is, and its tagged as functionalizable, then:
+      Mode analysis will *ensure*:
+      - the prefixed expression is given in the annotation as a qualified name
+        (nonempty list of ids), to remap
+      - the annotation contains the separated input-moded argument list and
+        output-moded argument (nonempty) list, in the order they are supposed to
+        appear
+        - and the output-moded argument list is a non-empty list of qualified
+          (by member access) names.
+        - and there are no conflicts in the output list (2 occurrences of the
+          same qualified output variable in the output positions of the source
+          predicate call)
+
+      Note that, if there are more than one outputs, the functionalized call is
+      going to be returning a tuple. I proposed that you implement this with a local let binding in the translated code.
+      #+begin_src
+        var res_PName_Impl = PName_Impl(input_vars...); ...
+      #+end_src
+
+      Then record assignments =List.nth out_vars i, Suffixed (NameSeg
+      ("res_PName_imp", []), AugDot (DSDig i, []))= for each 0 <= i <
+      List.length out_vars; when you finally get to the point where you're
+      returning an expression to functionalize the this whole predicate, it
+      could look something like:
+      #+begin_src
+        (..., res_PName_Impl.0, res_PName_Impl.1, ...)
+      #+end_src
+
+      Or like
+      #+begin_src
+        (..., CTor(member1 = res_PName_Impl.0, member2 = res_PName_Impl.1,...),..., res_PName_Impl.2,...)
+      #+end_src
+
+      (We should allow multiple such let bindings to precede the returned
+      expression in the functionalized result)
+
+    - if no meta data is present, then
+      - record this as a requires clause for the predicate declaration in which this was found
+      - *NOTE:* mode analysis will mark the toplevel predicate declaration as
+        untranslatable (earlier in the pipeline) if this expression neither
+        functionalizes nor is suitable as a requirement.
+
+  - Encountering any other suffix should produce an error (the mode analysis
+    should have caught this as untranslatable)
+- =If (guard, then_, else_)=
+
+  This will have an annotation noting whether this is
+  functionalizable or a requirement on inputs
+
+  - *if metadata has tag functionalizable*
+    - mode analysis will *guarantee* the qualified output variables assigned by
+      both branches are present: =assigned_vars: (id_t NonEmptyList.t) NonEmptyList.t=
+    - *assume* that the =then_= and =else_= branch generate assignments for all
+      and only the qualified output variable list appearing in the annotation
+    - mode analysis will *guarantee* the =then_= and =else_= branches have
+      permutations of =assigned_vars= attached to them (if e.g., the then and
+      else branches have two different predicate calls, the order of the output
+      arguments might not match the order present in the annotation)
+    - your functionalization code should recursively functionalize both branches
+      (where you only care about generating assignments for =assigned_vars=),
+      then wrap these like so:
+      #+begin_src dafny
+        var $(NonEmptyList.map make_local assigned_vars) := (
+          if ($(remap guard)) then {
+            var $(NonEmptyList.map make_local then_permutation) := $(functionalize_conjunct then_ <...>);
+            ($(NonEmptyList.map make_local assigned_vars))
+          } else {
+            var $(NonEmptyList.map make_local else_permutation) := $(functionalize_conjunct else_ <...>);
+            ($(NonEmptyList.map make_local assigned_vars))
+          }
+        )
+      #+end_src
+
+      *NOTE* to understand this, it's important to note that =then_permutation=
+      and =else_permutation= are permutations of =assigned_vars=; so, all those
+      names are in scope in the final expression of both branches we
+      functionalize for the of the if-then-else expression
+
+  - *otherwise* (its a requirement on inputs)
+    record this as a requires clause
+- =Match (scrut, case_tree)=
+
+  Match expressions are similar to if-then-else. There will be an annotation on
+  this AST indicating whether this is /funcionalizable/ or a requirement on inputs
+
+  - *if metadata has tag functionalizable*
+    - mode analysis will *guarantee* that the (qualified) output variables to be
+      assigned in each case tree are present: =assigned_vars: (id_t
+      NonEmptyList.t) NonEmptyList.t=
+    - *assume* each case branch generates assignments for all and only
+      =assigned_vars=
+    - mode analysis will *guarantee* each case branch will come with a
+      permutation =branch_vars= of =assigned_vars=
+    - you should recursively functionalize each branch, then wrap them like you
+      did with if-then-else to get the assigned vars in the right order.
+
+  - *otherwise*
+    record this as a requires clause
+- =Quantifier {qt = qt; qdom = qdom; qbody = qbody}=
+
+  - mode analysis will *guarantee* an annotation indicating whether this is
+    /functionalizable/ or a requirement on inputs
+    - if a requirement, record as requires clause
+  - check =qt : Common.quantifier_t= to see if its =Forall= or =Exists= if its
+    =Exists=, emit an error (the enclosing predicate should have been marked as
+    needing to be generated as a stub)
+  - since its functionalizable, mode analysis will *guarantee* that there is an
+    annotation present indicating
+    - which output variable this determins, and its type (seq, map, set)
+    - depending on the type, the subterms needed to build a (seq, map, set)
+      comprehension
+  - you should assemble this term and record it as an assignment for the
+    specified output variable.
+
+- =Binary (bop, e1, e2)=
+  - mode analysis will *guarantee* an annotation indicating whether this is
+    functionalizable or a requirement on inputs
+    - if the latter, record it as a requires clause
+  - match on =bop=:
+    - if it isn't =Eq=, the emit an error (mode analysis should have caught
+      this)
+
+      Note that it shouldn't be =And= either, since we turned the original
+      expression into a list of conjuncts
+    - if it is eq, then mode analysis will *guarantee* an annotation indicating
+      whether this is /functionalizable/ or a constraint on inputs
+      - if its a constraint on inputs, record as an requires clause
+    - if functionalizable, the annotation will include
+      - =isLhs: bool=, indicating whether the assignee is the lhs or rhs
+      - =qid: id_t NonEmptyList.t=, the (member-access qualified) identifier of
+        the output variable
+      - an additional annotation indicating whether the output variable is under
+        some other operation that the translator understands (for now, just length)
+        - if it is length, expect to do nothing for now: another mode pass is
+          resposible for recording length information for collections and using
+          that to build comprehensions
+      - if the last annotation indicates this equality is constraining the
+        output var =qid= directly, add this as an assignment
+- =NameSeg= -> error, mode analysis should have caught it
+- =Lambda= -> error, ...
+- =MapDisplay= -> error, ...
+- =SeqDisplay= -> error, ...
+- =SetDisplay= -> error, ...
+- =StmtInExpr= -> error (this is a TODO for now)
+- =Lit= -> error, mode analysis should have caught it
+- =This= -> error, ...
+- =Cardinality= -> error, ...
+- =Tuple= -> error, ...
+- =Unary= -> error, ...
+- =Lemma=
+
+  recursively functionalize the main expression, and drop the lemma invocation
+  (perhaps with a comment?)
