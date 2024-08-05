@@ -117,6 +117,11 @@ module Common = struct
     | Abstract | Ghost | Static | Opaque
   [@@deriving show, eq]
 
+  (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-method-declaration
+     NOTE: no constructor, twostate/least/greatest lemmas  *)
+  type method_sort_t = Method | Lemma
+  [@@deriving show, eq]
+
   (* Modules *)
   type module_reference_t =
     | Concrete | Abstract
@@ -522,9 +527,6 @@ module AST (M : MetaData) = struct
     (* Method/Lemma START
        https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-method-declaration
        NOTE: no constructor, twostate/least/greatest lemmas *)
-    type method_sort_t =
-      | Method | Lemma
-    [@@deriving show, eq]
 
     (* NOTE: no KType, "returns" clause *)
     type method_signature_t =
@@ -541,7 +543,7 @@ module AST (M : MetaData) = struct
     [@@deriving show, eq]
 
     type method_t =
-      { sort: method_sort_t
+      { sort: Common.method_sort_t
       ; attrs: Prog.attribute_t list
       ; id: id_t
       ; signature: method_signature_t
