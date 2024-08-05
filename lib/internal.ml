@@ -77,6 +77,12 @@ module NonEmptyList = struct
   let unsnoc (xs: 'a t): 'a list * 'a =
     List.unsnoc (as_list xs)
 
+  let uncons (xs : 'a t): 'a * 'a list = 
+    let xs = as_list xs in
+    match xs with 
+    | [] -> invalid_arg "NonEmptyList.coerce: arg is empty"
+    | x :: xs' -> (x, xs')
+
   let map (f: 'a -> 'b) (xs: 'a t): 'b t =
     let ( :: ) (hd, tl) = xs in
     f hd :: List.map f tl
