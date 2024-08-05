@@ -19,13 +19,15 @@ end ;;
 
 module ExprMap = Map.Make(Expr)
 
-class data_tracker (s : AST.Prog.expr_t) = 
+class data_tracker 
+  (s : AST.Prog.expr_t) (init_dtp : AST.Prog.expr_t) = 
 object (self)
 
   val mutable table         = ExprMap.empty
   val mutable end_point     = TranslatorCommon.expr_blank
   val mutable data_update   = TranslatorCommon.expr_blank
   val mutable this          = s
+  val mutable init_dtp      = init_dtp
 
   method set_table t        = table <- t
   method set_end_point e    = end_point <- e
@@ -34,7 +36,7 @@ object (self)
     if TranslatorCommon.is_expr_blank this then this <- e else ()
 
   method copy = 
-    let new_tracker = new data_tracker this in 
+    let new_tracker = new data_tracker this init_dtp in 
     let new_table = begin
       ExprMap.fold (
         fun k v acc -> ExprMap.add k (v#copy) acc
@@ -58,7 +60,7 @@ object (self)
   method is_data_update_filled : bool = 
     TranslatorCommon.is_expr_n_blank data_update
 
-  method is_init_tp : bool = TranslatorCommon.is_expr_blank s
+  method is_init_dtp_filled : bool = TranslatorCommon.is_expr_n_blank init_dtp
 
   method query_member 
     (prefix_list : AST.Prog.expr_t list)
@@ -117,7 +119,9 @@ object (self)
         match ExprMap.find_opt h table with
         | Some entry -> entry#add prefix_list suffix_list value
         | None -> begin
-          let new_entry = new data_tracker TranslatorCommon.expr_blank in
+          let new_entry = 
+            new data_tracker 
+              TranslatorCommon.expr_blank TranslatorCommon.expr_blank in
           new_entry#add prefix_list suffix_list value;
           self#add_helper h new_entry
         end
@@ -185,7 +189,9 @@ object (self)
     match ExprMap.find_opt h table with
     | Some entry -> entry#add prefix_list suffix_list value
     | None -> begin
-      let new_entry = new data_tracker TranslatorCommon.expr_blank in
+      let new_entry = 
+        new data_tracker 
+          TranslatorCommon.expr_blank TranslatorCommon.expr_blank in
       new_entry#add_data_update prefix_list suffix_list value root_entry s s';
       self#add_helper h new_entry
     end
@@ -201,16 +207,6 @@ object (self)
     self#add_data_update [] suffix_list value root_entry s s'
 
   method construct = 
-    let rec aux lst = 
-      match lst with 
-      | [] -> []
-      | (k, v) :: lst -> begin
-        let k_id = TranslatorCommon.expr_to_id k in
-        let k_id_either : (id_t, int) Either.t = Left k_id in
-        let member_binding_upd = (k_id_either, v#construct) in
-        [member_binding_upd] @ (aux lst)
-      end
-    in
     let x = begin
       match self#is_data_update_filled with 
       | true -> data_update
@@ -218,10 +214,27 @@ object (self)
         match self#is_end_point_filled with 
         | true -> end_point
         | false -> begin
-          let bindings = ExprMap.bindings table in
-          let kv_list = aux bindings in 
-          let kv_list = NonEmptyList.coerce kv_list in
-          AST.Prog.Suffixed(this, DataUpd(kv_list))
+          match self#is_init_dtp_filled with 
+          | false -> begin
+            let rec aux lst = 
+              match lst with 
+              | [] -> []
+              | (k, v) :: lst -> begin
+                let k_id = TranslatorCommon.expr_to_id k in
+                let k_id_either : (id_t, int) Either.t = Left k_id in
+                let member_binding_upd = (k_id_either, v#construct) in
+                [member_binding_upd] @ (aux lst)
+              end
+            in
+            let bindings = ExprMap.bindings table in
+            let kv_list = aux bindings in 
+            let kv_list = NonEmptyList.coerce kv_list in
+            AST.Prog.Suffixed(this, DataUpd(kv_list))
+          end
+          | true -> begin 
+            (*  *)
+            assert false
+          end
         end
       end
     end in

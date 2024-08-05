@@ -15,12 +15,14 @@ let print data_tracker =
   print_endline x_str
 
 let test1 = 
-  let data_tracker = new DataTracker.data_tracker (id_to_expr "s") in
+  let data_tracker = 
+    new DataTracker.data_tracker (id_to_expr "s") TranslatorCommon.expr_blank in
   data_tracker#add_wrapper [id_to_expr "s'"] (id_to_expr "s");
   print data_tracker
 
 let test2 = 
-  let data_tracker = new DataTracker.data_tracker (id_to_expr "s") in
+  let data_tracker = 
+    new DataTracker.data_tracker (id_to_expr "s") TranslatorCommon.expr_blank in
   data_tracker#add_wrapper 
     [(id_to_expr "s'");(id_to_expr "a")] (id_to_expr "x");
   data_tracker#add_wrapper 
@@ -28,7 +30,8 @@ let test2 =
   print data_tracker
 
 let test3 = 
-  let data_tracker = new DataTracker.data_tracker (id_to_expr "s") in
+  let data_tracker = 
+    new DataTracker.data_tracker (id_to_expr "s") TranslatorCommon.expr_blank in
   data_tracker#add_wrapper 
     [(id_to_expr "s'");(id_to_expr "a")] (id_to_expr "x");
   data_tracker#add_data_update_wrapper 
