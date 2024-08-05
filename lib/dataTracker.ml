@@ -234,11 +234,7 @@ object (self)
           | true -> begin 
             (*  *)
             assert false
-          end
-        end
-      end
-    end in
-    x
+          end end end end in x
 
 end ;;
 
