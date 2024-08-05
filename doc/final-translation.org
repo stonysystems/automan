@@ -1,3 +1,5 @@
+#+OPTIONS: toc:nil num:nil
+
 * Predicate bodies
 
 - Input:
@@ -168,7 +170,7 @@ Pattern match on the expression
     needing to be generated as a stub)
   - since its functionalizable, mode analysis will *guarantee* that there is an
     annotation present indicating
-    - which output variable this determins, and its type (seq, map, set)
+    - which output variable this determines, and its type (seq, map, set)
     - depending on the type, the subterms needed to build a (seq, map, set)
       comprehension
   - you should assemble this term and record it as an assignment for the
@@ -184,7 +186,7 @@ Pattern match on the expression
 
       Note that it shouldn't be =And= either, since we turned the original
       expression into a list of conjuncts
-    - if it is eq, then mode analysis will *guarantee* an annotation indicating
+    - if it is =Eq=, then mode analysis will *guarantee* an annotation indicating
       whether this is /functionalizable/ or a constraint on inputs
       - if its a constraint on inputs, record as an requires clause
     - if functionalizable, the annotation will include
@@ -194,7 +196,7 @@ Pattern match on the expression
       - an additional annotation indicating whether the output variable is under
         some other operation that the translator understands (for now, just length)
         - if it is length, expect to do nothing for now: another mode pass is
-          resposible for recording length information for collections and using
+          responsible for recording length information for collections and using
           that to build comprehensions
       - if the last annotation indicates this equality is constraining the
         output var =qid= directly, add this as an assignment
