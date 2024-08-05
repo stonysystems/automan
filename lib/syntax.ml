@@ -617,6 +617,11 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
     let Formal (id, tp) = p in
     Formal (id, typ tp)
 
+  let method_signature (s: Src.TopDecl.method_signature_t)
+    : Tgt.TopDecl.method_signature_t =
+    let ps = List.map formal s.params in
+    { generic_params = s.generic_params; params = ps }
+
   let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t)
     : Tgt.TopDecl.datatype_ctor_t =
     let DataCtor (attrs, id, params) = ctor in
