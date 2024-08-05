@@ -120,8 +120,10 @@ let rec annotate_expr
     let<* e' = StateError.mapM_option (fun e -> annotate_expr e anns) e in
     StateError.return AnnotationPass.Prog.(
         SetComp (qdom', e'))
-  | StmtInExpr (_, _) ->
-    failwith "TODO: StmtInExpr unsupported"
+  | StmtInExpr (stmt, e) ->
+    let<* stmt' = annotate_stmt_in_expr stmt anns in
+    let<* e' = annotate_expr e anns in
+    StateError.return AnnotationPass.Prog.(StmtInExpr (stmt', e'))
   | Let {ghost = ghost; pats = pats; defs = defs; body = body} ->
     let pats' = NonEmptyList.map Convert.pattern pats in
     let<* defs' = StateError.mapM (fun e -> annotate_expr e anns) (NonEmptyList.as_list defs) in
@@ -161,83 +163,6 @@ let rec annotate_expr
     StateError.return AnnotationPass.Prog.(
         Lemma {lem = lem'; e = body'})
 
-(* match e with *)
-(* | Suffixed (e, suf) -> *)
-(*   Suffixed (annotate_expr e, annotate_suffix suf) *)
-(* | NameSeg (id, gen_inst) -> *)
-(*   NameSeg (id, List.map Convert.typ gen_inst) *)
-(* | Lambda (params, e) -> *)
-(*   let params' = *)
-(*     List.map *)
-(*       (function (id, tp) -> *)
-(*           (id, Option.map Convert.typ tp)) *)
-(*       params in *)
-(*   let e' = annotate_expr e in *)
-(*   Lambda (params', e') *)
-(* | MapDisplay es -> *)
-(*   let es' = *)
-(*     List.map *)
-(*       (function (k, v) -> (annotate_expr k, annotate_expr v)) *)
-(*       es in *)
-(*   MapDisplay es' *)
-  (* | SeqDisplay ed -> *)
-  (*   SeqDisplay begin match ed with *)
-  (*     | SeqEnumerate es -> *)
-  (*       SeqEnumerate (List.map annotate_expr es) *)
-  (*     | SeqTabulate *)
-  (*         { gen_inst = gen_inst; len = len; func = func} -> *)
-  (*       SeqTabulate *)
-  (*         { gen_inst = List.map Convert.typ gen_inst *)
-  (*         ; len = annotate_expr len *)
-  (*         ; func = annotate_expr func } *)
-  (*   end *)
-  (* | SetDisplay elems -> *)
-  (*   SetDisplay (List.map annotate_expr elems) *)
-  (* | If (g, t, e) -> *)
-  (*   If (annotate_expr g *)
-  (*      , annotate_expr t *)
-  (*      , annotate_expr e) *)
-  (* | Match (scrut, tree) -> *)
-  (*   let annotate_branch = function *)
-  (*     | ParserPass.Prog.Case (attrs, pat, body) -> *)
-  (*       AnnotationPass.Prog.Case *)
-  (*         ( attribute_handler attrs *)
-  (*         , Convert.extended_pattern pat *)
-  (*         , annotate_expr body) *)
-  (*   in *)
-  (*   Match (annotate_expr scrut, List.map annotate_branch tree) *)
-  (* | Quantifier { qt = qt; qdom = qdom; qbody = body } -> *)
-  (*   Quantifier *)
-  (*     { qt = qt *)
-  (*     ; qdom = annotate_quantifier_domain qdom *)
-  (*     ; qbody = annotate_expr body } *)
-  (* | SetComp (qdom, e) -> *)
-  (*   SetComp *)
-  (*     ( annotate_quantifier_domain qdom *)
-  (*     , Option.map annotate_expr e) *)
-  (* | StmtInExpr (_, _) -> *)
-  (*   failwith "TODO: annotate StmtInExpr" *)
-  (* | Let { ghost = ghost; pats = pats; defs = defs; body = body } -> *)
-  (*   Let *)
-  (*     { ghost = ghost *)
-  (*     ; pats = NonEmptyList.map Convert.pattern pats *)
-  (*     ; defs = NonEmptyList.map annotate_expr defs *)
-  (*     ; body = annotate_expr body } *)
-  (* | MapComp { qdom = qdom; key = key; valu = valu } -> *)
-  (*   MapComp *)
-  (*     { qdom = annotate_quantifier_domain qdom *)
-  (*     ; key = Option.map annotate_expr key *)
-  (*     ; valu = annotate_expr valu } *)
-  (* | Lit lit -> Lit lit *)
-  (* | This -> This *)
-  (* | Cardinality e -> Cardinality (annotate_expr e) *)
-  (* | Tuple es -> Tuple (List.map annotate_expr es) *)
-  (* | Unary (op, e) -> Unary (op, annotate_expr e) *)
-  (* | Binary (op, e1, e2) -> *)
-  (*   Binary( op, annotate_expr e1, annotate_expr e2) *)
-  (* | Lemma { lem = lem; e = e } -> *)
-  (*   Lemma {lem = annotate_expr lem; e = annotate_expr e } *)
-
 and annotate_expr_arglist
     (f: ParserPass.Prog.expr_t) (args: ParserPass.Prog.expr_t list) (anns: Annotation.toplevel_t)
   : AnnotationPass.Prog.expr_t Resolver.m =
@@ -267,31 +192,6 @@ and annotate_expr_arglist
         StateError.return AnnotationPass.Prog.(
           Suffixed (f', ArgList (args', Some (qf_id, p_modes))))
 
-(* and annotate_suffix = function *)
-(*   | AugDot (dotsuff, gen_inst) -> *)
-(*     AugDot (dotsuff, List.map Convert.typ gen_inst) *)
-(*   | DataUpd upds -> *)
-(*     let annotate_upd = function *)
-(*       | (mem, e) -> (mem, annotate_expr e) in *)
-(*     DataUpd (NonEmptyList.map annotate_upd upds) *)
-(*   | Subseq { lb = lb; ub = ub } -> *)
-(*     Subseq *)
-(*       { lb = Option.map annotate_expr lb *)
-(*       ; ub = Option.map annotate_expr ub } *)
-(*   | SliceLen { sublens = sublens; to_end = to_end } -> *)
-(*     SliceLen *)
-(*       { sublens = NonEmptyList.map annotate_expr sublens *)
-(*       ; to_end = to_end } *)
-(*   | SeqUpd {idx = idx; v = v } -> *)
-(*     SeqUpd *)
-(*       { idx = annotate_expr idx *)
-(*       ; v   = annotate_expr v } *)
-(*   | Sel idx -> *)
-(*     Sel (annotate_expr idx) *)
-(*   | ArgList (args, ()) -> *)
-(*     (\* TODO: this needs reworking (lookup in PMD) *\) *)
-(*     ArgList (List.map annotate_expr args, None) *)
-
 and annotate_case_branch
     (branch: ParserPass.Prog.case_expr_t) (anns: Annotation.toplevel_t)
   : AnnotationPass.Prog.case_expr_t Resolver.m =
@@ -320,7 +220,134 @@ and annotate_quantifier_domain
   let<* qrange' = StateError.mapM_option (fun e -> annotate_expr e anns) qrange in
   StateError.return AnnotationPass.Prog.(
     QDom { qvars = qvars'; qrange = qrange'})
+
+and annotate_stmt_in_expr
+    (stmt: ParserPass.Prog.stmt_in_expr_t) (anns: Annotation.toplevel_t)
+  : AnnotationPass.Prog.stmt_in_expr_t Resolver.m =
+  match stmt with
+  | Assert (attrs, assertion, block) ->
+    let attrs' = attribute_handler attrs in
+    let<* assertion' = annotate_expr assertion anns in
+    let<* block' = StateError.mapM (fun s -> annotate_stmt s anns) block in
+    StateError.return AnnotationPass.Prog.(
+        Assert (attrs', assertion', block'))
+  | Assume (attrs, assumption) ->
+    let attrs' = attribute_handler attrs in
+    let<* assumption' = annotate_expr assumption anns in
+    StateError.return AnnotationPass.Prog.(
+        Assume (attrs', assumption'))
 (* END expressions *)
+
+(* BEGIN statements *)
+and annotate_stmt
+    (stmt: ParserPass.Prog.stmt_t) (anns: Annotation.toplevel_t)
+  : AnnotationPass.Prog.stmt_t Resolver.m =
+  match stmt with
+  | SAssert (attrs, assertion, block) ->
+    let attrs' = attribute_handler attrs in
+    let<* assertion' = annotate_expr assertion anns in
+    let<* block' =
+      StateError.mapM (fun s -> annotate_stmt s anns) block in
+    StateError.return AnnotationPass.Prog.(
+        SAssert (attrs', assertion', block'))
+  | SAssume (attrs, assumption) ->
+    let attrs' = attribute_handler attrs in
+    let<* assumption' = annotate_expr assumption anns in
+    StateError.return AnnotationPass.Prog.(
+        SAssume (attrs', assumption'))
+  | SBlock block ->
+    let<* block' = StateError.mapM (fun s -> annotate_stmt s anns) block in
+    StateError.return AnnotationPass.Prog.(
+        SBlock block')
+  | SIf if_ ->
+    let<* if_' = annotate_stmt_if if_ anns in
+    StateError.return AnnotationPass.Prog.(
+        SIf if_')
+  | SMatch (scrut, case_tree) ->
+    let<* scrut' = annotate_expr scrut anns in
+    let<* case_tree' =
+      StateError.mapM (fun br -> annotate_stmt_case br anns) case_tree in
+    StateError.return AnnotationPass.Prog.(
+        SMatch (scrut', case_tree'))
+  | SReturn rets ->
+    let<* rets': AnnotationPass.Prog.rhs_t list =
+      StateError.mapM begin
+        function (ret, attrs) ->
+           let<* ret' = annotate_expr ret anns in
+           let attrs' = attribute_handler attrs in
+           StateError.return (ret', attrs')
+      end rets in
+    StateError.return AnnotationPass.Prog.(
+        SReturn rets')
+  | SUpdAndCall (lhss, rhss) ->
+    let<* lhss' =
+      StateError.mapM
+        (fun e -> annotate_expr e anns)
+        (NonEmptyList.as_list lhss)
+    in let<* rhss' =
+         StateError.mapM begin function (e, attrs) ->
+           let<* e' = annotate_expr e anns in
+           let attrs' = attribute_handler attrs in
+           StateError.return (e', attrs')
+         end rhss in
+    StateError.return AnnotationPass.Prog.(
+        SUpdAndCall (NonEmptyList.coerce lhss', rhss'))
+  | SVarDecl (DeclIds (ids, rhs)) ->
+    let annotate_stmt_var_decl_id_lhs
+        (id: ParserPass.Prog.var_decl_id_lhs_t)
+        : AnnotationPass.Prog.var_decl_id_lhs_t =
+      let tp' = Option.map Convert.typ id.tp in
+      let attrs' = attribute_handler id.attrs in
+      {id = id.id; tp = tp'; attrs = attrs'}
+    in
+    let ids' = List.map annotate_stmt_var_decl_id_lhs ids in
+    let<* rhs' = StateError.mapM_option begin fun r ->
+        match r with
+        | ParserPass.Prog.Assign rhss ->
+          let<* rhss' =
+            StateError.mapM begin function (e, attrs) ->
+              let<* e' = annotate_expr e anns in
+              let attrs' = attribute_handler attrs in
+              StateError.return (e', attrs')
+            end rhss in
+          StateError.return AnnotationPass.Prog.(Assign rhss')
+      end rhs
+    in
+    StateError.return AnnotationPass.Prog.(
+        SVarDecl (DeclIds (ids', rhs')))
+
+and annotate_stmt_if
+    (if_: ParserPass.Prog.stmt_if_t) (anns: Annotation.toplevel_t)
+  : AnnotationPass.Prog.stmt_if_t Resolver.m =
+  let<* g' = annotate_expr if_.guard anns in
+  let<* t' =
+    StateError.mapM (fun s -> annotate_stmt s anns) if_.then_br in
+  let<* footer' = StateError.mapM_option (fun f -> annotate_stmt_if_footer f anns) if_.footer in
+  StateError.return AnnotationPass.Prog.(
+      {guard = g'; then_br = t'; footer = footer'})
+
+
+and annotate_stmt_if_footer
+    (footer: ParserPass.Prog.stmt_if_footer_t) (anns: Annotation.toplevel_t)
+  : AnnotationPass.Prog.stmt_if_footer_t Resolver.m =
+  match footer with
+  | ElseIf if_ ->
+    let<* if_' = annotate_stmt_if if_ anns in
+    StateError.return AnnotationPass.Prog.(
+        ElseIf if_')
+  | ElseBlock block ->
+    let<* block' = StateError.mapM (fun s -> annotate_stmt s anns) block in
+    StateError.return AnnotationPass.Prog.(
+        ElseBlock block')
+
+and annotate_stmt_case
+    (branch: ParserPass.Prog.stmt_case_t) (anns: Annotation.toplevel_t)
+  : AnnotationPass.Prog.stmt_case_t Resolver.m =
+  let (epats, body) = branch in
+  let epats' = Convert.extended_pattern epats in
+  let<* body' = StateError.mapM (fun s -> annotate_stmt s anns) body in
+  StateError.return (epats', body')
+(* END statements *)
 
 (* BEGIN TopDecls (utilities) *)
 let annotate_formal
