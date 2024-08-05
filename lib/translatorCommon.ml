@@ -4,8 +4,21 @@ open Internal
 
 
 (**
-  *  
-  *
+  * expr_to_suffix
+  * suffix_to_dot_id
+  * suffix_to_data_update
+  * is_expr_tp_aug_dot
+  * is_expr_tp_data_update
+  * str_of_expr
+  * expr_blank
+  * is_expr_eq
+  * is_expr_neq
+  * is_expr_blank
+  * is_expr_n_blank
+  * expr_to_id
+  * move_one_expr_from_suffix_to_prefix
+  * convert_expr_lst_to_dot_expr
+  * convert_dot_expr_to_expr_lst
   *)
 
 module TranslatorCommon (M : MetaData) = struct 
@@ -80,7 +93,7 @@ module TranslatorCommon (M : MetaData) = struct
 
   let move_one_expr_from_suffix_to_prefix prefix_list suffix_list =
     let suffix_list = NonEmptyList.coerce suffix_list in
-    let suffix_list, h = NonEmptyList.unsnoc suffix_list in
+    let h, suffix_list = NonEmptyList.uncons suffix_list in
     let prefix_list = prefix_list @ [h] in
     prefix_list, suffix_list
   
@@ -111,5 +124,11 @@ module TranslatorCommon (M : MetaData) = struct
       end
     in
     aux x
+
+  let debug_print (e : string) = 
+    Printf.printf "[+] %s \n" (e)
+  
+  let debug_print_expr (e) = 
+    Printf.printf "[+] %s \n" (str_of_expr e)
 
 end

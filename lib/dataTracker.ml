@@ -19,20 +19,22 @@ end ;;
 
 module ExprMap = Map.Make(Expr)
 
-class data_tracker = 
+class data_tracker (s : AST.Prog.expr_t) = 
 object (self)
+
   val mutable table         = ExprMap.empty
   val mutable end_point     = TranslatorCommon.expr_blank
   val mutable data_update   = TranslatorCommon.expr_blank
-  val mutable this          = TranslatorCommon.expr_blank
+  val mutable this          = s
 
   method set_table t        = table <- t
   method set_end_point e    = end_point <- e
   method set_data_update e  = data_update <- e
-  method set_this e         = this <- e
+  method set_this e         = 
+    if TranslatorCommon.is_expr_blank this then this <- e else ()
 
   method copy = 
-    let new_tracker = new data_tracker in 
+    let new_tracker = new data_tracker this in 
     let new_table = begin
       ExprMap.fold (
         fun k v acc -> ExprMap.add k (v#copy) acc
@@ -50,10 +52,13 @@ object (self)
     | true -> assert false (* checking *)
     | false -> table <- ExprMap.add k v table
 
-  method is_end_point_filled = TranslatorCommon.is_expr_neq end_point
+  method is_end_point_filled : bool = 
+    TranslatorCommon.is_expr_n_blank end_point
 
-  method is_data_update_filled = 
-    TranslatorCommon.is_expr_neq data_update
+  method is_data_update_filled : bool = 
+    TranslatorCommon.is_expr_n_blank data_update
+
+  method is_init_tp : bool = TranslatorCommon.is_expr_blank s
 
   method query_member 
     (prefix_list : AST.Prog.expr_t list)
@@ -70,12 +75,13 @@ object (self)
     | h :: _ -> begin
         let prefix_expr = 
           TranslatorCommon.convert_expr_lst_to_dot_expr prefix_list in
+        (* TranslatorCommon.debug_print_expr prefix_expr; *)
         (* checking *)
         assert (
           (TranslatorCommon.is_expr_blank this) ||
           (TranslatorCommon.is_expr_eq this prefix_expr)
         );
-        this <- prefix_expr;
+        self#set_this prefix_expr;
         match ExprMap.find_opt h table with
         | Some entry -> entry#query_member prefix_list suffix_list
         | None -> assert false
@@ -96,22 +102,22 @@ object (self)
     match suffix_list with
     | [] -> begin
         (* checking *)
-        assert (TranslatorCommon.is_expr_n_blank end_point);
-        assert (TranslatorCommon.is_expr_blank this);
-        this <- prefix_expr;
+        assert (TranslatorCommon.is_expr_blank end_point);
+        (* assert (TranslatorCommon.is_expr_blank this); *)
+        self#set_this prefix_expr;
         end_point <- value;
       end
     | h :: _ -> begin
         (* checking *)
-        assert (
+        (* assert (
           (TranslatorCommon.is_expr_blank this) ||
           (TranslatorCommon.is_expr_eq this prefix_expr)
-        );
-        this <- prefix_expr;
+        ); *)
+        self#set_this prefix_expr;
         match ExprMap.find_opt h table with
         | Some entry -> entry#add prefix_list suffix_list value
         | None -> begin
-          let new_entry = new data_tracker in
+          let new_entry = new data_tracker TranslatorCommon.expr_blank in
           new_entry#add prefix_list suffix_list value;
           self#add_helper h new_entry
         end
@@ -134,10 +140,11 @@ object (self)
     TranslatorCommon.convert_expr_lst_to_dot_expr prefix_list in
   let rec replace_dot_expr_starts_with_s' 
     (e : AST.Prog.expr_t) : AST.Prog.expr_t = 
+    (* TranslatorCommon.debug_print_expr e; *)
     if (TranslatorCommon.is_expr_tp_aug_dot e) then
       let e_lst = TranslatorCommon.convert_dot_expr_to_expr_lst e in
       let e_lst = NonEmptyList.coerce e_lst in 
-      let rest, h = NonEmptyList.unsnoc e_lst in
+      let h, rest = NonEmptyList.uncons e_lst in
       match (TranslatorCommon.is_expr_eq h s') with
       | true -> root_entry#query_member_wrapper (s :: rest)
       | false -> e
@@ -165,7 +172,7 @@ object (self)
   match suffix_list with
   | [] -> begin
     assert (TranslatorCommon.is_expr_blank data_update);
-    this <- prefix_expr;
+    self#set_this prefix_expr;
     data_update <- replace_dot_expr_starts_with_s' value;
   end
   | h :: _ -> begin 
@@ -174,15 +181,51 @@ object (self)
       (TranslatorCommon.is_expr_blank this) ||
       (TranslatorCommon.is_expr_eq this prefix_expr)
     );
-    this <- prefix_expr;
+    self#set_this prefix_expr;
     match ExprMap.find_opt h table with
     | Some entry -> entry#add prefix_list suffix_list value
     | None -> begin
-      let new_entry = new data_tracker in
+      let new_entry = new data_tracker TranslatorCommon.expr_blank in
       new_entry#add_data_update prefix_list suffix_list value root_entry s s';
       self#add_helper h new_entry
     end
-  end
+  end    
+
+  method add_data_update_wrapper
+  (suffix_list  : AST.Prog.expr_t list)
+  (value        : AST.Prog.expr_t)
+  (root_entry   : data_tracker)
+  (s            : AST.Prog.expr_t)
+  (s'           : AST.Prog.expr_t) : unit = 
+    (* TranslatorCommon.debug_print_expr value; *)
+    self#add_data_update [] suffix_list value root_entry s s'
+
+  method construct = 
+    let rec aux lst = 
+      match lst with 
+      | [] -> []
+      | (k, v) :: lst -> begin
+        let k_id = TranslatorCommon.expr_to_id k in
+        let k_id_either : (id_t, int) Either.t = Left k_id in
+        let member_binding_upd = (k_id_either, v#construct) in
+        [member_binding_upd] @ (aux lst)
+      end
+    in
+    let x = begin
+      match self#is_data_update_filled with 
+      | true -> data_update
+      | false -> begin
+        match self#is_end_point_filled with 
+        | true -> end_point
+        | false -> begin
+          let bindings = ExprMap.bindings table in
+          let kv_list = aux bindings in 
+          let kv_list = NonEmptyList.coerce kv_list in
+          AST.Prog.Suffixed(this, DataUpd(kv_list))
+        end
+      end
+    end in
+    x
 
 end ;;
 

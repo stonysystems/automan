@@ -17,3 +17,8 @@
   (name test_printer)
   (modules test_printer)
   (libraries core core_unix.command_unix async_unix automan))
+
+(test
+  (name test_data_tracker)
+  (modules test_data_tracker)
+  (libraries core core_unix.command_unix async_unix automan))
