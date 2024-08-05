@@ -20,8 +20,16 @@
 
 - [ ] Match expressions require curly braces around the case tree.
 
-- [ ] lambda expressions can only be of the form ID => EXPR (there is a parser conflict with parenthesized formal parameters and tuples)
+- [ ] lambda expressions can only be of the form ID => EXPR (there is a parser
+      conflict with parenthesized formal parameters and tuples)
 
-- [ ] Several sorts of statements are not currently parsed (reveal, TODO)
+- [ ] Several sorts of statements are not currently parsed (reveal, TODO list
+      here)
 
 - [ ] `ghost` modifier is not currently parsed
+
+# Annotator
+
+## Nice-to-haves
+- [ ] annotation files should ideally be searched while processing Dafny
+      `include` directives, not presented all upfront as is done currently

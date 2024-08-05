@@ -35,6 +35,20 @@ module Annotation = struct
 
   type toplevel_t = t list
   [@@deriving show, eq]
+
+  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Module (m_id, _) -> m_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Predicate (p_id, _) -> p_id = id
+        | _ -> false)
+      anns
 end
 
 module AnnotationMetaData : MetaData
@@ -416,14 +430,28 @@ module AST (M : MetaData) = struct
     let assoc_right_bop (o: Common.bop_t) (es: expr_t NonEmptyList.t): expr_t =
       NonEmptyList.fold_right_1 (fun x y -> Binary (o, x, y)) es
 
-    (* let assoc_left_bop (o: bop_t) (es: t NonEmptyList.t): t = *)
-    (*   NonEmptyList.fold_left_1 (fun x y ) *)
-
     let foldl1 (f: expr_t -> expr_t -> expr_t) (es: expr_t list): expr_t =
       match es with
       | [] -> assert false      (* TODO: better error handling (integrate with parser (option)) *)
       | init :: es ->
         List.fold_left f init es
+
+    let maybe_to_qualified_id (e: expr_t): id_t NonEmptyList.t option =
+      (* TODO: handle identifier dot suffixes with generic instantations *)
+      let rec aux accum = function
+        | NameSeg (id, []) ->
+          Some (id :: accum)
+        | Suffixed (e', AugDot (Common.DSId id, [])) ->
+          aux (id :: accum) e'
+        | _ -> None
+      in
+      Option.map NonEmptyList.coerce (aux [] e)
+
+    let from_qualified_id (qid: id_t NonEmptyList.t): expr_t =
+      let NonEmptyList.( :: ) (hd, tl) = qid in
+      List.fold_left
+        (fun qid id -> Suffixed (qid, AugDot (Common.DSId id, [])))
+        (NameSeg (hd, [])) tl
   end
 
   module TopDecl = struct
