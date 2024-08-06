@@ -1,0 +1,19 @@
+module Collections__CountMatches_i {
+    IsNthHighestValueInSequence(+,+,+);
+}
+module LiveRSL__Acceptor_i {
+    IsLogTruncationPointValid(+,+,+);
+    RemoveVotesBeforeLogTruncationPoint(+,-,+);
+    LAddVoteAndRemoveOldOnes(+,-,+,+,+);
+    LAcceptorInit(-,+);
+    LAcceptorProcess1a(+,-,+,-);
+    LAcceptorProcess2a(+, -, +, -);
+    LAcceptorProcessHeartbeat(+, -, +);
+    LAcceptorTruncateLog(+, -, +);
+}
+module LiveRSL__Broadcast_i {
+    LBroadcastToEveryone(+,+,+,-);
+}
+module LiveRSL__Constants_i {
+    LReplicaConstantsValid(+);
+}

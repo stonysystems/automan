@@ -4,21 +4,31 @@ open Internal
 
 
 (**
-  * expr_to_suffix
-  * suffix_to_dot_id
-  * suffix_to_data_update
-  * is_expr_tp_aug_dot
-  * is_expr_tp_data_update
+  * **************************************************************************
+  * Some helper functions to assist with translation
+  * **************************************************************************
+  * expr_to_suffix : AST.Prog.exprt_t -> AST.Prog.Suffixed 
+  * suffix_to_dot_id : x.b -> b; b must be a id_t; return as expr_t
+  * suffix_to_data_update : Suffix -> member_binding_upd_lst as list
+  *
+  * is_expr_tp_aug_dot : Whether an expr_t is Suffix with AugDot
+  * is_expr_tp_data_update : Whether an expr_t is Suffix with DataUpd
+  *
+  * debug_print
+  * debug_print_expr
   * str_of_expr
   * expr_blank
-  * is_expr_eq
+  * is_expr_eq 
   * is_expr_neq
   * is_expr_blank
   * is_expr_n_blank
-  * expr_to_id
-  * move_one_expr_from_suffix_to_prefix
-  * convert_expr_lst_to_dot_expr
-  * convert_dot_expr_to_expr_lst
+  * expr_to_id : expr -> id; The expr must be a id_t
+  *
+  * move_one_expr_from_suffix_to_prefix: 
+  *                     h :: suffix, prefix -> suffix, preffix @ [h]
+  * convert_expr_lst_to_dot_expr : [a, b, c, d] -> a.b.c.d
+  * convert_dot_expr_to_expr_lst : a.b.c.d -> [a, b, c, d]
+  * **************************************************************************
   *)
 
 module TranslatorCommon (M : MetaData) = struct 
