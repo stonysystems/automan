@@ -1,0 +1,155 @@
+* SHT
+
+** [0/2] =Configuration.i.dfy=
+
+- [ ] =HostsDistinct=
+
+  Check only (all inputs)
+
+- [ ] =WFSHTConfiguration=
+
+  Check only
+
+** [0/3] =Delegations.i.dfy=
+
+- [ ] =DelegationMapComplete=
+
+  Check only
+
+- [ ] =DelegateForKeyRangeIsHost=
+
+  Check only
+
+- [ ] =DelegationMapsAreEqualUpToKey=
+
+  Check only
+
+** [4/18] =Host.i.dfy=
+
+- [ ] =ValidKeyPlus=
+
+  Check only
+
+- [ ] =ValidOptionalValue=
+
+  Check only
+
+- [ ] =ValidKeyRange=
+
+  Check only
+
+- [ ] =DelegationMap_InitTrigger=
+
+  constant function returning =true=
+
+- [ ] =Host_Init=
+
+  - Describes an initialization operation
+  - Full specification
+
+- [X] =NextGetRequest_Reply=
+
+  - Describes a state transition
+  - ouputs: =s':Host, out:set<Packet>=
+
+    *NOTE:* =m:Message, sm:SingleMessage<Message>= are output moded but not
+    outputs, they appear to be "local" constructions telling you something about
+    the output =out=. /We can't support this yet/
+  - if-then-else
+    - then
+      - if-then-else
+        - then
+          - updates vars =m, s'.receivedRequests=
+        - else
+          - updates vars =m, s'.receivedRequests=
+        - branches are consistent: =m, s'.receivedRequests=
+      - updates vars =s'.receivedRequests, s'.sd, m, out=
+    - else
+      - updates vars =out, s' <- {s'.constants, s'.me, s'.h, s'.sd, s'.receivedPacket, s'.numDelegations}=
+    - *NOTE:* update branches not consistent (outer else updates a strict superset of then)
+
+  *NOTE* The problem arises because the full determination occurs in the next
+  predicate, =NextGetRequest=
+
+- [ ] =NextGetRequest=
+  - outputs: =s':Host, out:set<Packet>=
+  - update vars: ='s.delegationMap, s'.h, s'.numDelegations, s'=
+    Note: the assumption that =s'= is a fully specified output of =NextGetRequest_Reply=
+    is wrong
+
+  *NOTE* we could not translate this one anyway, the existential poses a problem
+
+- [X] =NextSetRequest_Complete=
+  - outputs: =s':Host, sm:SingleMessage<Message>, replym:Message, out:set<Packet>=
+    - *NOTE:* only =s', out= are intended as real outputs
+  - if-then-else
+    - then
+      - if-then-else
+        - then
+          - updates: =s'.h, s'.receivedRequests=, =replym=
+        - else
+          - updates: =s'.h, s'.receivedRequests=, =replym=
+        - CONSISTENT: =s'.h, s'.receivedRequests=
+      - updates: =s'.sd, out=, =sm=
+    - else
+      - updates: =s'.(constants, me, h, sd, receivedPacket, numDelegations), out=
+    - INCONSISTENT
+
+  Similar to =NextGetRequest_Reply=
+
+- [X] =NextSetRequest=
+
+  Unset fields of =NextSetRequest_Complete= (where this is called) are determined here
+  - However, =s'.me= is underspecified
+
+- [X] =NextShard=
+  - outputs: =s': Host, out: set<Packet>=, out-locals: =sm:SingleMessage<Message>=
+  - updates: =s'.(sd, constants, numDelegations, receivedRequests)=
+  - if-then-else
+    - then
+      - updates: =out, s'.(delegationMap, h)=
+    - else
+      - updates: =out, s'.(delegationMap, h)=
+    - CONSISTENT: =out, s'.(delegationMap, h)=
+
+- [ ] =NextShard_Wrapper=
+  - only completely specifies =s'= if we assume the functionalization of =NextShard= does
+
+- [ ] =NextReply=
+  - outputs: =s', out=
+  - updates: =s', out=
+
+- [ ] =NextRedirect=
+  - outputs: =s', out=
+  - updates: =s', out=
+
+- [ ] =ShouldProcessReceivedMessage=
+  To translate as a check
+
+- [ ] =Process_Message=
+  not currently translatable (disjunction)
+
+- [ ] =ReceivePacket=
+  - outputs: =s', out=
+  - if-then-else
+    - then
+      - updates: =s'.sd, out=
+      - if-then-else
+        - then
+          - updates: =s'.receivedPacket=
+        - else
+          - updates: =s'.receivedPacket=
+        - CONSISTENT: =s'.receivedPackets=
+      - updates: =s'.(sd, receivedPacket, constants, me, h, sd, numDelegations, receivedRequests)=
+    - else
+      - updates: =s'.(...)=
+    - CONSISTENT: =s', out=
+
+- [ ] =ProcessReceivedPacket=
+  - updates all outputs: =s', out=
+
+- [ ] =SpontaneousRetransmit=
+  - updates all outputs: =s', out=
+
+- [ ] =Host_Next=
+  - not translatable (existential, disjunctions)
