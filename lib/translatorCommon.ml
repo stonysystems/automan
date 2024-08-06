@@ -131,4 +131,14 @@ module TranslatorCommon (M : MetaData) = struct
   let debug_print_expr (e) = 
     Printf.printf "[+] %s \n" (str_of_expr e)
 
+  module Expr = struct 
+    type t = AST.Prog.expr_t
+    let compare e1 e2 = 
+      let e1_str = str_of_expr e1 in
+      let e2_str = str_of_expr e2 in 
+      if e1_str = e2_str then 0 
+      else if e1_str < e2_str then -1 
+      else 1
+  end ;;
+
 end

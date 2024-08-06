@@ -7,17 +7,7 @@ module DataTracker (M : MetaData) = struct
 
 module AST = AST(M)
 module TranslatorCommon = TranslatorCommon(M)
-module Expr = struct 
-  type t = AST.Prog.expr_t
-  let compare e1 e2 = 
-    let e1_str = TranslatorCommon.str_of_expr e1 in
-    let e2_str = TranslatorCommon.str_of_expr e2 in 
-    if e1_str = e2_str then 0 
-    else if e1_str < e2_str then -1 
-    else 1
-end ;;
-
-module ExprMap = Map.Make(Expr)
+module ExprMap = Map.Make(TranslatorCommon.Expr)
 
 class data_tracker 
   (s : AST.Prog.expr_t) (init_dtp : AST.Prog.expr_t) = 
@@ -34,6 +24,8 @@ object (self)
   method set_data_update e  = data_update <- e
   method set_this e         = 
     if TranslatorCommon.is_expr_blank this then this <- e else ()
+
+  method get_this = this
 
   method copy = 
     let new_tracker = new data_tracker this init_dtp in 
