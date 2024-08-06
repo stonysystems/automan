@@ -117,6 +117,11 @@ module Common = struct
     | Abstract | Ghost | Static | Opaque
   [@@deriving show, eq]
 
+  (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-method-declaration
+     NOTE: no constructor, twostate/least/greatest lemmas  *)
+  type method_sort_t = Method | Lemma
+  [@@deriving show, eq]
+
   (* Modules *)
   type module_reference_t =
     | Concrete | Abstract
@@ -522,9 +527,6 @@ module AST (M : MetaData) = struct
     (* Method/Lemma START
        https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-method-declaration
        NOTE: no constructor, twostate/least/greatest lemmas *)
-    type method_sort_t =
-      | Method | Lemma
-    [@@deriving show, eq]
 
     (* NOTE: no KType, "returns" clause *)
     type method_signature_t =
@@ -541,7 +543,7 @@ module AST (M : MetaData) = struct
     [@@deriving show, eq]
 
     type method_t =
-      { sort: method_sort_t
+      { sort: Common.method_sort_t
       ; attrs: Prog.attribute_t list
       ; id: id_t
       ; signature: method_signature_t
@@ -614,6 +616,11 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
   let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t =
     let Formal (id, tp) = p in
     Formal (id, typ tp)
+
+  let method_signature (s: Src.TopDecl.method_signature_t)
+    : Tgt.TopDecl.method_signature_t =
+    let ps = List.map formal s.params in
+    { generic_params = s.generic_params; params = ps }
 
   let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t)
     : Tgt.TopDecl.datatype_ctor_t =

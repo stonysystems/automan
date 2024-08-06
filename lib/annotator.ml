@@ -246,8 +246,7 @@ and annotate_stmt
   | SAssert (attrs, assertion, block) ->
     let attrs' = attribute_handler attrs in
     let<* assertion' = annotate_expr assertion anns in
-    let<* block' =
-      StateError.mapM (fun s -> annotate_stmt s anns) block in
+    let<* block' = annotate_stmt_block block anns in
     StateError.return AnnotationPass.Prog.(
         SAssert (attrs', assertion', block'))
   | SAssume (attrs, assumption) ->
@@ -316,12 +315,14 @@ and annotate_stmt
     StateError.return AnnotationPass.Prog.(
         SVarDecl (DeclIds (ids', rhs')))
 
+and annotate_stmt_block block anns =
+  StateError.mapM (fun s -> annotate_stmt s anns) block
+
 and annotate_stmt_if
     (if_: ParserPass.Prog.stmt_if_t) (anns: Annotation.toplevel_t)
   : AnnotationPass.Prog.stmt_if_t Resolver.m =
   let<* g' = annotate_expr if_.guard anns in
-  let<* t' =
-    StateError.mapM (fun s -> annotate_stmt s anns) if_.then_br in
+  let<* t' = annotate_stmt_block if_.then_br anns in
   let<* footer' = StateError.mapM_option (fun f -> annotate_stmt_if_footer f anns) if_.footer in
   StateError.return AnnotationPass.Prog.(
       {guard = g'; then_br = t'; footer = footer'})
@@ -336,7 +337,7 @@ and annotate_stmt_if_footer
     StateError.return AnnotationPass.Prog.(
         ElseIf if_')
   | ElseBlock block ->
-    let<* block' = StateError.mapM (fun s -> annotate_stmt s anns) block in
+    let<* block' = annotate_stmt_block block anns in
     StateError.return AnnotationPass.Prog.(
         ElseBlock block')
 
@@ -345,7 +346,7 @@ and annotate_stmt_case
   : AnnotationPass.Prog.stmt_case_t Resolver.m =
   let (epats, body) = branch in
   let epats' = Convert.extended_pattern epats in
-  let<* body' = StateError.mapM (fun s -> annotate_stmt s anns) body in
+  let<* body' = annotate_stmt_block body anns in
   StateError.return (epats', body')
 (* END statements *)
 
@@ -378,6 +379,27 @@ let annotate_function_spec
     StateError.return AnnotationPass.TopDecl.(
         Decreases e')
 
+let annotate_method_spec
+    (s: ParserPass.TopDecl.method_spec_t) (anns: Annotation.toplevel_t)
+  : AnnotationPass.TopDecl.method_spec_t Resolver.m =
+  match s with
+  | MModifies e ->
+    let<* e' = annotate_expr e anns in
+    StateError.return AnnotationPass.TopDecl.(
+        MModifies e')
+  | MRequires e ->
+    let<* e' = annotate_expr e anns in
+    StateError.return AnnotationPass.TopDecl.(
+        MRequires e')
+  | MEnsures e ->
+    let<* e' = annotate_expr e anns in
+    StateError.return AnnotationPass.TopDecl.(
+        MEnsures e')
+  | MDecreases e ->
+    let<* e' = annotate_expr e anns in
+    StateError.return AnnotationPass.TopDecl.(
+        MDecreases e')
+
 let rec annotate_topdecl
   (anns: Annotation.toplevel_t) (d: ParserPass.TopDecl.t')
   : AnnotationPass.TopDecl.t' Resolver.m =
@@ -406,14 +428,35 @@ let rec annotate_topdecl
     StateError.return
       (AnnotationPass.TopDecl.SynonymTypeDecl
          (Convert.synonym_type attribute_handler syn))
-  | ParserPass.TopDecl.MethLemDecl _ ->
-    failwith
-      ("annotator: annotate_toplevel: TODO: methods/lemmas: "
-       ^ ParserPass.TopDecl.(show_t' d))
-  | ParserPass.TopDecl.PredFunDecl (Function (_, _, id, _, _, _, _, _)) ->
-    failwith
-      ("annotator: annotate_toplevel: TODO functions:"
-       ^ id)
+  | ParserPass.TopDecl.MethLemDecl
+      { sort = sort; attrs = attrs
+      ; id = id; signature = sign; spec = spec
+      ; body = body } ->
+    let attrs' = attribute_handler attrs in
+    let signature' = Convert.method_signature sign in
+    let<* spec' =
+      StateError.mapM
+        (fun s -> annotate_method_spec s anns)
+        spec in
+    let<* body' = annotate_stmt_block body anns in
+    StateError.return AnnotationPass.TopDecl.(
+        MethLemDecl
+          { sort = sort; attrs = attrs'
+          ; id = id; signature = signature'; spec = spec'
+          ; body = body' })
+  | ParserPass.TopDecl.PredFunDecl
+      (Function (m_pres, attrs, id, tp_ps, ps, tp, specs, body)) ->
+    let attrs' = attribute_handler attrs in
+    let ps' = List.map Convert.formal ps in
+    let tp' = Convert.typ tp in
+    let<* specs' =
+      StateError.mapM
+        (fun s -> annotate_function_spec s anns)
+        specs in
+    let<* body' = annotate_expr body anns in
+    StateError.return AnnotationPass.TopDecl.(
+        PredFunDecl
+          (Function (m_pres, attrs', id, tp_ps, ps', tp', specs', body')))
   | ParserPass.TopDecl.PredFunDecl
       (Predicate (method_present, p_attrs, p_id, p_tp_params, p_params, p_specs, p_body)) ->
     let<* (_, p_ann_modes) = Resolver.find_predicate_local_decl p_id in

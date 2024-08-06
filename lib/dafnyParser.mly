@@ -654,8 +654,8 @@ ds = delimited(LBRACE, list(top_decl), RBRACE);
     { (attrs, m, ds) }
 
 methlem_keyword:
-  | METHOD { Syntax.ParserPass.TopDecl.Method }
-  | LEMMA  { Syntax.ParserPass.TopDecl.Lemma  }
+  | METHOD { Syntax.Common.Method }
+  | LEMMA  { Syntax.Common.Lemma  }
 
 /* NOTE: modifies clause not supported
 */
