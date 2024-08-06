@@ -55,6 +55,14 @@ module AnnotationMetaData : MetaData
   with type predicate_decl_t  = Annotation.mode_t list option
   with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
 = struct
+  (** - When this is Option.None, the user did not provide an annotation for
+        this predicate. For now, a sensible default is to assume all arguments are
+        input moded; however, since this might change it is desirable to
+        distinguish this case from the case where the user provides an explicit
+        annotation indicating all arguments should be input moded
+
+      - When this is Option.Some modes, `List.length modes` is exactly the arity
+        of the predicate *)
   type predicate_decl_t  = Annotation.mode_t list option
   [@@deriving show, eq]
 
