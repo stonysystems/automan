@@ -28,8 +28,15 @@
 
 - [ ] `ghost` modifier is not currently parsed
 
+- [ ] Language support for named parameters in argument lists
+
+- [ ] Consider state relationship (for partial specifications)
+
 # Annotator
 
 ## Nice-to-haves
 - [ ] annotation files should ideally be searched while processing Dafny
       `include` directives, not presented all upfront as is done currently
+- [ ] following on the previous item, for harmony and saturation its desirable
+      to chase down includes to know type / datatpe definitions (to know what
+      their fields are).
