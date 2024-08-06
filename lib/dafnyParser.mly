@@ -577,9 +577,6 @@ formals:
   | ps = delimited(LPAREN, separated_list(COMMA, formal), RPAREN);
     { ps }
 
-annotated_formals:
-  | ps = formals { List.map (fun x -> (x, ())) ps }
-
 /* TODO: parallel pipes for constructors? (like &&, ||)
    TODO: optional ids for datatype constructor's formal parameters
 */
@@ -624,11 +621,11 @@ synonym_type_decl:
    NOTE: bodies are optional (abstract modules/classes?) */
 predfun_decl:
   | PREDICATE; attrs = list(attribute); p = ID;
-    gen_ps = gen_params; ps = annotated_formals;
+    gen_ps = gen_params; ps = formals;
     specs = list(function_spec);
     e = delimited(LBRACE, expr(yeslem), RBRACE);
     { Syntax.ParserPass.TopDecl.(
-        Predicate (false, attrs, p, gen_ps, ps, specs, e)
+        Predicate ((), false, attrs, p, gen_ps, ps, specs, e)
       )
     }
   | FUNCTION; attrs = list(attribute); p = ID;

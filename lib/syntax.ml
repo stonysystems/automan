@@ -4,15 +4,15 @@ open Internal
 
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
-  type formal_t [@@deriving show, eq]
+  type predicate_decl_t [@@deriving show, eq]
   type arglist_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
-  with type formal_t  = unit
+  with type predicate_decl_t  = unit
   with type arglist_t = unit
 = struct
-  type formal_t  = unit [@@deriving show, eq]
+  type predicate_decl_t  = unit [@@deriving show, eq]
   type arglist_t = unit [@@deriving show, eq]
 end
 
@@ -52,10 +52,10 @@ module Annotation = struct
 end
 
 module AnnotationMetaData : MetaData
-  with type formal_t  = Annotation.mode_t
+  with type predicate_decl_t  = Annotation.mode_t list option
   with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
 = struct
-  type formal_t  = Annotation.mode_t
+  type predicate_decl_t  = Annotation.mode_t list option
   [@@deriving show, eq]
 
   (** - When this is Option.None, the call is not associated with a known
@@ -464,8 +464,6 @@ module AST (M : MetaData) = struct
     (* Formal parameters to constructors/functions/methods *)
     type formal_t = Formal of id_t * Type.t
     [@@deriving show, eq]
-    type formal_annotated_t = formal_t * M.formal_t
-    [@@deriving show, eq]
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-datatype
        NOTE: no codatatype, type members
@@ -510,9 +508,10 @@ module AST (M : MetaData) = struct
 
     type function_t =
       | Predicate of
-          bool                  (* method present *)
+          M.predicate_decl_t
+          * bool                  (* method present *)
           * Prog.attribute_t list * id_t
-          * Type.generic_params_t * formal_annotated_t list
+          * Type.generic_params_t * formal_t list
           * function_spec_t list
           * Prog.expr_t
       | Function of

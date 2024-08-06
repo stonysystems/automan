@@ -351,11 +351,11 @@ and annotate_stmt_case
 (* END statements *)
 
 (* BEGIN TopDecls (utilities) *)
-let annotate_formal
-    (p: ParserPass.TopDecl.formal_annotated_t) (m: Annotation.mode_t)
-    : AnnotationPass.TopDecl.formal_annotated_t =
-  let (Formal (id, tp), ()) = p in
-  (Formal (id, Convert.typ tp), m)
+(* let annotate_formal *)
+(*     (p: ParserPass.TopDecl.formal_annotated_t) (m: Annotation.mode_t) *)
+(*     : AnnotationPass.TopDecl.formal_annotated_t = *)
+(*   let (Formal (id, tp), ()) = p in *)
+(*   (Formal (id, Convert.typ tp), m) *)
 (* END TopDecls (utilities) *)
 
 let annotate_function_spec
@@ -458,25 +458,32 @@ let rec annotate_topdecl
         PredFunDecl
           (Function (m_pres, attrs', id, tp_ps, ps', tp', specs', body')))
   | ParserPass.TopDecl.PredFunDecl
-      (Predicate (method_present, p_attrs, p_id, p_tp_params, p_params, p_specs, p_body)) ->
-    let<* (_, p_ann_modes) = Resolver.find_predicate_local_decl p_id in
-    if List.(length p_params <> length p_ann_modes) then
-      StateError.error
-        ("annotator: annotate_toplevel: mismatched arity for predicate: "
-         ^ p_id)
-    else begin
-      let p_attrs' = attribute_handler p_attrs in
-      let p_params' = List.map2 annotate_formal p_params p_ann_modes in
-      let<* p_specs' =
-        StateError.mapM (fun spec -> annotate_function_spec spec anns) p_specs in
-      (* TODO: annotate predicate calls in expressions, too *)
-      let<* p_body' = annotate_expr p_body anns in
-      StateError.return AnnotationPass.TopDecl.(
-          PredFunDecl
-            (Predicate
-               ( method_present, p_attrs', p_id, p_tp_params
-               , p_params', p_specs', p_body')))
-    end
+      (Predicate ((), method_present, p_attrs, p_id, p_tp_params, p_params, p_specs, p_body)) ->
+    let<* p_ann_modes = begin
+      let<* p_ann =
+        StateError.map_error ((^) "annotator.annotate_topdecl:\n")
+          Resolver.(maybe_find_predicate_local_decl p_id) in
+      StateError.mapM_option
+        (function (_, p_ann_modes) ->
+           if List.(length p_params <> length p_ann_modes) then
+             StateError.error
+               ("annotator.annotate_topdecl: mismatched arity for predicate: "
+                ^ p_id)
+           else StateError.return p_ann_modes
+        )
+        p_ann
+    end in
+    let p_attrs' = attribute_handler p_attrs in
+    let p_params' = List.map Convert.formal p_params in
+    let<* p_specs' =
+      StateError.mapM (fun spec -> annotate_function_spec spec anns) p_specs in
+    (* TODO: annotate predicate calls in expressions, too *)
+    let<* p_body' = annotate_expr p_body anns in
+    StateError.return AnnotationPass.TopDecl.(
+        PredFunDecl
+          (Predicate
+             ( p_ann_modes, method_present, p_attrs'
+             , p_id, p_tp_params, p_params', p_specs', p_body')))
 
 and annotate_topdecls
   (anns: Annotation.toplevel_t) (ds: ParserPass.TopDecl.t list)
