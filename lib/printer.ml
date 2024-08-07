@@ -407,9 +407,6 @@ module PrettyPrinter (M : MetaData) = struct
       let x' = List.map print_formal x in 
       Printf.sprintf "(%s)" (String.concat ", " x')
 
-    let print_formal_annotated (x : AST.TopDecl.formal_annotated_t) = 
-      let (x, _) = x in print_formal x
-
     let print_datatype_ctor 
       (x : AST.TopDecl.datatype_ctor_t) (idnt_lvl : int) = 
       let idnt_str = get_indt_str_with_new_line idnt_lvl in
@@ -457,8 +454,8 @@ module PrettyPrinter (M : MetaData) = struct
     let print_function (x : AST.TopDecl.function_t) (idnt_lvl : int) = 
       let idnt_str = (get_indt_str_with_new_line idnt_lvl) in
       match x with
-      | Predicate (_, _, p, _, fs, specs, e) -> (
-        let fs' = List.map print_formal_annotated fs in
+      | Predicate (_, _, _, p, _, fs, specs, e) -> (
+        let fs' = List.map print_formal fs in
         let fs_str = String.concat ", " fs' in
         let specs' = List.map 
           (fun x -> print_function_spec x (idnt_lvl + 1)) specs in 

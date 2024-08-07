@@ -1,0 +1,14 @@
+module LiveRSL__Proposer_i {
+  LProposerInit(-,+);
+  LProposerProcessRequest(+,-,+);
+  LProposerMaybeEnterNewViewAndSend1a(+,-,-);
+  LProposerProcess1b(+,-,+);
+  LProposerMaybeEnterPhase2(+,-,+,-);
+  LProposerNominateNewValueAndSend2a(+,-,+,+,-);
+  LProposerNominateOldValueAndSend2a(+,-,+,-);
+  LProposerMaybeNominateValueAndSend2a(+,-,+,+,-);
+  LProposerProcessHeartbeat(+,-,+,+);
+  LProposerCheckForViewTimeout(+,-,+);
+  LProposerCheckForQuorumOfViewSuspicions(+,-,+);
+  LProposerResetViewTimerDueToExecution(+,-,+);
+}

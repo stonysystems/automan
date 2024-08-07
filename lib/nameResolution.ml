@@ -69,7 +69,7 @@ module TopLevel = struct
     : (Annotation.predicate_t, string) Result.t =
     let< opt_p = maybe_find_predicate id anns in
     Option.fold
-      ~none:(Result.Error ("module not found: " ^ NonEmptyList.(show pp_id_t id)))
+      ~none:(Result.Error ("TopLevel.find_predicate: not found: " ^ NonEmptyList.(show pp_id_t id)))
       ~some:Result.ok
       opt_p
 end
@@ -167,14 +167,15 @@ module NameSpace = struct
       else
         find_module ns.enclosing m_id
 
-  let find_predicate_local_decl (ns: t) (m_id: id_t)
-    : (Annotation.predicate_t, string) Result.t =
+  (** Searches only the the local namespace for the predicate `m_id` *)
+  let maybe_find_predicate_local_decl (ns: t) (m_id: id_t)
+    : (Annotation.predicate_t option, string) Result.t =
     match ns with
     | TopLevel ->
       Result.Error
         "NameSpace.find_predicate_local: no local definitions at toplevel"
     | Module ns' ->
-      TopLevel.find_predicate (NonEmptyList.singleton m_id) ns'.locals
+      TopLevel.maybe_find_predicate (NonEmptyList.singleton m_id) ns'.locals
 
   let rec maybe_find_predicate (ns: t) (qm_id: id_t NonEmptyList.t)
       : (Annotation.predicate_t option, string) Result.t =
@@ -230,8 +231,9 @@ module Resolver = struct
     | Some m_ann ->
       StateError.return m_ann
 
-  let find_predicate_local_decl (m_id: id_t): Annotation.predicate_t m =
-    StateError.gets (fun ns -> NameSpace.find_predicate_local_decl ns m_id)
+  let maybe_find_predicate_local_decl (m_id: id_t)
+    : (Annotation.predicate_t option) m =
+    StateError.gets (fun ns -> NameSpace.maybe_find_predicate_local_decl ns m_id)
 
   let maybe_find_predicate
       (qp_id: id_t NonEmptyList.t) (anns: Annotation.toplevel_t)

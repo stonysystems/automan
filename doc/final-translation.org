@@ -68,7 +68,7 @@ Pattern match on the expression
         (nonempty list of ids), to remap
       - the annotation contains the separated input-moded argument list and
         output-moded argument (nonempty) list, in the order they are supposed to
-        appear
+        appear. The output list has the types attached to the output variables
         - and the output-moded argument list is a non-empty list of qualified
           (by member access) names.
         - and there are no conflicts in the output list (2 occurrences of the
@@ -76,7 +76,8 @@ Pattern match on the expression
           predicate call)
 
       Note that, if there are more than one outputs, the functionalized call is
-      going to be returning a tuple. I proposed that you implement this with a local let binding in the translated code.
+      going to be returning a tuple. I proposed that you implement this with a
+      local let binding in the translated code.
       #+begin_src
         var res_PName_Impl = PName_Impl(input_vars...); ...
       #+end_src
