@@ -40,3 +40,5 @@
 - [ ] following on the previous item, for harmony and saturation its desirable
       to chase down includes to know type / datatpe definitions (to know what
       their fields are).
+
+- [ ] users may want to introduce some indirection to certain types
