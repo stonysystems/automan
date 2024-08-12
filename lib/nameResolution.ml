@@ -27,7 +27,7 @@ module TopLevel = struct
     in
     Result.map_error
       (fun _ ->
-         "module name is ambiguous: "
+         "NameResolution.TopLevel.maybe_find_module: name is ambiguous: "
          ^ NonEmptyList.(show pp_id_t qm_id))
       (aux qm_id anns)
 
@@ -72,6 +72,54 @@ module TopLevel = struct
       ~none:(Result.Error ("TopLevel.find_predicate: not found: " ^ NonEmptyList.(show pp_id_t id)))
       ~some:Result.ok
       opt_p
+
+  (* TODO: This does not resolve ambiguity in the target type, e.g., multiple
+     aliases for type `MyType` distinguished by module qualifications (where we
+     should choose the alias for the name that Dafny resolves). We would need to
+     follow #include directives and parse the whole Dafny project for that. *)
+  let rec maybe_find_tp_alias
+    (tp: ParserPass.Type.t) (anns: Annotation.toplevel_t)
+    : (Annotation.qualified_tp_alias_t option, string) Result.t =
+    (* 1. Look for type aliases at the current level whose target matches `tp` *)
+    let aliases_here = Annotation.filter_by_tp_alias_tgt tp anns in
+    match aliases_here with
+    | (TypeAlias (id, _) :: []) ->
+      Result.Ok (Some (NonEmptyList.singleton id, tp))
+    | [] ->
+      (* 2. Search modules in scope for target matching `tp`, and add qualifications *)
+      (* 2.1. Pick out the module annotations *)
+      let m_anns =
+        List.filter_map
+          (function
+            | Annotation.Module m_ann -> Some m_ann
+            | _ -> None)
+          anns
+      in
+      (* 2.2 Recursively search each for a type alias annotation *)
+      List.foldM_left_result begin fun acc ann ->
+          let (id, m_anns) = ann in
+          let< r = maybe_find_tp_alias tp m_anns in
+          match (acc, r) with
+          (* 2.2.1. We haven't found it now or earlier *)
+          | (None, None) ->
+            Result.Ok None
+          (* 2.2.2. Ambiguous type alias *)
+          | (Some _, Some _) ->
+            Result.Error
+              ("NameResolution.TopLevel.maybe_find_tp_alias: multiple (qualilfied) aliases for type:\n"
+               ^ ParserPass.Type.(show tp))
+          (* 2.2.3. We found it before *)
+          | (Some acc', _) ->
+            Result.Ok (Some acc')
+          (* 2.2.4. We found it now, so qualify with that module id *)
+          | (_, Some (ids, tgt)) ->
+            Result.Ok (Some (NonEmptyList.cons id ids, tgt))
+          end
+          (Result.Ok None) m_anns
+    | _ ->
+      Result.Error
+        ("NameResolution.TopLevel.maybe_find_tp_alias: multiple toplevel aliases for type:\n"
+         ^ ParserPass.Type.(show tp))
 end
 
 module NameSpace = struct
@@ -151,7 +199,7 @@ module NameSpace = struct
     | None ->
       TopLevel.maybe_find_module m_id ns.imports
 
-  let rec find_module (ns: t) (m_id: module_qualified_name_t)
+  let rec maybe_find_module (ns: t) (m_id: module_qualified_name_t)
     : (Annotation.module_t option, string) Result.t =
     match ns with
     | TopLevel ->
@@ -165,7 +213,7 @@ module NameSpace = struct
       if Option.is_some opt_m_ann then
         Result.Ok opt_m_ann
       else
-        find_module ns.enclosing m_id
+        maybe_find_module ns.enclosing m_id
 
   (** Searches only the the local namespace for the predicate `m_id` *)
   let maybe_find_predicate_local_decl (ns: t) (m_id: id_t)
@@ -192,6 +240,27 @@ module NameSpace = struct
         | Some _ -> Result.Ok p_import
         | None ->
           maybe_find_predicate ns'.enclosing qm_id
+
+  (* TODO: This does not resolve ambiguity in the target type, e.g., multiple
+     definitions of type `MyType` distinguished by module qualifications. We
+     would need to follow #include directives and parse the whole Dafny
+     project for that.
+
+     TODO: Consider an alias, to be declared in the translation of the current
+     module, for a datatype (also declared in this module) that appears after
+     some predicates in which the target of the alias appears. *)
+  let rec maybe_find_tp_alias (ns: t) (tp: ParserPass.Type.t)
+      : (Annotation.qualified_tp_alias_t option, string) Result.t =
+    match ns with
+    | TopLevel -> Result.Ok None
+    | Module ns' ->
+      (* NOTE: Prefer local definitions *)
+      let< a_local = TopLevel.maybe_find_tp_alias tp ns'.locals in
+      if Option.is_some a_local then Result.Ok a_local else begin
+        let< a_import = TopLevel.maybe_find_tp_alias tp ns'.imports in
+        if Option.is_some a_import then Result.Ok a_import else
+          maybe_find_tp_alias ns'.enclosing tp
+      end
 end
 
 module Resolver = struct
@@ -209,7 +278,7 @@ module Resolver = struct
     : Annotation.module_t option m =
     StateError.map_error ((^) "Resolver.maybe_find_module:\n") begin
       State.gets begin fun ns ->
-        let< m_ann = NameSpace.find_module ns m_id in
+        let< m_ann = NameSpace.maybe_find_module ns m_id in
         match m_ann with
         | Some x -> Result.Ok (Some x)
         | None -> TopLevel.maybe_find_module m_id anns
@@ -244,6 +313,10 @@ module Resolver = struct
     | Some _ -> StateError.return p_ann
     | None ->
       State.return (TopLevel.maybe_find_predicate qp_id anns)
+
+  let maybe_find_tp_alias (tp: ParserPass.Type.t)
+    : (Annotation.qualified_tp_alias_t option) m =
+    StateError.gets (fun ns -> NameSpace.maybe_find_tp_alias ns tp)
 
   (** Returns `true` if the import is found, `false` otherwise *)
   let push_import

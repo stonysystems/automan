@@ -5,77 +5,12 @@ open Internal
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
   type predicate_decl_t [@@deriving show, eq]
+  type type_t [@@deriving show, eq]
   type arglist_t [@@deriving show, eq]
-end
-
-module TrivMetaData : MetaData
-  with type predicate_decl_t  = unit
-  with type arglist_t = unit
-= struct
-  type predicate_decl_t  = unit [@@deriving show, eq]
-  type arglist_t = unit [@@deriving show, eq]
 end
 
 type id_t   = string
 [@@deriving show, eq]
-
-(* AutoMan annotations *)
-module Annotation = struct
-  type mode_t = Input | Output
-  [@@deriving show, eq]
-
-  type t =
-    | Module    of module_t
-    | Predicate of predicate_t
-  [@@deriving show, eq]
-
-  and predicate_t = id_t * mode_t list
-
-  and module_t = id_t * t list
-
-  type toplevel_t = t list
-  [@@deriving show, eq]
-
-  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
-    List.filter
-      (function
-        | Module (m_id, _) -> m_id = id
-        | _ -> false)
-      anns
-
-  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
-    List.filter
-      (function
-        | Predicate (p_id, _) -> p_id = id
-        | _ -> false)
-      anns
-end
-
-module AnnotationMetaData : MetaData
-  with type predicate_decl_t  = Annotation.mode_t list option
-  with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
-= struct
-  (** - When this is Option.None, the user did not provide an annotation for
-        this predicate. For now, a sensible default is to assume all arguments are
-        input moded; however, since this might change it is desirable to
-        distinguish this case from the case where the user provides an explicit
-        annotation indicating all arguments should be input moded
-
-      - When this is Option.Some modes, `List.length modes` is exactly the arity
-        of the predicate *)
-  type predicate_decl_t  = Annotation.mode_t list option
-  [@@deriving show, eq]
-
-  (** - When this is Option.None, the call is not associated with a known
-        predicate. For now, assume this means all arguments are input moded
-
-      - When this is Option.Some, the mode list this contains has the same
-        length as the argument list suffix, and the expression to which the
-        call is attached is given the qualified identifier
-  *)
-  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
-  [@@deriving show, eq]
-end
 
 (* Data that does not change during the different passes *)
 module Common = struct
@@ -161,17 +96,18 @@ module AST (M : MetaData) = struct
 
     (* NOTE: no function types *)
     and t =
-      | TpName of name_seg_t NonEmptyList.t
+      | TpName of name_seg_t NonEmptyList.t * M.type_t
       (* NOTE: this representation allows singleton tuples; use the smart
          constructor *)
       | TpTup  of t list
     [@@deriving show, eq]
 
-    let simple_generic (id: id_t) (gen_inst: t list) =
+    let simple_generic (id: id_t) (gen_inst: t list) (t_ann: M.type_t) =
       TpName (NonEmptyList.singleton
-                (TpIdSeg {id = id; gen_inst = gen_inst}))
+                (TpIdSeg {id = id; gen_inst = gen_inst})
+             , t_ann)
 
-    let simple (id: id_t): t = simple_generic id []
+    let simple (id: id_t) (t_ann: M.type_t): t = simple_generic id [] t_ann
 
     let int    = simple "int"
     let bool   = simple "bool"
@@ -597,64 +533,161 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
   type attr_handler_t =
     Src.Prog.attribute_t list -> Tgt.Prog.attribute_t list
 
-  let rec typ (tp: Src.Type.t): Tgt.Type.t =
+  type tp_handler_t =
+    M1.type_t -> M2.type_t
+
+  let rec typ (tp_h: tp_handler_t) (tp: Src.Type.t) : Tgt.Type.t =
     let aux_ns (ns: Src.Type.name_seg_t): Tgt.Type.name_seg_t =
       let TpIdSeg {id = id; gen_inst = gen_inst} = ns in
-      TpIdSeg {id = id; gen_inst = List.map typ gen_inst}
+      TpIdSeg {id = id; gen_inst = List.map (typ tp_h) gen_inst}
     in
     match tp with
-    | TpTup tps -> TpTup (List.map typ tps)
-    | TpName nss -> TpName (NonEmptyList.map aux_ns nss)
+    | TpTup tps -> TpTup (List.map (typ tp_h) tps)
+    | TpName (nss, t_ann) -> TpName (NonEmptyList.map aux_ns nss, tp_h t_ann)
 
-  let rec extended_pattern (pat: Src.Prog.extended_pattern_t)
+  let rec extended_pattern
+      (tp_h: tp_handler_t) (pat: Src.Prog.extended_pattern_t)
     : Tgt.Prog.extended_pattern_t =
     match pat with
     | EPatLit lit -> EPatLit lit
     | EPatVar (id, tp) ->
-      EPatVar (id, Option.map typ tp)
+      EPatVar (id, Option.map (typ tp_h) tp)
     | EPatCtor (id, pats) ->
-      EPatCtor (id, List.map extended_pattern pats)
+      EPatCtor (id, List.map (extended_pattern tp_h) pats)
 
-  let rec pattern (pat: Src.Prog.pattern_t): Tgt.Prog.pattern_t =
+  let rec pattern
+      (tp_h: tp_handler_t) (pat: Src.Prog.pattern_t)
+    : Tgt.Prog.pattern_t =
     match pat with
-    | PatVar (id, tp) -> PatVar (id, Option.map typ tp)
-    | PatCtor (id, pats) -> PatCtor (id, List.map pattern pats)
+    | PatVar (id, tp) -> PatVar (id, Option.map (typ tp_h) tp)
+    | PatCtor (id, pats) -> PatCtor (id, List.map (pattern tp_h) pats)
 
-  let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t =
-    let Formal (id, tp) = p in
-    Formal (id, typ tp)
+  (* let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t = *)
+  (*   let Formal (id, tp) = p in *)
+  (*   Formal (id, typ tp) *)
 
-  let method_signature (s: Src.TopDecl.method_signature_t)
-    : Tgt.TopDecl.method_signature_t =
-    let ps = List.map formal s.params in
-    { generic_params = s.generic_params; params = ps }
+  (* let method_signature (s: Src.TopDecl.method_signature_t) *)
+  (*   : Tgt.TopDecl.method_signature_t = *)
+  (*   let ps = List.map formal s.params in *)
+  (*   { generic_params = s.generic_params; params = ps } *)
 
-  let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t)
-    : Tgt.TopDecl.datatype_ctor_t =
-    let DataCtor (attrs, id, params) = ctor in
-    DataCtor (attr_handler attrs, id, List.map formal params)
+  (* let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t) *)
+  (*   : Tgt.TopDecl.datatype_ctor_t = *)
+  (*   let DataCtor (attrs, id, params) = ctor in *)
+  (*   DataCtor (attr_handler attrs, id, List.map formal params) *)
 
-  let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t)
-    : Tgt.TopDecl.datatype_t =
-    let (attrs, id, tpparams, ctors) = d in
-    (attr_handler attrs, id, tpparams
-    , NonEmptyList.map (datatype_ctor attr_handler) ctors)
+  (* let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t) *)
+  (*   : Tgt.TopDecl.datatype_t = *)
+  (*   let (attrs, id, tpparams, ctors) = d in *)
+  (*   (attr_handler attrs, id, tpparams *)
+  (*   , NonEmptyList.map (datatype_ctor attr_handler) ctors) *)
 
-  let synonym_typ_rhs (rhs: Src.TopDecl.synonym_type_rhs_t)
+  let synonym_typ_rhs (tp_h: tp_handler_t) (rhs: Src.TopDecl.synonym_type_rhs_t)
     : Tgt.TopDecl.synonym_type_rhs_t =
     match rhs with
-    | Synonym tp -> Tgt.TopDecl.Synonym (typ tp)
+    | Synonym tp -> Tgt.TopDecl.Synonym (typ tp_h tp)
     | Subset (_, _, _) ->
       failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs))
 
-  let synonym_type (attr_handler: attr_handler_t) (d: Src.TopDecl.synonym_type_t)
+  let synonym_type
+      (attr_handler: attr_handler_t) (tp_h: tp_handler_t) (d: Src.TopDecl.synonym_type_t)
     : Tgt.TopDecl.synonym_type_t =
     { attrs = attr_handler d.attrs
     ; id = d.id
     ; params = d.params
-    ; rhs = synonym_typ_rhs d.rhs
+    ; rhs = synonym_typ_rhs tp_h d.rhs
     }
 end
 
-module ParserPass     = AST (TrivMetaData)
+(** Meta-data modules *)
+
+(* Parser pass (trivial meta-data) *)
+module TrivMetaData : MetaData
+  with type predicate_decl_t  = unit
+  with type type_t            = unit
+  with type arglist_t         = unit
+= struct
+  type predicate_decl_t  = unit [@@deriving show, eq]
+  type type_t            = unit [@@deriving show, eq]
+  type arglist_t         = unit [@@deriving show, eq]
+end
+
+module ParserPass = AST (TrivMetaData)
+
+(* AutoMan annotations *)
+module Annotation = struct
+  type mode_t = Input | Output
+  [@@deriving show, eq]
+
+  type t =
+    | Module    of module_t
+    | Predicate of predicate_t
+    | TypeAlias of tp_alias_t
+  [@@deriving show, eq]
+
+  and predicate_t = id_t * mode_t list
+  and module_t = id_t * t list
+  and tp_alias_t = id_t * ParserPass.Type.t
+
+  type qualified_tp_alias_t = id_t NonEmptyList.t * ParserPass.Type.t
+  [@@deriving show, eq]
+
+  type toplevel_t = t list
+  [@@deriving show, eq]
+
+  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Module (m_id, _) -> m_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Predicate (p_id, _) -> p_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_tp_alias_tgt
+      (tp: ParserPass.Type.t) (anns: toplevel_t)
+    : toplevel_t =
+    List.filter
+      (function
+        | TypeAlias (_, tp') -> tp = tp'
+        | _ -> false)
+      anns
+end
+
+module AnnotationMetaData : MetaData
+  with type predicate_decl_t  = Annotation.mode_t list option
+  with type predicate_decl_t  = Annotation.mode_t list option
+  with type arglist_t         = (id_t NonEmptyList.t * Annotation.mode_t list) option
+= struct
+  (** - When this is Option.None, the user did not provide an annotation for
+        this predicate. For now, a sensible default is to assume all arguments are
+        input moded; however, since this might change it is desirable to
+        distinguish this case from the case where the user provides an explicit
+        annotation indicating all arguments should be input moded
+
+      - When this is Option.Some modes, `List.length modes` is exactly the arity
+        of the predicate *)
+  type predicate_decl_t  = Annotation.mode_t list option
+  [@@deriving show, eq]
+
+  (** - When this is Option.None, the call is not associated with a known
+        predicate. For now, assume this means all arguments are input moded
+
+      - When this is Option.Some, the mode list this contains has the same
+        length as the argument list suffix, and the expression to which the
+        call is attached is given the qualified identifier
+  *)
+
+  type type_t = Annotation.qualified_tp_alias_t option
+  [@@deriving show, eq]
+
+  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+  [@@deriving show, eq]
+end
+
 module AnnotationPass = AST (AnnotationMetaData)

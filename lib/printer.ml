@@ -119,7 +119,7 @@ module PrettyPrinter (M : MetaData) = struct
         (print h), rest
       in
       match x with
-      | TpName (name_seg_t_lst) -> (
+      | TpName (name_seg_t_lst, _) -> (
           let (_, h) = Internal.NonEmptyList.unsnoc name_seg_t_lst in
           match h with | TpIdSeg tp_id_seg ->
             let (id, gen_inst) = (tp_id_seg.id, tp_id_seg.gen_inst) in
