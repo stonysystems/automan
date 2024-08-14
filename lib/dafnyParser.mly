@@ -379,9 +379,15 @@ member_binding_upd:
   | x = ID; ASSIGN; e = expr(yeslem)  { (Either.Left x, e) }
   | n = NUM; ASSIGN; e = expr(yeslem) { (Either.Right n, e) }
 
+parameter_binding:
+  | id = option(id = ID; ASSIGN { id }); arg = expr(yeslem)
+    { (id, arg) }
+
 call_suffix:
-  | args = delimited(LPAREN, separated_list(COMMA, expr(yeslem)), RPAREN)
-    { Syntax.ParserPass.Prog.ArgList (args, ()) }
+  | args = delimited(LPAREN, separated_list(COMMA, parameter_binding), RPAREN)
+    { Syntax.ParserPass.Prog.(
+        ArgList (coerce_arglist args, ()))
+    }
 
 lit: /* TODO: character literals */
   | TRUE  { Syntax.Common.True }

@@ -198,10 +198,12 @@ module PrettyPrinter (M : MetaData) = struct
           (print_expr_in_one_line idx) (print_expr_in_one_line v)  
       )
       | Sel x -> Printf.sprintf "[%s]" (print_expr_in_one_line x)
-      | ArgList (x, _) -> (
-        let x' = List.map print_expr_in_one_line x in
-        Printf.sprintf "(%s)" (String.concat ", " x')
-      )
+      | ArgList ({positional = pos ; named = ns}, _) -> (
+          let pos' = List.map print_expr_in_one_line pos in
+          let ns' = List.map print_named_arg_in_one_line ns in
+          Printf.sprintf "(%s)"
+            (String.concat ", " (pos' @ ns'))
+        )
 
     and print_pattern (x : AST.Prog.pattern_t) = 
       match x with
@@ -331,6 +333,11 @@ module PrettyPrinter (M : MetaData) = struct
     and print_expr_in_one_line (x) = 
       let res = print_expr x 0 in
       remove_newlines_and_tabs res
+
+    and print_named_arg_in_one_line (narg : (id_t * AST.Prog.expr_t)) =
+      let (id, e) = narg in
+      let e' = print_expr_in_one_line e in
+      id ^ " := " ^ e'
 
     and print_member_binding_upd (x : AST.Prog.member_binding_upd_t) = 
       let (either_t, x_expr_t) = x in

@@ -377,10 +377,14 @@ module AST (M : MetaData) = struct
          NOTE: multiple indices (for multi-dimensional arrays) not (yet?) supported *)
       | Sel      of expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-argument-list-suffix *)
-      | ArgList  of expr_t list * M.arglist_t
+      | ArgList  of arglist_t * M.arglist_t
     [@@deriving show, eq]
 
     and member_binding_upd_t = (id_t, int) Either.t * expr_t
+
+    and arglist_t =
+      { positional: expr_t list
+      ; named: (id_t * expr_t) list }
 
     and seq_display_t =
       | SeqEnumerate of expr_t list
@@ -465,6 +469,30 @@ module AST (M : MetaData) = struct
       List.fold_left
         (fun qid id -> Suffixed (qid, AugDot (Common.DSId id, [])))
         (NameSeg (hd, [])) tl
+
+    (* Argument lists *)
+    type pseudo_arglist_t = (id_t option * expr_t) list
+    [@@deriving show, eq]
+
+    let coerce_arglist (args: pseudo_arglist_t): arglist_t =
+      let rec aux_name acc_pos acc_name = function
+        | [] -> (acc_pos, acc_name)
+        | (Some id, expr) :: args ->
+          aux_name acc_pos ((id, expr) :: acc_name) args
+        | _ :: _ ->
+          failwith
+            "Syntax.AST.ArgList.coerce: positional arguments must come before named ones"
+      in
+      let rec aux acc_pos = function
+        | [] -> (acc_pos, [])
+        | (None, expr) :: args ->
+          aux (expr :: acc_pos) args
+        | _ :: _ as args ->
+          aux_name acc_pos [] args
+      in
+      let (positional, named) = aux [] args in
+      { positional = List.rev positional
+      ; named      = List.rev named }
   end
 
   module TopDecl = struct

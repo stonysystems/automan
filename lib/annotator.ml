@@ -164,32 +164,41 @@ let rec annotate_expr
         Lemma {lem = lem'; e = body'})
 
 and annotate_expr_arglist
-    (f: ParserPass.Prog.expr_t) (args: ParserPass.Prog.expr_t list) (anns: Annotation.toplevel_t)
+    (f: ParserPass.Prog.expr_t) (args: ParserPass.Prog.arglist_t) (anns: Annotation.toplevel_t)
   : AnnotationPass.Prog.expr_t Resolver.m =
   (* NOTE: This pass does not try to determine if the usages of predicates
      are sensible; it only tries to make sure that every invocation in the
      AST of a predicate the user has annotated is decorated with that annotation *)
-    let<* args' =
-      StateError.mapM (fun a -> annotate_expr a anns) args in
-    match ParserPass.Prog.maybe_to_qualified_id f with
-    | None ->
-      (* `f` is not a qualified identifier, so we couldn't hope to know what the
+  let (args_pos, args_named) = (args.positional, args.named) in
+  let<* args_pos' =
+    StateError.mapM (fun a -> annotate_expr a anns) args_pos in
+  let<* args_named' =
+    StateError.mapM begin function (id, a) ->
+      let<* a' = annotate_expr a anns in
+      StateError.return (id, a')
+    end args_named
+  in
+  let args': AnnotationPass.Prog.arglist_t =
+    { positional = args_pos' ; named = args_named' } in
+  match ParserPass.Prog.maybe_to_qualified_id f with
+  | None ->
+    (* `f` is not a qualified identifier, so we couldn't hope to know what the
          intended annotations are without type analysis *)
-      let<* f' = annotate_expr f anns in
-      StateError.return AnnotationPass.Prog.(
-          Suffixed (f', ArgList (args', None)))
-    | Some qf_id ->
-      (* `f` is a qualified identifier, so did the user provide an annotation
+    let<* f' = annotate_expr f anns in
+    StateError.return AnnotationPass.Prog.(
+        Suffixed (f', ArgList (args', None)))
+  | Some qf_id ->
+    (* `f` is a qualified identifier, so did the user provide an annotation
          for it? *)
-      let f' = AnnotationPass.Prog.from_qualified_id qf_id in
-      let<* maybe_p_ann = Resolver.maybe_find_predicate qf_id anns in
-      match maybe_p_ann with
-      | None ->
-        (* No annotation found for `f`, so treat it as before *)
-        StateError.return AnnotationPass.Prog.(
+    let f' = AnnotationPass.Prog.from_qualified_id qf_id in
+    let<* maybe_p_ann = Resolver.maybe_find_predicate qf_id anns in
+    match maybe_p_ann with
+    | None ->
+      (* No annotation found for `f`, so treat it as before *)
+      StateError.return AnnotationPass.Prog.(
           Suffixed (f', (ArgList (args', None))))
-      | Some (_, p_modes) ->
-        StateError.return AnnotationPass.Prog.(
+    | Some (_, p_modes) ->
+      StateError.return AnnotationPass.Prog.(
           Suffixed (f', ArgList (args', Some (qf_id, p_modes))))
 
 and annotate_case_branch
