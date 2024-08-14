@@ -422,7 +422,7 @@ module PrettyPrinter (M : MetaData) = struct
               let fmls' = List.map print_formal fmls in 
               String.concat (", " ^ idnt_str) fmls'
             )
-            idnt_str
+            (get_indt_str_with_new_line (idnt_lvl - 1))
         )
 
     let print_datatype 

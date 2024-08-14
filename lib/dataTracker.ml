@@ -68,7 +68,7 @@ object (self)
       end
     | h :: _ -> begin
         let prefix_expr = 
-          TranslatorCommon.convert_expr_lst_to_dot_expr prefix_list in
+          TranslatorCommon.expr_lst_to_dot_expr prefix_list in
         (* TranslatorCommon.debug_print_expr prefix_expr; *)
         (* checking *)
         assert (
@@ -92,7 +92,7 @@ object (self)
       TranslatorCommon.move_one_expr_from_suffix_to_prefix 
         prefix_list suffix_list in 
     let prefix_expr = 
-      TranslatorCommon.convert_expr_lst_to_dot_expr prefix_list in
+      TranslatorCommon.expr_lst_to_dot_expr prefix_list in
     match suffix_list with
     | [] -> begin
         (* checking *)
@@ -133,12 +133,12 @@ object (self)
   TranslatorCommon.move_one_expr_from_suffix_to_prefix 
     prefix_list suffix_list in 
   let prefix_expr = 
-    TranslatorCommon.convert_expr_lst_to_dot_expr prefix_list in
+    TranslatorCommon.expr_lst_to_dot_expr prefix_list in
   let rec replace_dot_expr_starts_with_s' 
     (e : AST.Prog.expr_t) : AST.Prog.expr_t = 
     (* TranslatorCommon.debug_print_expr e; *)
     if (TranslatorCommon.is_expr_tp_aug_dot e) then
-      let e_lst = TranslatorCommon.convert_dot_expr_to_expr_lst e in
+      let e_lst = TranslatorCommon.dot_expr_to_expr_lst e in
       let e_lst = NonEmptyList.coerce e_lst in 
       let h, rest = NonEmptyList.uncons e_lst in
       match (TranslatorCommon.is_expr_eq h s') with

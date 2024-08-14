@@ -40,12 +40,12 @@ let test3 =
       Internal.NonEmptyList.coerce (
         [
           (let x : (Syntax.id_t, int) Either.t = Left "a" in x,
-            TranslatorCommon.convert_expr_lst_to_dot_expr [
+            TranslatorCommon.expr_lst_to_dot_expr [
               (id_to_expr "s'");
               (id_to_expr "a")
             ]);
           (let x : (Syntax.id_t, int) Either.t = Left "b" in x,
-            TranslatorCommon.convert_expr_lst_to_dot_expr [
+            TranslatorCommon.expr_lst_to_dot_expr [
               (id_to_expr "s");
               (id_to_expr "b")
             ]);
