@@ -1,5 +1,45 @@
 #+OPTIONS: toc:nil num:nil
 
+* Terminology
+- *functionalizing translation* (or just *functionalization*) is the main work
+  we are performing: turning a relation into a functional implementation
+- *remapping translation* (or just *remapping*) straightforwardly renames the
+  types, datatype constructors, etc of the specificational expression to their
+  implementation versions but otherwise closely preserves the semantics of the
+  original expression
+
+  Expressions are *remappable* only when they do not contain output-moded
+  variables or invocations of predicates to be functionalized
+
+* Predicate declaration
+
+The annotations attached to a predicate declaration will indicate:
+- whether this predicate is to be *remapped* or *functionalized* or a *functionalized stub*
+  - if *functionalized*, a partition (order-preserving) of the parameter list
+    into the inputs and outputs of the functionalized result
+
+    and maybe some information about the structure of the types of the
+    parameters, when those types contain names (e.g., declaration attached to a
+    datatype)
+  - if *functional stub*, no body will be generated
+- in the remapped and functionalized, an =ensures= clause will need to be added relating the
+  translated code to the spec
+  - remapping: equivalence modulo abstractification
+  - functionalization:
+    - at the very least, the outputs of the functionalized code satisfy the predicate
+    - uniqueness? (might be better suited for the user to provide on the original spec)
+
+Translation steps:
+- rename predicate
+- map spec types to impl types in signature
+- remapping for requires/ensures
+- add contracts relating spec to impl
+- translate body (if not functional stub)
+
+*NOTE* its TBD whether one of the prior passes will augment predicates with an
+expression assembled from the conjuncts that are fully remappable (i.e., just
+conditions on input-moded variables).
+
 * Predicate bodies
 
 - Input:
@@ -10,16 +50,6 @@
     them or their members or members' members, etc. Initially no solutions)
 
 
-- *Terminology*
-  - *functionalizing translation* (or just *functionalization*) is the main work
-    we are performing: turning a relation into a functional implementation
-  - *remapping translation* (or just *remapping*) straightforwardly renames the
-    types, datatype constructors, etc of the specificational expression to their
-    implementation versions but otherwise closely preserves the semantics of the
-    original expression
-
-    Expressions are *remappable* only when they do not contain output-moded
-    variables or invocations of predicates to be functionalized
 ** =functionalize_expr=
 
 Pattern match on the expression
@@ -46,14 +76,17 @@ Pattern match on the expression
     recursively rename constructors in the patterns; this will not be the same
     remapping function as for expressions) and =defs=, producing a new =let= expression
 
+    - *NOTE:* some additional thought is needed here if =pats= contains datatype
+      constructors for which the user has requested indirection. Maybe some
+      "unabstractify" calls?
+
 - *StmtInExpr* and *Lemma* will receive future support, throw an exception if encountered
   (an earlier mode analysis pass should catch it)
 
 - *catchall:*
   - convert the expression to a list of conjuncts and invoke
-    *functionalize_conjunct* on each, in order, propagating solutions to output-moded variables
-
-    Subsequent conjucts may depend on preceding conjucts for solutions
+    *functionalize_conjunct* on each, in order, propagating solutions to
+    output-moded variables
 
   - return the output variable sets with solutions (function body will be
     generated when we process top-level declarations like predicates)
@@ -68,7 +101,11 @@ Pattern match on the expression
         (nonempty list of ids), to remap
       - the annotation contains the separated input-moded argument list and
         output-moded argument (nonempty) list, in the order they are supposed to
-        appear. The output list has the types attached to the output variables
+        appear.
+
+        Its desirable also that the output list has the types attached to the
+        output variables, but that requires a rework of the annotation pass
+
         - and the output-moded argument list is a non-empty list of qualified
           (by member access) names.
         - and there are no conflicts in the output list (2 occurrences of the
@@ -76,8 +113,9 @@ Pattern match on the expression
           predicate call)
 
       Note that, if there are more than one outputs, the functionalized call is
-      going to be returning a tuple. I proposed that you implement this with a
-      local let binding in the translated code.
+      going to be returning a tuple. I proposed that you implement this (in
+      general, not just for multi-outputs) with a local let binding in the
+      translated code.
       #+begin_src
         var res_PName_Impl = PName_Impl(input_vars...); ...
       #+end_src
@@ -104,6 +142,9 @@ Pattern match on the expression
       - *NOTE:* mode analysis will mark the toplevel predicate declaration as
         untranslatable (earlier in the pipeline) if this expression neither
         functionalizes nor is suitable as a requirement.
+      - *NOTE:* if the predicate declaration comes with information saying what
+        condition should be a requires clause, you will be able to just skip
+        this conjunct.
 
   - Encountering any other suffix should produce an error (the mode analysis
     should have caught this as untranslatable)
@@ -122,8 +163,9 @@ Pattern match on the expression
       else branches have two different predicate calls, the order of the output
       arguments might not match the order present in the annotation)
     - your functionalization code should recursively functionalize both branches
-      (where you only care about generating assignments for =assigned_vars=),
-      then wrap these like so:
+      (with =functionalize_expr=, not =functionalize_expr_conj=), where you only
+      care about generating assignments for =assigned_vars=, then wrap these
+      like so in the functionalized code:
       #+begin_src dafny
         var $(NonEmptyList.map make_local assigned_vars) := (
           if ($(remap guard)) then {
@@ -142,7 +184,7 @@ Pattern match on the expression
       functionalize for the of the if-then-else expression
 
   - *otherwise* (its a requirement on inputs)
-    record this as a requires clause
+    record this as a requires clause (or skip, depending on how we're handling this)
 - =Match (scrut, case_tree)=
 
   Match expressions are similar to if-then-else. There will be an annotation on
@@ -165,7 +207,7 @@ Pattern match on the expression
 
   - mode analysis will *guarantee* an annotation indicating whether this is
     /functionalizable/ or a requirement on inputs
-    - if a requirement, record as requires clause
+    - if a requirement, record as requires clause (or skip, depending)
   - check =qt : Common.quantifier_t= to see if its =Forall= or =Exists= if its
     =Exists=, emit an error (the enclosing predicate should have been marked as
     needing to be generated as a stub)
@@ -180,38 +222,45 @@ Pattern match on the expression
 - =Binary (bop, e1, e2)=
   - mode analysis will *guarantee* an annotation indicating whether this is
     functionalizable or a requirement on inputs
-    - if the latter, record it as a requires clause
-  - match on =bop=:
-    - if it isn't =Eq=, the emit an error (mode analysis should have caught
-      this)
+    - if the latter, record it as a requires clause (or skip, depending)
+  - if *functionalizable*
+    - match on =bop=:
+      - if it isn't =Eq=, the emit an error (mode analysis should have caught
+        this)
 
-      Note that it shouldn't be =And= either, since we turned the original
-      expression into a list of conjuncts
-    - if it is =Eq=, then mode analysis will *guarantee* an annotation indicating
-      whether this is /functionalizable/ or a constraint on inputs
-      - if its a constraint on inputs, record as an requires clause
-    - if functionalizable, the annotation will include
+        Note that it shouldn't be =And= either, since we turned the original
+        expression into a list of conjuncts
+      - if it is =Eq=, then mode analysis will *guarantee* an annotation indicating
       - =isLhs: bool=, indicating whether the assignee is the lhs or rhs
       - =qid: id_t NonEmptyList.t=, the (member-access qualified) identifier of
         the output variable
       - an additional annotation indicating whether the output variable is under
-        some other operation that the translator understands (for now, just length)
+        some other operation that the translator understands (for now, just
+        length)
         - if it is length, expect to do nothing for now: another mode pass is
-          responsible for recording length information for collections and using
-          that to build comprehensions
+          responsible for adding annotations that record length information for
+          collections and using that to build comprehensions
       - if the last annotation indicates this equality is constraining the
         output var =qid= directly, add this as an assignment
 - =NameSeg= -> error, mode analysis should have caught it
-- =Lambda= -> error, ...
+
+  *TODO:* need to reconsider for datatype discriminators... something like
+  =s'.Cons?= tells you how to build =s'=
+- =Lambda= -> error (type incorrect), ...
 - =MapDisplay= -> error, ...
 - =SeqDisplay= -> error, ...
 - =SetDisplay= -> error, ...
 - =StmtInExpr= -> error (this is a TODO for now)
 - =Lit= -> error, mode analysis should have caught it
+
+  *NOTE:* We should be removing =true=, bailing out on =false=
 - =This= -> error, ...
 - =Cardinality= -> error, ...
 - =Tuple= -> error, ...
 - =Unary= -> error, ...
+
+  *TODO* again, reconsider for logical equivalences (not not equal), datatype
+  discriminators
 - =Lemma=
 
   recursively functionalize the main expression, and drop the lemma invocation
