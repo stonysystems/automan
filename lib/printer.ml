@@ -119,7 +119,7 @@ module PrettyPrinter (M : MetaData) = struct
         (print h), rest
       in
       match x with
-      | TpName (name_seg_t_lst, _) -> (
+      | TpName (_, name_seg_t_lst) -> (
           let (_, h) = Internal.NonEmptyList.unsnoc name_seg_t_lst in
           match h with | TpIdSeg tp_id_seg ->
             let (id, gen_inst) = (tp_id_seg.id, tp_id_seg.gen_inst) in
@@ -428,7 +428,7 @@ module PrettyPrinter (M : MetaData) = struct
     let print_datatype 
       (x : AST.TopDecl.datatype_t) (idnt_lvl : int) = 
       let idnt_str = get_indt_str_with_new_line idnt_lvl in
-      let attrs, id, gen_params, ctors = x in
+      let _, attrs, id, gen_params, ctors = x in
       let ctors = NonEmptyList.as_list ctors in
       let _ = gen_params in (* How to print gen_params ? *)
       Printf.sprintf "datatype %s%s = %s%s"

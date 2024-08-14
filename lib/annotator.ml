@@ -10,9 +10,36 @@ open struct
   let ( let<* ) = StateError.bind
 end
 
+(** BEGIN types *)
+(* NOTE: Types are annotated with any user-declared aliases that are in scope *)
+let rec annotate_type (tp: ParserPass.Type.t)
+  : AnnotationPass.Type.t Resolver.m =
+  match tp with
+  | TpName (_, nsegs) ->
+    let<* t_ann = Resolver.maybe_find_tp_alias tp in
+    let<* nsegs' =
+      StateError.(
+        map NonEmptyList.coerce
+          (mapM annotate_tp_name_seg (NonEmptyList.as_list nsegs))) in
+    StateError.return
+      AnnotationPass.Type.(
+        TpName (t_ann, nsegs'))
+  | TpTup tps ->
+    let<* tps' = StateError.mapM annotate_type tps in
+    StateError.return
+      AnnotationPass.Type.(
+        TpTup tps')
+
+and annotate_tp_name_seg (nseg: ParserPass.Type.name_seg_t)
+  : AnnotationPass.Type.name_seg_t Resolver.m =
+  let ParserPass.Type.TpIdSeg { id = id; gen_inst = tp_ps} = nseg in
+  let<* tp_ps' = StateError.mapM annotate_type tp_ps in
+  StateError.return AnnotationPass.Type.(TpIdSeg { id = id; gen_inst = tp_ps'})
+
+(** END types *)
 
 (* BEGIN expressions
-   NOTE: for now, this does nothing
+   NOTE: for now, this erases all annotations
 *)
 let attribute_handler (_: ParserPass.Prog.attribute_t list)
   : AnnotationPass.Prog.attribute_t list
@@ -29,8 +56,9 @@ let rec annotate_expr
         annotate_expr_arglist e args anns
       | AugDot (dotsuf, tp_inst) ->
         let<* e' = annotate_expr e anns in
+        let<* tp_inst' = StateError.mapM annotate_type tp_inst in
         StateError.return AnnotationPass.Prog.(
-          Suffixed (e', AugDot (dotsuf, List.map Convert.typ tp_inst)))
+          Suffixed (e', AugDot (dotsuf, tp_inst')))
       | DataUpd upds ->
         let<* e' = annotate_expr e anns in
         let<* upds' =
@@ -66,12 +94,20 @@ let rec annotate_expr
           Suffixed (e', Sel idx'))
     end
   | NameSeg (id, tp_inst) ->
+    let<* tp_inst' = StateError.mapM annotate_type tp_inst in
     StateError.return
-      (AnnotationPass.Prog.NameSeg (id, List.map Convert.typ tp_inst))
+      (AnnotationPass.Prog.NameSeg (id, tp_inst'))
   | Lambda (params, body) ->
     let<* body' = annotate_expr body anns in
-    let params' =
-      List.map (function (id, tp) -> (id, Option.map Convert.typ tp)) params in
+    (* TODO: "how do you solve a problem like a lambda?" *)
+    let<* params' =
+      StateError.mapM
+        begin function (id, tp) ->
+          let<* tp' = StateError.mapM_option annotate_type tp in
+          StateError.return (id, tp')
+        end
+        params
+    in
     StateError.return
       AnnotationPass.Prog.(Lambda (params', body'))
   | MapDisplay es ->
@@ -88,7 +124,7 @@ let rec annotate_expr
         let<* es' = StateError.mapM (fun e -> annotate_expr e anns) es in
         StateError.return AnnotationPass.Prog.(SeqEnumerate es')
       | SeqTabulate {gen_inst = tps; len = l; func = f} ->
-        let tps' = List.map Convert.typ tps in
+        let<* tps' = StateError.mapM annotate_type tps in
         let<* l' = annotate_expr l anns in
         let<* f' = annotate_expr f anns in
         StateError.return AnnotationPass.Prog.(
@@ -125,7 +161,7 @@ let rec annotate_expr
     let<* e' = annotate_expr e anns in
     StateError.return AnnotationPass.Prog.(StmtInExpr (stmt', e'))
   | Let {ghost = ghost; pats = pats; defs = defs; body = body} ->
-    let pats' = NonEmptyList.map Convert.pattern pats in
+    let pats' = NonEmptyList.map (Convert.pattern (fun _ -> None)) pats in
     let<* defs' = StateError.mapM (fun e -> annotate_expr e anns) (NonEmptyList.as_list defs) in
     let<* body' = annotate_expr body anns in
     StateError.return AnnotationPass.Prog.(
@@ -197,7 +233,7 @@ and annotate_case_branch
   : AnnotationPass.Prog.case_expr_t Resolver.m =
   let Case (attrs, epat, body) = branch in
   let attrs' = attribute_handler attrs in
-  let epat' = Convert.extended_pattern epat in
+  let epat' = Convert.extended_pattern (fun _ -> None) epat in
   let<* body' = annotate_expr body anns in
   StateError.return AnnotationPass.Prog.(
     Case (attrs', epat', body'))
@@ -209,7 +245,7 @@ and annotate_quantifier_domain
   let<* qvars' =
     StateError.mapM
       (function ParserPass.Prog.QVar (id, tp, col_dom, attrs) ->
-         let tp' = Option.map Convert.typ tp in
+         let tp' = Option.map (Convert.typ (fun _ -> None)) tp in
          let<* col_dom' =
            StateError.mapM_option (fun e -> annotate_expr e anns) col_dom in
          let attrs' = attribute_handler attrs in
@@ -295,7 +331,7 @@ and annotate_stmt
     let annotate_stmt_var_decl_id_lhs
         (id: ParserPass.Prog.var_decl_id_lhs_t)
         : AnnotationPass.Prog.var_decl_id_lhs_t =
-      let tp' = Option.map Convert.typ id.tp in
+      let tp' = Option.map (Convert.typ (fun _ -> None)) id.tp in
       let attrs' = attribute_handler id.attrs in
       {id = id.id; tp = tp'; attrs = attrs'}
     in
@@ -345,18 +381,54 @@ and annotate_stmt_case
     (branch: ParserPass.Prog.stmt_case_t) (anns: Annotation.toplevel_t)
   : AnnotationPass.Prog.stmt_case_t Resolver.m =
   let (epats, body) = branch in
-  let epats' = Convert.extended_pattern epats in
+  let epats' = Convert.extended_pattern (fun _ -> None) epats in
   let<* body' = annotate_stmt_block body anns in
   StateError.return (epats', body')
 (* END statements *)
 
 (* BEGIN TopDecls (utilities) *)
-(* let annotate_formal *)
-(*     (p: ParserPass.TopDecl.formal_annotated_t) (m: Annotation.mode_t) *)
-(*     : AnnotationPass.TopDecl.formal_annotated_t = *)
-(*   let (Formal (id, tp), ()) = p in *)
-(*   (Formal (id, Convert.typ tp), m) *)
-(* END TopDecls (utilities) *)
+let annotate_formal_parameter (p: ParserPass.TopDecl.formal_t)
+  : AnnotationPass.TopDecl.formal_t Resolver.m =
+  let Formal (p_id, p_tp) = p in
+  let<* p_tp' = annotate_type p_tp in
+  StateError.return
+    AnnotationPass.TopDecl.(Formal (p_id, p_tp'))
+
+let annotate_datatype_ctor (ctor: ParserPass.TopDecl.datatype_ctor_t)
+  : AnnotationPass.TopDecl.datatype_ctor_t Resolver.m =
+  let DataCtor (ctor_attrs, ctor_id, ctor_ps) = ctor in
+  let ctor_attrs' = attribute_handler ctor_attrs in
+  let<* ctor_ps = StateError.mapM annotate_formal_parameter ctor_ps in
+  StateError.return
+    AnnotationPass.TopDecl.(
+      DataCtor (ctor_attrs', ctor_id, ctor_ps))
+
+let annotate_datatype (d: ParserPass.TopDecl.datatype_t)
+  : AnnotationPass.TopDecl.datatype_t Resolver.m =
+  let ((), d_attrs, d_id, d_tp_ps, d_ctors) = d in
+  let d_attrs' = attribute_handler d_attrs in
+  let d_tp_ps': AnnotationPass.Type.generic_params_t = d_tp_ps in
+  let<* d_ctors' =
+    StateError.mapM annotate_datatype_ctor
+      (NonEmptyList.as_list d_ctors)
+  in
+  (* 1. if the datatype has type parameters, then only instances of it will get
+     indirection in the translation (Automan type aliases don't support
+     generics) *)
+  let<* d_ann = begin
+    if List.length d_tp_ps > 0 then
+      StateError.return None
+    else
+      (* 2. look for a local alias for this declaration *)
+      let<* d_local_alias =
+        Resolver.maybe_find_tp_alias_local_decl
+          ParserPass.Type.(simple d_id ())
+      in
+      StateError.return
+        Option.(map (function (id, _) -> id) d_local_alias)
+  end in
+  StateError.return
+    (d_ann, d_attrs', d_id, d_tp_ps', NonEmptyList.coerce d_ctors')
 
 let annotate_function_spec
     (spec: ParserPass.TopDecl.function_spec_t) (anns: Annotation.toplevel_t)
@@ -399,6 +471,8 @@ let annotate_method_spec
     let<* e' = annotate_expr e anns in
     StateError.return AnnotationPass.TopDecl.(
         MDecreases e')
+(* END TopDecls (utilities) *)
+
 
 let rec annotate_topdecl
   (anns: Annotation.toplevel_t) (d: ParserPass.TopDecl.t')
@@ -421,9 +495,9 @@ let rec annotate_topdecl
   (* Declarations that don't modify the namespace
      NOTE: assume an unknown function call is all input mode *)
   | ParserPass.TopDecl.DatatypeDecl dat ->
+    let<* dat' = annotate_datatype dat in
     StateError.return
-      (AnnotationPass.TopDecl.DatatypeDecl
-         (Convert.datatype attribute_handler dat))
+      (AnnotationPass.TopDecl.DatatypeDecl dat')
   | ParserPass.TopDecl.SynonymTypeDecl syn ->
     StateError.return
       (AnnotationPass.TopDecl.SynonymTypeDecl
@@ -447,8 +521,8 @@ let rec annotate_topdecl
   | ParserPass.TopDecl.PredFunDecl
       (Function (m_pres, attrs, id, tp_ps, ps, tp, specs, body)) ->
     let attrs' = attribute_handler attrs in
-    let ps' = List.map Convert.formal ps in
-    let tp' = Convert.typ tp in
+    let<* ps' = StateError.mapM annotate_formal_parameter ps in
+    let<* tp' = annotate_type tp in
     let<* specs' =
       StateError.mapM
         (fun s -> annotate_function_spec s anns)
@@ -474,7 +548,7 @@ let rec annotate_topdecl
         p_ann
     end in
     let p_attrs' = attribute_handler p_attrs in
-    let p_params' = List.map Convert.formal p_params in
+    let<* p_params' = StateError.mapM annotate_formal_parameter p_params in
     let<* p_specs' =
       StateError.mapM (fun spec -> annotate_function_spec spec anns) p_specs in
     (* TODO: annotate predicate calls in expressions, too *)

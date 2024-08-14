@@ -48,7 +48,7 @@ tp:
   | t = tp_prim { t }
   | t = tp_tup  { t }
   | nss = separated_nonempty_list(DOT, tp_name_seg)
-    { Syntax.ParserPass.Type.TpName (Internal.NonEmptyList.coerce nss, ()) }
+    { Syntax.ParserPass.Type.TpName ((), Internal.NonEmptyList.coerce nss) }
 
 gen_inst:
   | tps = delimited(LANGLE, separated_nonempty_list(COMMA, tp), RANGLE) { tps }

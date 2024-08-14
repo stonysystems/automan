@@ -419,7 +419,7 @@ tp:
   | t = tp_prim { t }
   | t = tp_tup  { t }
   | nss = separated_nonempty_list(DOT, tp_name_seg)
-    { Syntax.ParserPass.Type.TpName (Internal.NonEmptyList.coerce nss, ()) }
+    { Syntax.ParserPass.Type.TpName ((), Internal.NonEmptyList.coerce nss) }
 
 gen_inst:
   | tps = delimited(LANGLE, separated_nonempty_list(COMMA, tp), RANGLE) { tps }
@@ -642,7 +642,7 @@ datatype_decl:
     d = ID; tp_ps = gen_params;
     SGEQ;
     ctors = datatype_ctors;
-    { (attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
+    { ((), attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
 
 /* TODO: declaration modifiers (abstract, ghost, static, opaque) */
 module_decl:

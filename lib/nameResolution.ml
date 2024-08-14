@@ -249,6 +249,24 @@ module NameSpace = struct
      TODO: Consider an alias, to be declared in the translation of the current
      module, for a datatype (also declared in this module) that appears after
      some predicates in which the target of the alias appears. *)
+  let maybe_find_tp_alias_local_decl (ns: t) (tp: ParserPass.Type.t)
+    : (Annotation.tp_alias_t option, string) Result.t =
+    match ns with
+    | TopLevel ->
+      Result.Error
+        ("NameResolution.NameSpace.maybe_find_tp_alias_local_decl: no local decls at the toplevel!\n"
+         ^ ParserPass.Type.(show tp))
+    | Module ns' ->
+      let< t_alias = TopLevel.maybe_find_tp_alias tp ns'.locals in
+      let ensure_is_local
+        : Annotation.qualified_tp_alias_t ->
+          Annotation.tp_alias_t option =
+        function (q_id, tp) ->
+          let (qs, id) = NonEmptyList.unsnoc q_id in
+          if List.length qs = 0 then Some (id, tp) else None
+      in
+      Result.Ok (Option.fold ~none:None ~some:ensure_is_local t_alias)
+
   let rec maybe_find_tp_alias (ns: t) (tp: ParserPass.Type.t)
       : (Annotation.qualified_tp_alias_t option, string) Result.t =
     match ns with
@@ -317,6 +335,15 @@ module Resolver = struct
   let maybe_find_tp_alias (tp: ParserPass.Type.t)
     : (Annotation.qualified_tp_alias_t option) m =
     StateError.gets (fun ns -> NameSpace.maybe_find_tp_alias ns tp)
+
+  let maybe_find_tp_alias_local_decl (tp: ParserPass.Type.t)
+    : (Annotation.tp_alias_t option) m =
+    StateError.map_error
+      ((^) "NameResolution.Resolver.maybe_find_tp_alias_local_decl:\n")
+      begin
+        StateError.gets (fun ns ->
+            NameSpace.maybe_find_tp_alias_local_decl ns tp)
+      end
 
   (** Returns `true` if the import is found, `false` otherwise *)
   let push_import

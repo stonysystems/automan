@@ -5,6 +5,7 @@ open Internal
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
   type predicate_decl_t [@@deriving show, eq]
+  type datatype_decl_t  [@@deriving show, eq]
   type type_t [@@deriving show, eq]
   type arglist_t [@@deriving show, eq]
 end
@@ -96,16 +97,16 @@ module AST (M : MetaData) = struct
 
     (* NOTE: no function types *)
     and t =
-      | TpName of name_seg_t NonEmptyList.t * M.type_t
+      | TpName of M.type_t * name_seg_t NonEmptyList.t
       (* NOTE: this representation allows singleton tuples; use the smart
          constructor *)
       | TpTup  of t list
     [@@deriving show, eq]
 
     let simple_generic (id: id_t) (gen_inst: t list) (t_ann: M.type_t) =
-      TpName (NonEmptyList.singleton
-                (TpIdSeg {id = id; gen_inst = gen_inst})
-             , t_ann)
+      TpName (t_ann
+             , NonEmptyList.singleton
+                (TpIdSeg {id = id; gen_inst = gen_inst}))
 
     let simple (id: id_t) (t_ann: M.type_t): t = simple_generic id [] t_ann
 
@@ -418,7 +419,8 @@ module AST (M : MetaData) = struct
     [@@deriving show, eq]
 
     type datatype_t =
-      Prog.attribute_t list
+      M.datatype_decl_t
+      * Prog.attribute_t list
       * id_t * Type.generic_params_t
       * datatype_ctor_t NonEmptyList.t
     [@@deriving show, eq]
@@ -537,13 +539,17 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
     M1.type_t -> M2.type_t
 
   let rec typ (tp_h: tp_handler_t) (tp: Src.Type.t) : Tgt.Type.t =
-    let aux_ns (ns: Src.Type.name_seg_t): Tgt.Type.name_seg_t =
-      let TpIdSeg {id = id; gen_inst = gen_inst} = ns in
-      TpIdSeg {id = id; gen_inst = List.map (typ tp_h) gen_inst}
-    in
     match tp with
     | TpTup tps -> TpTup (List.map (typ tp_h) tps)
-    | TpName (nss, t_ann) -> TpName (NonEmptyList.map aux_ns nss, tp_h t_ann)
+    | TpName (t_ann, nss) ->
+      TpName
+        ( tp_h t_ann
+        , NonEmptyList.map (typ_name_seg tp_h) nss)
+
+  and typ_name_seg (tp_h: tp_handler_t) (nsegs: Src.Type.name_seg_t)
+    : Tgt.Type.name_seg_t =
+    let TpIdSeg {id = id; gen_inst = gen_inst} = nsegs in
+    TpIdSeg {id = id; gen_inst = List.map (typ tp_h) gen_inst}
 
   let rec extended_pattern
       (tp_h: tp_handler_t) (pat: Src.Prog.extended_pattern_t)
@@ -604,10 +610,12 @@ end
 (* Parser pass (trivial meta-data) *)
 module TrivMetaData : MetaData
   with type predicate_decl_t  = unit
+  with type datatype_decl_t   = unit
   with type type_t            = unit
   with type arglist_t         = unit
 = struct
   type predicate_decl_t  = unit [@@deriving show, eq]
+  type datatype_decl_t   = unit [@@deriving show, eq]
   type type_t            = unit [@@deriving show, eq]
   type arglist_t         = unit [@@deriving show, eq]
 end
@@ -661,7 +669,8 @@ end
 
 module AnnotationMetaData : MetaData
   with type predicate_decl_t  = Annotation.mode_t list option
-  with type predicate_decl_t  = Annotation.mode_t list option
+  with type datatype_decl_t   = id_t option
+  with type type_t            = Annotation.qualified_tp_alias_t option
   with type arglist_t         = (id_t NonEmptyList.t * Annotation.mode_t list) option
 = struct
   (** - When this is Option.None, the user did not provide an annotation for
@@ -675,6 +684,25 @@ module AnnotationMetaData : MetaData
   type predicate_decl_t  = Annotation.mode_t list option
   [@@deriving show, eq]
 
+  (** - When this is Option.None, use the default strategy to translate the
+      datatype declaration
+
+      - When this is `Option.Some id`, the user intends to provide their own
+      implementation using name `id`, so translation should produce a stub
+      datatype with name `id` with conversions (abstractify and its inverse)
+      to/from the specifications
+  *)
+  type datatype_decl_t = id_t option
+  [@@deriving show, eq]
+
+  (** Type alias annotations are never present when
+      - the toplevel type expression has an annotation
+      - the type is attached to a local variable (conversions are only applied to input/output)
+  *)
+  type type_t = Annotation.qualified_tp_alias_t option
+  [@@deriving show, eq]
+
+
   (** - When this is Option.None, the call is not associated with a known
         predicate. For now, assume this means all arguments are input moded
 
@@ -682,10 +710,6 @@ module AnnotationMetaData : MetaData
         length as the argument list suffix, and the expression to which the
         call is attached is given the qualified identifier
   *)
-
-  type type_t = Annotation.qualified_tp_alias_t option
-  [@@deriving show, eq]
-
   type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
   [@@deriving show, eq]
 end
