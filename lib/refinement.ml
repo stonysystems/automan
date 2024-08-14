@@ -2,11 +2,11 @@ open Syntax
 open Internal
 
 
-module Refinement (M : MetaData) = struct
-  let remapper = new NameRemapper.name_remapper
+module AST = AnnotationPass
+module TCommon = TranslatorCommon.TranslatorCommon
 
-  module AST = AST(M)
-  module TCommon = TranslatorCommon.TranslatorCommon(M)
+module Refinement  = struct
+  let remapper = new NameRemapper.name_remapper
 
   let s_id = "s"
   let s = TCommon.expr_of_str s_id
@@ -32,17 +32,18 @@ module Refinement (M : MetaData) = struct
       | TpTup _ -> assert false
       | TpName name_seg_lst -> begin
         let name_seg, _ = NonEmptyList.uncons name_seg_lst in
-        let TpIdSeg {id = id; gen_inst = gen_inst} = name_seg in
+        let TpIdSeg {id = t_id; gen_inst = gen_inst} = name_seg in
         (
           match List.length gen_inst with 
           | 0 -> begin 
-            let t_id = remapper#id_remap id in
             [AST.Prog.Suffixed (
               is_valid_template t_id, 
               let e = 
                 TCommon.expr_lst_to_dot_expr 
                 [s; TCommon.expr_of_str fml_id] in
-              AST.Prog.ArgList (([e], ())))]
+                AST.Prog.ArgList (([e], None))
+              )
+            ]
           end
           | 1 -> begin (* id is set/seq or an alias to them *)
             let _, param_tp = List.unsnoc gen_inst in
@@ -50,20 +51,23 @@ module Refinement (M : MetaData) = struct
             match TCommon.is_primitive param_tp_id with 
             | true -> []
             | false -> [
-              (* (forall i :: i in s.last_checkpointed_operation ==> COperationNumberIsValid(i)) *)
               Quantifier {
                 qt = Syntax.Common.Forall;
                 qdom = QDom {
                   qvars = [QVar (i_id, None, None, [])];
-                  qrange = Some (AST.Prog.Binary (
+                  qrange = None
+                };
+                qbody = Binary (
+                  Syntax.Common.Implies,
+                  (AST.Prog.Binary (
                     Syntax.Common.In, 
                     i, 
                     TCommon.expr_lst_to_dot_expr 
-                      [s; TCommon.expr_of_str fml_id]));
-                };
-                qbody = Suffixed (
-                  is_valid_template i_id, 
-                  AST.Prog.ArgList ([i], ())
+                      [s; TCommon.expr_of_str fml_id])), 
+                  Suffixed (
+                    is_valid_template param_tp_id, 
+                    AST.Prog.ArgList ([i], None)
+                  )
                 );
               }
             ]
@@ -86,13 +90,11 @@ module Refinement (M : MetaData) = struct
     end
     | _ -> assert false
 
-  (* predicate CAcceptorIsValid(s : CAcceptor) *)
   let generate_is_valid_4_datatype (dtp : AST.TopDecl.datatype_t) = 
-    let _, id, _, ctors = dtp in
+    let _, t_id, _, ctors = dtp in
     let expr = generate_is_valid_4_ctors (NonEmptyList.as_list ctors) in
-    let t_id = remapper#id_remap id in
     AST.TopDecl.Predicate (
-      (), 
+      None, 
       false, 
       [], TCommon.expr_to_id (is_valid_template t_id), 
       [], [AST.TopDecl.Formal (s_id, TCommon.tp_of_id t_id)], 

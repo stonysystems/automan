@@ -1,13 +1,11 @@
 open Syntax
-open TranslatorCommon
-open DataTracker
 
+module AST = AnnotationPass
+module TranslatorCommon = TranslatorCommon.TranslatorCommon
+module DataTracker = DataTracker.DataTracker
 
-module MultiDataTracker (M : MetaData) = struct 
+module MultiDataTracker = struct 
 
-module AST = AST(M)
-module TranslatorCommon = TranslatorCommon(M)
-module DataTracker = DataTracker(M)
 module ExprMap = Map.Make(TranslatorCommon.Expr)
 
 class multi_data_tracker = 

@@ -4,7 +4,7 @@ open Lexing
 open TestCommon
 
 
-module Translator = Translator.Translator(Syntax.AnnotationMetaData)
+module Translator = Translator.Translator
 module Printer    = Printer.PrettyPrinter(Syntax.AnnotationMetaData)
 
 let main dafny_fn automan_fn () =

@@ -1,5 +1,4 @@
 open Syntax
-open Printer
 open Internal
 
 
@@ -38,9 +37,10 @@ open Internal
   * **************************************************************************
   *)
 
-module TranslatorCommon (M : MetaData) = struct 
-  module AST = AST(M)
-  module Printer = PrettyPrinter(M)
+module AST = AnnotationPass
+module Printer = Printer.PrinterAnnotation
+
+module TranslatorCommon = struct 
 
   let is_primitive id = 
     List.exists (fun x -> x = id)

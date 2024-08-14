@@ -507,3 +507,6 @@ module PrettyPrinter (M : MetaData) = struct
         (String.concat "\n" decls')
 
 end
+
+module PrinterAnnotation = PrettyPrinter(Syntax.AnnotationMetaData)
+

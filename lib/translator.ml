@@ -2,11 +2,12 @@ open Syntax
 open Internal
 
 
-module Translator (M : MetaData) = struct 
+module AST = AnnotationPass
+module Refinement = Refinement.Refinement
+
+module Translator = struct 
   let remapper = new NameRemapper.name_remapper
 
-  module AST = AST(M)
-  module Refinement = Refinement.Refinement(M)
   module Type = struct 
 
     let rec t_name_seg (x : AST.Type.name_seg_t) = 

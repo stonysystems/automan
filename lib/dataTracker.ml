@@ -3,10 +3,11 @@ open Internal
 open TranslatorCommon
 
 
-module DataTracker (M : MetaData) = struct
+module AST = AnnotationPass
+module TranslatorCommon = TranslatorCommon
 
-module AST = AST(M)
-module TranslatorCommon = TranslatorCommon(M)
+module DataTracker = struct
+
 module ExprMap = Map.Make(TranslatorCommon.Expr)
 
 class data_tracker 
