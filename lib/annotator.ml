@@ -1,6 +1,52 @@
 open Syntax
 open Internal
 
+module AnnotationMetaData : MetaData
+  with type predicate_decl_t  = Annotation.mode_t list option
+
+  with type ite_t            = unit
+  with type match_t          = unit
+  with type quantification_t = unit
+  with type binary_op_t      = unit
+
+  with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+= struct
+  (** - When this is Option.None, the user did not provide an annotation for
+        this predicate. For now, a sensible default is to assume all arguments are
+        input moded; however, since this might change it is desirable to
+        distinguish this case from the case where the user provides an explicit
+        annotation indicating all arguments should be input moded
+
+      - When this is Option.Some modes, `List.length modes` is exactly the arity
+        of the predicate *)
+  type predicate_decl_t  = Annotation.mode_t list option
+  [@@deriving show, eq]
+
+  type ite_t = unit
+  [@@deriving show, eq]
+
+  type match_t = unit
+  [@@deriving show, eq]
+
+  type quantification_t = unit
+  [@@deriving show, eq]
+
+  type binary_op_t = unit
+  [@@deriving show, eq]
+
+  (** - When this is Option.None, the call is not associated with a known
+        predicate. For now, assume this means all arguments are input moded
+
+      - When this is Option.Some, the mode list this contains has the same
+        length as the argument list suffix, and the expression to which the
+        call is attached is given the qualified identifier
+  *)
+  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+  [@@deriving show, eq]
+end
+
+module AnnotationPass = AST (AnnotationMetaData)
+
 module Convert  = Syntax.Convert (TrivMetaData) (AnnotationMetaData)
 module NameSpace = NameResolution.NameSpace
 module Resolver  = NameResolution.Resolver
@@ -99,27 +145,27 @@ let rec annotate_expr
   | SetDisplay es ->
     let<* es' = StateError.mapM (fun e -> annotate_expr e anns) es in
     StateError.return AnnotationPass.Prog.(SetDisplay es')
-  | If (guard, then_, else_) ->
+  | If ((), guard, then_, else_) ->
     let<* guard' = annotate_expr guard anns in
     let<* then_' = annotate_expr then_ anns in
     let<* else_' = annotate_expr else_ anns in
     StateError.return AnnotationPass.Prog.(
-        If (guard', then_', else_'))
-  | Match (scrut, tree) ->
+        If ((), guard', then_', else_'))
+  | Match ((), scrut, tree) ->
     let<* scrut' = annotate_expr scrut anns in
     let<* tree' = StateError.mapM (fun b -> annotate_case_branch b anns) tree in
     StateError.return AnnotationPass.Prog.(
-      Match (scrut', tree'))
-  | Quantifier {qt = qt; qdom = qdom; qbody = qbody} ->
+      Match ((), scrut', tree'))
+  | Quantifier ((), {qt = qt; qdom = qdom; qbody = qbody}) ->
     let<* qdom' = annotate_quantifier_domain qdom anns in
     let<* qbody' = annotate_expr qbody anns in
     StateError.return AnnotationPass.Prog.(
-        Quantifier {qt = qt; qdom = qdom'; qbody = qbody'})
-  | SetComp (qdom, e) ->
+        Quantifier ((), {qt = qt; qdom = qdom'; qbody = qbody'}))
+  | SetComp {qdom = qdom; body = body} ->
     let<* qdom' = annotate_quantifier_domain qdom anns in
-    let<* e' = StateError.mapM_option (fun e -> annotate_expr e anns) e in
+    let<* body' = StateError.mapM_option (fun e -> annotate_expr e anns) body in
     StateError.return AnnotationPass.Prog.(
-        SetComp (qdom', e'))
+        SetComp {qdom = qdom'; body = body'})
   | StmtInExpr (stmt, e) ->
     let<* stmt' = annotate_stmt_in_expr stmt anns in
     let<* e' = annotate_expr e anns in
@@ -152,11 +198,11 @@ let rec annotate_expr
   | Unary (uop, e) ->
     let<* e' = annotate_expr e anns in
     StateError.return AnnotationPass.Prog.(Unary (uop, e'))
-  | Binary (bop, e1, e2) ->
+  | Binary ((), bop, e1, e2) ->
     let<* e1' = annotate_expr e1 anns in
     let<* e2' = annotate_expr e2 anns in
     StateError.return AnnotationPass.Prog.(
-        Binary (bop, e1', e2'))
+        Binary ((), bop, e1', e2'))
   | Lemma {lem = lem; e = body} ->
     let<* lem' = annotate_expr lem anns in
     let<* body' = annotate_expr body anns in

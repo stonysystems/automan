@@ -249,14 +249,14 @@ module PrettyPrinter (M : MetaData) = struct
         let x_lst' = List.map print_expr_in_one_line x_lst in
         Printf.sprintf "{%s}" (String.concat ", " x_lst')
       )
-      | If (e1, e2, e3) -> (
+      | If (_, e1, e2, e3) -> (
         Printf.sprintf "if %s then %s %selse %s"
             (print_expr_in_one_line e1)
             (print_expr e2 (idnt_lvl + 1))
             idnt_str
             (print_expr e3 (idnt_lvl + 1))
       )
-      | Quantifier x -> (
+      | Quantifier (_, x) -> (
         Printf.sprintf "(%s %s :: %s)"
             (CommonPrinter.print_quantifier x.qt)
             (print_qdom x.qdom)
@@ -284,7 +284,7 @@ module PrettyPrinter (M : MetaData) = struct
       )
       | Lit x -> CommonPrinter.print_lit x 
       | Cardinality x -> Printf.sprintf "|%s|" (print_expr_in_one_line x)
-      | Binary (bop, expr_l, expr_r) -> (
+      | Binary (_, bop, expr_l, expr_r) -> (
         let get_bop_priority (bop : Common.bop_t) = 
           match bop with
           | Mul | Div | Mod -> 1
@@ -298,7 +298,7 @@ module PrettyPrinter (M : MetaData) = struct
         in
         let get_expr_priority (x : AST.Prog.expr_t) = 
           match x with
-          | Binary (bop, _, _) -> get_bop_priority bop
+          | Binary (_, bop, _, _) -> get_bop_priority bop
           | _ -> 0
         in
         let aux expr printer = 

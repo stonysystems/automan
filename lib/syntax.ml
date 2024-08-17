@@ -4,15 +4,35 @@ open Internal
 
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
+  (* Toplevel declarations *)
   type predicate_decl_t [@@deriving show, eq]
+  (* Expressions *)
+  type ite_t     [@@deriving show, eq]
+  type match_t   [@@deriving show, eq]
+  type quantification_t [@@deriving show, eq]
+  type binary_op_t [@@deriving show, eq]
+
+  (* Expression suffixes *)
   type arglist_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
   with type predicate_decl_t  = unit
+
+  with type ite_t            = unit
+  with type match_t          = unit
+  with type quantification_t = unit
+  with type binary_op_t      = unit
+
   with type arglist_t = unit
 = struct
   type predicate_decl_t  = unit [@@deriving show, eq]
+
+  type ite_t            = unit [@@deriving show, eq]
+  type match_t          = unit [@@deriving show, eq]
+  type quantification_t = unit [@@deriving show, eq]
+  type binary_op_t      = unit [@@deriving show, eq]
+
   type arglist_t = unit [@@deriving show, eq]
 end
 
@@ -51,32 +71,6 @@ module Annotation = struct
       anns
 end
 
-module AnnotationMetaData : MetaData
-  with type predicate_decl_t  = Annotation.mode_t list option
-  with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
-= struct
-  (** - When this is Option.None, the user did not provide an annotation for
-        this predicate. For now, a sensible default is to assume all arguments are
-        input moded; however, since this might change it is desirable to
-        distinguish this case from the case where the user provides an explicit
-        annotation indicating all arguments should be input moded
-
-      - When this is Option.Some modes, `List.length modes` is exactly the arity
-        of the predicate *)
-  type predicate_decl_t  = Annotation.mode_t list option
-  [@@deriving show, eq]
-
-  (** - When this is Option.None, the call is not associated with a known
-        predicate. For now, assume this means all arguments are input moded
-
-      - When this is Option.Some, the mode list this contains has the same
-        length as the argument list suffix, and the expression to which the
-        call is attached is given the qualified identifier
-  *)
-  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
-  [@@deriving show, eq]
-end
-
 (* Data that does not change during the different passes *)
 module Common = struct
   (* Literals *)
@@ -94,6 +88,10 @@ module Common = struct
     | DSRequires | DSReads
     | DSId  of id_t
     | DSDig of int (* NOTE: natural number*)
+  [@@deriving show, eq]
+
+  (* a.b.c *)
+  type member_qualified_name_t = id_t NonEmptyList.t
   [@@deriving show, eq]
 
   type uop_t = Neg | Not
@@ -115,7 +113,7 @@ module Common = struct
     | Equiv
   [@@deriving show, eq]
 
-  (* Quantifiers *)
+  (* Quantifications *)
   type quantifier_t = Forall | Exists
   [@@deriving show, eq]
 
@@ -255,20 +253,17 @@ module AST (M : MetaData) = struct
          https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-endless-expression *)
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-if-expression
          NOTE: no binding guards*)
-      | If of expr_t * expr_t * expr_t
+      | If of M.ite_t * expr_t * expr_t * expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-match-expression *)
-      | Match of expr_t * case_expr_t list
+      | Match of M.match_t * expr_t * case_expr_t list
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-quantifier-expression
          NOTE: Dafny 3 does not support per-variable quantifier ranges, so we
          aren't either *)
-      | Quantifier of
-          { qt : Common.quantifier_t
-          ; qdom : qdom_t
-          ; qbody : expr_t }
+      | Quantifier of M.quantification_t * quantification_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-set-comprehension-expression
          NOTE: no support for iset
          NOTE: no per-variable quantifier ranges *)
-      | SetComp of qdom_t * expr_t option
+      | SetComp of set_comp_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-statement-in-expression
          NOTE: that an expression follows the statement is part of the endless expression definition *)
       | StmtInExpr of stmt_in_expr_t * expr_t
@@ -282,7 +277,7 @@ module AST (M : MetaData) = struct
           ; body: expr_t }
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-map-comprehension-expression
          NOTE: imap not supported *)
-      | MapComp of { qdom: qdom_t; key: expr_t option; valu: expr_t }
+      | MapComp of map_comp_t
       (* const atom expressions: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-atomic-expression
          NOTE: no fresh, allocated, unchanged, old *)
       | Lit  of Common.lit_t
@@ -301,7 +296,7 @@ module AST (M : MetaData) = struct
          - as/is: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-as-is-expression
          - bitvector: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-bitvector-expression
       *)
-      | Binary of Common.bop_t * expr_t * expr_t
+      | Binary of M.binary_op_t * Common.bop_t * expr_t * expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-top-level-expression *)
       | Lemma of {lem: expr_t; e: expr_t}
     [@@deriving show, eq]
@@ -394,6 +389,20 @@ module AST (M : MetaData) = struct
           ; func: expr_t
           }
 
+    and quantification_t =
+      { qt: Common.quantifier_t
+      ; qdom: qdom_t
+      ; qbody: expr_t }
+
+    and map_comp_t =
+      { qdom: qdom_t
+      ; key: expr_t option
+      ; valu: expr_t }
+
+    and set_comp_t =
+      { qdom: qdom_t
+      ; body: expr_t option }
+
     and attribute_t = string * expr_t list
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-case-pattern
@@ -436,16 +445,24 @@ module AST (M : MetaData) = struct
 
     (** should only be called with relational operators that support chaining,
         and can be chained together *)
-    let rec chain_bop (e1: expr_t) (es: (Common.bop_t * expr_t) list): expr_t =
+    let rec chain_bop
+        (and_ann: M.binary_op_t) (e1: expr_t)
+        (es: (M.binary_op_t * Common.bop_t * expr_t) list)
+      : expr_t =
       match es with
       | [] -> e1
-      | [(o, e2)] -> Binary (o, e1, e2)
-      | (o, e2) :: es ->
-        let res = chain_bop e2 es in
-        Binary (And, Binary (o, e1, e2), res)
+      | [(ann, o, e2)] -> Binary (ann, o, e1, e2)
+      | (ann, o, e2) :: es ->
+        let res = chain_bop and_ann e2 es in
+        Binary (and_ann, And, Binary (ann, o, e1, e2), res)
 
-    let assoc_right_bop (o: Common.bop_t) (es: expr_t NonEmptyList.t): expr_t =
-      NonEmptyList.fold_right_1 (fun x y -> Binary (o, x, y)) es
+    let assoc_right_bop
+        (o_ann: M.binary_op_t) (o: Common.bop_t)
+        (es: expr_t NonEmptyList.t)
+      : expr_t =
+      NonEmptyList.fold_right_1
+        (fun x y -> Binary (o_ann, o, x, y))
+        es
 
     let foldl1 (f: expr_t -> expr_t -> expr_t) (es: expr_t list): expr_t =
       match es with
@@ -618,6 +635,8 @@ module AST (M : MetaData) = struct
   [@@deriving show, eq]
 end
 
+module ParserPass     = AST (TrivMetaData)
+
 module Convert (M1 : MetaData) (M2 : MetaData) = struct
   module Src = AST (M1)
   module Tgt = AST (M2)
@@ -684,5 +703,3 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
     }
 end
 
-module ParserPass     = AST (TrivMetaData)
-module AnnotationPass = AST (AnnotationMetaData)
