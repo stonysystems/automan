@@ -2,7 +2,7 @@ open Syntax
 open Internal
 
 module AnnotationMetaData : MetaData
-  with type predicate_decl_t  = Annotation.mode_t list option
+  with type predicate_decl_t = Annotation.mode_t list option
 
   with type ite_t            = unit
   with type match_t          = unit
