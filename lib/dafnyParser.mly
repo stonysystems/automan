@@ -379,8 +379,8 @@ member_binding_upd:
   | n = NUM; ASSIGN; e = expr(yeslem) { (Either.Right n, e) }
 
 parameter_binding:
-  | id = option(id = ID; ASSIGN { id }); arg = expr(yeslem)
-    { (id, arg) }
+  | e1 = expr(yeslem); e2 = option(ASSIGN; e2 = expr(yeslem) { e2 })
+    { (e1, e2) }
 
 call_suffix:
   | args = delimited(LPAREN, separated_list(COMMA, parameter_binding), RPAREN)

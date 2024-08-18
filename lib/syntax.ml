@@ -470,6 +470,11 @@ module AST (M : MetaData) = struct
       | init :: es ->
         List.fold_left f init es
 
+    let maybe_to_id (e: expr_t): id_t option =
+      match e with
+      | NameSeg (id, []) -> Some id
+      | _ -> None
+
     let maybe_to_qualified_id (e: expr_t): id_t NonEmptyList.t option =
       (* TODO: handle identifier dot suffixes with generic instantations *)
       let rec aux accum = function
@@ -488,21 +493,30 @@ module AST (M : MetaData) = struct
         (NameSeg (hd, [])) tl
 
     (* Argument lists *)
-    type pseudo_arglist_t = (id_t option * expr_t) list
+    type pseudo_arglist_t = (expr_t * expr_t option) list
     [@@deriving show, eq]
 
     let coerce_arglist (args: pseudo_arglist_t): arglist_t =
+      let here = "Syntax.AST.ArgList.coerce: " in
       let rec aux_name acc_pos acc_name = function
         | [] -> (acc_pos, acc_name)
-        | (Some id, expr) :: args ->
-          aux_name acc_pos ((id, expr) :: acc_name) args
+        | (expr_id, Some expr_arg) :: args ->
+          begin
+            match maybe_to_id expr_id with
+            | None ->
+              failwith begin
+                here
+                ^ "invalid parameter name: " ^ (show_expr_t expr_id)
+              end
+            | Some id ->
+              aux_name acc_pos ((id, expr_arg) :: acc_name) args
+          end
         | _ :: _ ->
-          failwith
-            "Syntax.AST.ArgList.coerce: positional arguments must come before named ones"
+          failwith (here ^ "positional arguments must come before named ones")
       in
       let rec aux acc_pos = function
         | [] -> (acc_pos, [])
-        | (None, expr) :: args ->
+        | (expr, None) :: args ->
           aux (expr :: acc_pos) args
         | _ :: _ as args ->
           aux_name acc_pos [] args
