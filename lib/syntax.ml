@@ -5,8 +5,9 @@ open Internal
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
   (* Toplevel declarations *)
-  type predicate_decl_t [@@deriving show, eq]
-  type datatype_decl_t  [@@deriving show, eq]
+  type predicate_decl_t    [@@deriving show, eq]
+  type datatype_decl_t     [@@deriving show, eq]
+  type synonym_type_decl_t [@@deriving show, eq]
 
   (* Types *)
   type type_t [@@deriving show, eq]
@@ -22,8 +23,9 @@ module type MetaData = sig
 end
 
 module TrivMetaData : MetaData
-  with type predicate_decl_t = unit
-  with type datatype_decl_t  = unit
+  with type predicate_decl_t    = unit
+  with type datatype_decl_t     = unit
+  with type synonym_type_decl_t = unit
 
   with type type_t = unit
 
@@ -34,8 +36,9 @@ module TrivMetaData : MetaData
 
   with type arglist_t = unit
 = struct
-  type predicate_decl_t  = unit [@@deriving show, eq]
-  type datatype_decl_t   = unit [@@deriving show, eq]
+  type predicate_decl_t    = unit [@@deriving show, eq]
+  type datatype_decl_t     = unit [@@deriving show, eq]
+  type synonym_type_decl_t = unit [@@deriving show, eq]
 
   type type_t = unit [@@deriving show, eq]
 
@@ -516,12 +519,13 @@ module AST (M : MetaData) = struct
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-type-definition
        NOTE: no type parameter characteristics, witness clauses *)
     type synonym_type_rhs_t =
-    | Synonym of Type.t
+      | Synonym of Type.t
       | Subset  of id_t * Type.t option * Prog.expr_t
     [@@deriving show, eq]
 
     type synonym_type_t =
-      { attrs: Prog.attribute_t list
+      { ann: M.synonym_type_decl_t
+      ; attrs: Prog.attribute_t list
       ; id: id_t
       ; params: Type.generic_params_t
       ; rhs: synonym_type_rhs_t
@@ -678,21 +682,21 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
   (*   (attr_handler attrs, id, tpparams *)
   (*   , NonEmptyList.map (datatype_ctor attr_handler) ctors) *)
 
-  let synonym_typ_rhs (tp_h: tp_handler_t) (rhs: Src.TopDecl.synonym_type_rhs_t)
-    : Tgt.TopDecl.synonym_type_rhs_t =
-    match rhs with
-    | Synonym tp -> Tgt.TopDecl.Synonym (typ tp_h tp)
-    | Subset (_, _, _) ->
-      failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs))
+  (* let synonym_typ_rhs (tp_h: tp_handler_t) (rhs: Src.TopDecl.synonym_type_rhs_t) *)
+  (*   : Tgt.TopDecl.synonym_type_rhs_t = *)
+  (*   match rhs with *)
+  (*   | Synonym tp -> Tgt.TopDecl.Synonym (typ tp_h tp) *)
+  (*   | Subset (_, _, _) -> *)
+  (*     failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs)) *)
 
-  let synonym_type
-      (attr_handler: attr_handler_t) (tp_h: tp_handler_t) (d: Src.TopDecl.synonym_type_t)
-    : Tgt.TopDecl.synonym_type_t =
-    { attrs = attr_handler d.attrs
-    ; id = d.id
-    ; params = d.params
-    ; rhs = synonym_typ_rhs tp_h d.rhs
-    }
+  (* let synonym_type *)
+  (*     (attr_handler: attr_handler_t) (tp_h: tp_handler_t) (d: Src.TopDecl.synonym_type_t) *)
+  (*   : Tgt.TopDecl.synonym_type_t = *)
+  (*   { attrs = attr_handler d.attrs *)
+  (*   ; id = d.id *)
+  (*   ; params = d.params *)
+  (*   ; rhs = synonym_typ_rhs tp_h d.rhs *)
+  (*   } *)
 end
 
 (* AutoMan annotations *)

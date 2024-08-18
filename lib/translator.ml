@@ -71,6 +71,9 @@ module TranslationMetaData : MetaData
   type datatype_decl_t = Annotator.AnnotationMetaData.datatype_decl_t
   [@@deriving show, eq]
 
+  type synonym_type_decl_t = Annotator.AnnotationMetaData.synonym_type_decl_t
+  [@@deriving show, eq]
+
   type type_t = Annotator.AnnotationMetaData.type_t
   [@@deriving show, eq]
 

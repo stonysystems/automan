@@ -2,8 +2,9 @@ open Syntax
 open Internal
 
 module AnnotationMetaData : MetaData
-  with type predicate_decl_t = Annotation.mode_t list option
-  with type datatype_decl_t  = id_t option
+  with type predicate_decl_t    = Annotation.mode_t list option
+  with type datatype_decl_t     = id_t option
+  with type synonym_type_decl_t = id_t option
 
   with type type_t = Annotation.qualified_tp_alias_t option
 
@@ -26,6 +27,9 @@ module AnnotationMetaData : MetaData
   [@@deriving show, eq]
 
   type datatype_decl_t  = id_t option
+  [@@deriving show, eq]
+
+  type synonym_type_decl_t = id_t option
   [@@deriving show, eq]
 
   type type_t = Annotation.qualified_tp_alias_t option
@@ -458,6 +462,22 @@ let annotate_formal_parameter (p: ParserPass.TopDecl.formal_t)
   StateError.return
     AnnotationPass.TopDecl.(Formal (p_id, p_tp'))
 
+let annotate_type_id_for_alias
+    (t_id: id_t) (t_tp_ps: ParserPass.Type.generic_params_t)
+  : (id_t option) Resolver.m =
+  (* 1. if the declared type has type parameters, then only instances of it can
+     have indirection (Automan doesn't support parameterized type aliases) *)
+  if List.length t_tp_ps > 0 then
+    StateError.return None
+  else
+    (* 2. loook for a local alias for this declaration *)
+    let<* t_local_alias =
+      Resolver.maybe_find_tp_alias_local_decl
+        ParserPass.Type.(simple t_id ())
+    in
+    StateError.return
+      Option.(map (function (id, _) -> id) t_local_alias)
+
 let annotate_datatype_ctor (ctor: ParserPass.TopDecl.datatype_ctor_t)
   : AnnotationPass.TopDecl.datatype_ctor_t Resolver.m =
   let DataCtor (ctor_attrs, ctor_id, ctor_ps) = ctor in
@@ -476,23 +496,32 @@ let annotate_datatype (d: ParserPass.TopDecl.datatype_t)
     StateError.mapM annotate_datatype_ctor
       (NonEmptyList.as_list d_ctors)
   in
-  (* 1. if the datatype has type parameters, then only instances of it will get
-     indirection in the translation (Automan type aliases don't support
-     generics) *)
-  let<* d_ann = begin
-    if List.length d_tp_ps > 0 then
-      StateError.return None
-    else
-      (* 2. look for a local alias for this declaration *)
-      let<* d_local_alias =
-        Resolver.maybe_find_tp_alias_local_decl
-          ParserPass.Type.(simple d_id ())
-      in
-      StateError.return
-        Option.(map (function (id, _) -> id) d_local_alias)
-  end in
+  let<* d_ann = annotate_type_id_for_alias d_id d_tp_ps in
   StateError.return
     (d_ann, d_attrs', d_id, d_tp_ps', NonEmptyList.coerce d_ctors')
+
+let annotate_type_synonym (syn: ParserPass.TopDecl.synonym_type_t)
+  : AnnotationPass.TopDecl.synonym_type_t Resolver.m =
+  let (t_id, t_tp_ps, t_rhs) = (syn.id, syn.params, syn.rhs) in
+  let t_attrs' = attribute_handler syn.attrs in
+  let t_tp_ps': AnnotationPass.Type.generic_params_t = t_tp_ps in
+  let<* t_rhs' = begin
+    match t_rhs with
+    | Synonym t_rhs_tp ->
+      StateError.map
+        (fun x -> AnnotationPass.TopDecl.Synonym x)
+        (annotate_type t_rhs_tp)
+    | Subset (_, _, _) ->
+      failwith "Annotator.annotate_type_synonym: TODO subset types unsupported"
+  end in
+  let<* t_ann = annotate_type_id_for_alias t_id t_tp_ps in
+  StateError.return
+    AnnotationPass.TopDecl.(
+      { ann = t_ann
+      ; attrs = t_attrs'
+      ; id = t_id
+      ; params = t_tp_ps'
+      ; rhs = t_rhs' })
 
 let annotate_function_spec
     (spec: ParserPass.TopDecl.function_spec_t) (anns: Annotation.toplevel_t)
@@ -562,17 +591,26 @@ let rec annotate_topdecl
     let<* dat' = annotate_datatype dat in
     StateError.return
       (AnnotationPass.TopDecl.DatatypeDecl dat')
-  | ParserPass.TopDecl.SynonymTypeDecl _ ->
-    assert false
+  | ParserPass.TopDecl.SynonymTypeDecl syn ->
+    let<* syn' = annotate_type_synonym syn in
+    StateError.return
+      AnnotationPass.TopDecl.(SynonymTypeDecl syn')
     (* StateError.return *)
     (*   (AnnotationPass.TopDecl.SynonymTypeDecl *)
     (*      (Convert.synonym_type attribute_handler syn)) *)
   | ParserPass.TopDecl.MethLemDecl
       { sort = sort; attrs = attrs
-      ; id = id; signature = _; spec = spec
+      ; id = id; signature = sign; spec = spec
       ; body = body } ->
     let attrs' = attribute_handler attrs in
-    let signature' = assert false (* Convert.method_signature sign *) in
+    let<* signature' = begin
+      let m_sig_tp_ps': AnnotationPass.Type.generic_params_t = sign.generic_params in
+      let<* m_sig_ps' = StateError.mapM annotate_formal_parameter sign.params in
+      StateError.return
+        AnnotationPass.TopDecl.(
+          { generic_params = m_sig_tp_ps'
+          ; params = m_sig_ps' })
+    end in
     let<* spec' =
       StateError.mapM
         (fun s -> annotate_method_spec s anns)

@@ -615,7 +615,8 @@ synonym_type_decl:
     params = gen_params; SGEQ;
     tp = tp
     { Syntax.ParserPass.TopDecl.(
-        { attrs = attrs
+        { ann = ()
+        ; attrs = attrs
         ; id = n
         ; params = params
         ; rhs = Synonym tp
