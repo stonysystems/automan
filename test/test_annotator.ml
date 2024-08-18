@@ -25,7 +25,7 @@ let main dafny_fn automan_fn () =
   | Result.Error msg ->
     printf "Error: %s\n" msg
   | Result.Ok    dfy ->
-    printf "%s\n" Syntax.AnnotationPass.(show dfy)
+    printf "%s\n" Annotator.AnnotationPass.(show dfy)
 
 let () =
   Command.basic_spec

@@ -198,10 +198,12 @@ module PrettyPrinter (M : MetaData) = struct
           (print_expr_in_one_line idx) (print_expr_in_one_line v)  
       )
       | Sel x -> Printf.sprintf "[%s]" (print_expr_in_one_line x)
-      | ArgList (x, _) -> (
-        let x' = List.map print_expr_in_one_line x in
-        Printf.sprintf "(%s)" (String.concat ", " x')
-      )
+      | ArgList ({positional = pos ; named = ns}, _) -> (
+          let pos' = List.map print_expr_in_one_line pos in
+          let ns' = List.map print_named_arg_in_one_line ns in
+          Printf.sprintf "(%s)"
+            (String.concat ", " (pos' @ ns'))
+        )
 
     and print_pattern (x : AST.Prog.pattern_t) = 
       match x with
@@ -247,14 +249,14 @@ module PrettyPrinter (M : MetaData) = struct
         let x_lst' = List.map print_expr_in_one_line x_lst in
         Printf.sprintf "{%s}" (String.concat ", " x_lst')
       )
-      | If (e1, e2, e3) -> (
+      | If (_, e1, e2, e3) -> (
         Printf.sprintf "if %s then %s %selse %s"
             (print_expr_in_one_line e1)
             (print_expr e2 (idnt_lvl + 1))
             idnt_str
             (print_expr e3 (idnt_lvl + 1))
       )
-      | Quantifier x -> (
+      | Quantifier (_, x) -> (
         Printf.sprintf "(%s %s :: %s)"
             (CommonPrinter.print_quantifier x.qt)
             (print_qdom x.qdom)
@@ -282,7 +284,7 @@ module PrettyPrinter (M : MetaData) = struct
       )
       | Lit x -> CommonPrinter.print_lit x 
       | Cardinality x -> Printf.sprintf "|%s|" (print_expr_in_one_line x)
-      | Binary (bop, expr_l, expr_r) -> (
+      | Binary (_, bop, expr_l, expr_r) -> (
         let get_bop_priority (bop : Common.bop_t) = 
           match bop with
           | Mul | Div | Mod -> 1
@@ -296,7 +298,7 @@ module PrettyPrinter (M : MetaData) = struct
         in
         let get_expr_priority (x : AST.Prog.expr_t) = 
           match x with
-          | Binary (bop, _, _) -> get_bop_priority bop
+          | Binary (_, bop, _, _) -> get_bop_priority bop
           | _ -> 0
         in
         let aux expr printer = 
@@ -331,6 +333,11 @@ module PrettyPrinter (M : MetaData) = struct
     and print_expr_in_one_line (x) = 
       let res = print_expr x 0 in
       remove_newlines_and_tabs res
+
+    and print_named_arg_in_one_line (narg : (id_t * AST.Prog.expr_t)) =
+      let (id, e) = narg in
+      let e' = print_expr_in_one_line e in
+      id ^ " := " ^ e'
 
     and print_member_binding_upd (x : AST.Prog.member_binding_upd_t) = 
       let (either_t, x_expr_t) = x in

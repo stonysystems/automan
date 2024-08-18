@@ -1,6 +1,61 @@
 open Syntax
 open Internal
 
+module AnnotationMetaData : MetaData
+  with type predicate_decl_t = Annotation.mode_t list option
+  with type datatype_decl_t  = id_t option
+
+  with type type_t = Annotation.qualified_tp_alias_t option
+
+  with type ite_t            = unit
+  with type match_t          = unit
+  with type quantification_t = unit
+  with type binary_op_t      = unit
+
+  with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+= struct
+  (** - When this is Option.None, the user did not provide an annotation for
+        this predicate. For now, a sensible default is to assume all arguments are
+        input moded; however, since this might change it is desirable to
+        distinguish this case from the case where the user provides an explicit
+        annotation indicating all arguments should be input moded
+
+      - When this is Option.Some modes, `List.length modes` is exactly the arity
+        of the predicate *)
+  type predicate_decl_t = Annotation.mode_t list option
+  [@@deriving show, eq]
+
+  type datatype_decl_t  = id_t option
+  [@@deriving show, eq]
+
+  type type_t = Annotation.qualified_tp_alias_t option
+  [@@deriving show, eq]
+
+  type ite_t = unit
+  [@@deriving show, eq]
+
+  type match_t = unit
+  [@@deriving show, eq]
+
+  type quantification_t = unit
+  [@@deriving show, eq]
+
+  type binary_op_t = unit
+  [@@deriving show, eq]
+
+  (** - When this is Option.None, the call is not associated with a known
+        predicate. For now, assume this means all arguments are input moded
+
+      - When this is Option.Some, the mode list this contains has the same
+        length as the argument list suffix, and the expression to which the
+        call is attached is given the qualified identifier
+  *)
+  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+  [@@deriving show, eq]
+end
+
+module AnnotationPass = AST (AnnotationMetaData)
+
 module Convert  = Syntax.Convert (TrivMetaData) (AnnotationMetaData)
 module NameSpace = NameResolution.NameSpace
 module Resolver  = NameResolution.Resolver
@@ -135,27 +190,27 @@ let rec annotate_expr
   | SetDisplay es ->
     let<* es' = StateError.mapM (fun e -> annotate_expr e anns) es in
     StateError.return AnnotationPass.Prog.(SetDisplay es')
-  | If (guard, then_, else_) ->
+  | If ((), guard, then_, else_) ->
     let<* guard' = annotate_expr guard anns in
     let<* then_' = annotate_expr then_ anns in
     let<* else_' = annotate_expr else_ anns in
     StateError.return AnnotationPass.Prog.(
-        If (guard', then_', else_'))
-  | Match (scrut, tree) ->
+        If ((), guard', then_', else_'))
+  | Match ((), scrut, tree) ->
     let<* scrut' = annotate_expr scrut anns in
     let<* tree' = StateError.mapM (fun b -> annotate_case_branch b anns) tree in
     StateError.return AnnotationPass.Prog.(
-      Match (scrut', tree'))
-  | Quantifier {qt = qt; qdom = qdom; qbody = qbody} ->
+      Match ((), scrut', tree'))
+  | Quantifier ((), {qt = qt; qdom = qdom; qbody = qbody}) ->
     let<* qdom' = annotate_quantifier_domain qdom anns in
     let<* qbody' = annotate_expr qbody anns in
     StateError.return AnnotationPass.Prog.(
-        Quantifier {qt = qt; qdom = qdom'; qbody = qbody'})
-  | SetComp (qdom, e) ->
+        Quantifier ((), {qt = qt; qdom = qdom'; qbody = qbody'}))
+  | SetComp {qdom = qdom; body = body} ->
     let<* qdom' = annotate_quantifier_domain qdom anns in
-    let<* e' = StateError.mapM_option (fun e -> annotate_expr e anns) e in
+    let<* body' = StateError.mapM_option (fun e -> annotate_expr e anns) body in
     StateError.return AnnotationPass.Prog.(
-        SetComp (qdom', e'))
+        SetComp {qdom = qdom'; body = body'})
   | StmtInExpr (stmt, e) ->
     let<* stmt' = annotate_stmt_in_expr stmt anns in
     let<* e' = annotate_expr e anns in
@@ -188,11 +243,11 @@ let rec annotate_expr
   | Unary (uop, e) ->
     let<* e' = annotate_expr e anns in
     StateError.return AnnotationPass.Prog.(Unary (uop, e'))
-  | Binary (bop, e1, e2) ->
+  | Binary ((), bop, e1, e2) ->
     let<* e1' = annotate_expr e1 anns in
     let<* e2' = annotate_expr e2 anns in
     StateError.return AnnotationPass.Prog.(
-        Binary (bop, e1', e2'))
+        Binary ((), bop, e1', e2'))
   | Lemma {lem = lem; e = body} ->
     let<* lem' = annotate_expr lem anns in
     let<* body' = annotate_expr body anns in
@@ -200,32 +255,41 @@ let rec annotate_expr
         Lemma {lem = lem'; e = body'})
 
 and annotate_expr_arglist
-    (f: ParserPass.Prog.expr_t) (args: ParserPass.Prog.expr_t list) (anns: Annotation.toplevel_t)
+    (f: ParserPass.Prog.expr_t) (args: ParserPass.Prog.arglist_t) (anns: Annotation.toplevel_t)
   : AnnotationPass.Prog.expr_t Resolver.m =
   (* NOTE: This pass does not try to determine if the usages of predicates
      are sensible; it only tries to make sure that every invocation in the
      AST of a predicate the user has annotated is decorated with that annotation *)
-    let<* args' =
-      StateError.mapM (fun a -> annotate_expr a anns) args in
-    match ParserPass.Prog.maybe_to_qualified_id f with
-    | None ->
-      (* `f` is not a qualified identifier, so we couldn't hope to know what the
+  let (args_pos, args_named) = (args.positional, args.named) in
+  let<* args_pos' =
+    StateError.mapM (fun a -> annotate_expr a anns) args_pos in
+  let<* args_named' =
+    StateError.mapM begin function (id, a) ->
+      let<* a' = annotate_expr a anns in
+      StateError.return (id, a')
+    end args_named
+  in
+  let args': AnnotationPass.Prog.arglist_t =
+    { positional = args_pos' ; named = args_named' } in
+  match ParserPass.Prog.maybe_to_qualified_id f with
+  | None ->
+    (* `f` is not a qualified identifier, so we couldn't hope to know what the
          intended annotations are without type analysis *)
-      let<* f' = annotate_expr f anns in
-      StateError.return AnnotationPass.Prog.(
-          Suffixed (f', ArgList (args', None)))
-    | Some qf_id ->
-      (* `f` is a qualified identifier, so did the user provide an annotation
+    let<* f' = annotate_expr f anns in
+    StateError.return AnnotationPass.Prog.(
+        Suffixed (f', ArgList (args', None)))
+  | Some qf_id ->
+    (* `f` is a qualified identifier, so did the user provide an annotation
          for it? *)
-      let f' = AnnotationPass.Prog.from_qualified_id qf_id in
-      let<* maybe_p_ann = Resolver.maybe_find_predicate qf_id anns in
-      match maybe_p_ann with
-      | None ->
-        (* No annotation found for `f`, so treat it as before *)
-        StateError.return AnnotationPass.Prog.(
+    let f' = AnnotationPass.Prog.from_qualified_id qf_id in
+    let<* maybe_p_ann = Resolver.maybe_find_predicate qf_id anns in
+    match maybe_p_ann with
+    | None ->
+      (* No annotation found for `f`, so treat it as before *)
+      StateError.return AnnotationPass.Prog.(
           Suffixed (f', (ArgList (args', None))))
-      | Some (_, p_modes) ->
-        StateError.return AnnotationPass.Prog.(
+    | Some (_, p_modes) ->
+      StateError.return AnnotationPass.Prog.(
           Suffixed (f', ArgList (args', Some (qf_id, p_modes))))
 
 and annotate_case_branch
@@ -498,16 +562,17 @@ let rec annotate_topdecl
     let<* dat' = annotate_datatype dat in
     StateError.return
       (AnnotationPass.TopDecl.DatatypeDecl dat')
-  | ParserPass.TopDecl.SynonymTypeDecl syn ->
-    StateError.return
-      (AnnotationPass.TopDecl.SynonymTypeDecl
-         (Convert.synonym_type attribute_handler syn))
+  | ParserPass.TopDecl.SynonymTypeDecl _ ->
+    assert false
+    (* StateError.return *)
+    (*   (AnnotationPass.TopDecl.SynonymTypeDecl *)
+    (*      (Convert.synonym_type attribute_handler syn)) *)
   | ParserPass.TopDecl.MethLemDecl
       { sort = sort; attrs = attrs
-      ; id = id; signature = sign; spec = spec
+      ; id = id; signature = _; spec = spec
       ; body = body } ->
     let attrs' = attribute_handler attrs in
-    let signature' = Convert.method_signature sign in
+    let signature' = assert false (* Convert.method_signature sign *) in
     let<* spec' =
       StateError.mapM
         (fun s -> annotate_method_spec s anns)

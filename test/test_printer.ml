@@ -26,7 +26,7 @@ let main dafny_fn automan_fn () =
   | Result.Error msg ->
     printf "Error: %s\n" msg
   | Result.Ok    dfy ->
-    let module Printer = PrettyPrinter(Syntax.AnnotationMetaData) in
+    let module Printer = PrettyPrinter(Annotator.AnnotationMetaData) in
     printf "%s" (Printer.(print dfy))
 
 
