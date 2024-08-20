@@ -1,2 +1,4 @@
 module LiveRSL__Environment_i {
+  type CPacket = RslPacket;
+  type OutboundPackets = seq<RslPacket>;
 }

@@ -5,6 +5,7 @@ module Result : sig
   include module type of Result
   val ( let< ): ('a, 'e) result -> ('a -> ('b, 'e) result) -> ('b, 'e) result
   val map2: ('a -> 'b) -> ('c -> 'd) -> ('a, 'c) t -> ('b, 'd) t
+  val map_option: ('a -> ('b, 'e) result) -> 'a option -> ('b option, 'e) result
 end = struct
   include Result
   let ( let< ) = bind
@@ -13,6 +14,13 @@ end = struct
     fold
       ~ok:(fun x -> Result.Ok (f x))
       ~error:(fun y -> Result.Error (g y))
+
+  let map_option f x =
+    match x with
+    | None -> Result.Ok None
+    | Some y ->
+      let< z = f y in
+      Result.Ok (Some z)
 end
 
 module List : sig
@@ -22,6 +30,10 @@ module List : sig
 
   (* TODO: Find decent OCaml monad library *)
   val mapMResult: ('a -> ('b, 'e) Result.t) -> 'a list -> ('b list, 'e) Result.t
+
+  val foldM_left_result:
+    ('acc -> 'a -> ('acc, 'e) Result.t) -> ('acc, 'e) Result.t -> 'a list
+    -> ('acc, 'e) Result.t
 end = struct
   include List
 
@@ -49,6 +61,12 @@ end = struct
         | Result.Error e -> Result.Error e
     in
     Result.map List.rev (aux [] xs)
+
+  let foldM_left_result f init xs =
+    let open Result in
+    List.fold_left
+      (fun acc x -> let< a = acc in f a x)
+      init xs
 end
 
 module NonEmptyList = struct

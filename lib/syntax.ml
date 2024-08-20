@@ -5,19 +5,29 @@ open Internal
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
   (* Toplevel declarations *)
-  type predicate_decl_t [@@deriving show, eq]
+  type predicate_decl_t    [@@deriving show, eq]
+  type datatype_decl_t     [@@deriving show, eq]
+  type synonym_type_decl_t [@@deriving show, eq]
+
+  (* Types *)
+  type type_t [@@deriving show, eq]
+
   (* Expressions *)
-  type ite_t     [@@deriving show, eq]
-  type match_t   [@@deriving show, eq]
+  type ite_t            [@@deriving show, eq]
+  type match_t          [@@deriving show, eq]
   type quantification_t [@@deriving show, eq]
-  type binary_op_t [@@deriving show, eq]
+  type binary_op_t      [@@deriving show, eq]
 
   (* Expression suffixes *)
   type arglist_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
-  with type predicate_decl_t  = unit
+  with type predicate_decl_t    = unit
+  with type datatype_decl_t     = unit
+  with type synonym_type_decl_t = unit
+
+  with type type_t = unit
 
   with type ite_t            = unit
   with type match_t          = unit
@@ -26,7 +36,11 @@ module TrivMetaData : MetaData
 
   with type arglist_t = unit
 = struct
-  type predicate_decl_t  = unit [@@deriving show, eq]
+  type predicate_decl_t    = unit [@@deriving show, eq]
+  type datatype_decl_t     = unit [@@deriving show, eq]
+  type synonym_type_decl_t = unit [@@deriving show, eq]
+
+  type type_t = unit [@@deriving show, eq]
 
   type ite_t            = unit [@@deriving show, eq]
   type match_t          = unit [@@deriving show, eq]
@@ -38,38 +52,6 @@ end
 
 type id_t   = string
 [@@deriving show, eq]
-
-(* AutoMan annotations *)
-module Annotation = struct
-  type mode_t = Input | Output
-  [@@deriving show, eq]
-
-  type t =
-    | Module    of module_t
-    | Predicate of predicate_t
-  [@@deriving show, eq]
-
-  and predicate_t = id_t * mode_t list
-
-  and module_t = id_t * t list
-
-  type toplevel_t = t list
-  [@@deriving show, eq]
-
-  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
-    List.filter
-      (function
-        | Module (m_id, _) -> m_id = id
-        | _ -> false)
-      anns
-
-  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
-    List.filter
-      (function
-        | Predicate (p_id, _) -> p_id = id
-        | _ -> false)
-      anns
-end
 
 (* Data that does not change during the different passes *)
 module Common = struct
@@ -159,17 +141,18 @@ module AST (M : MetaData) = struct
 
     (* NOTE: no function types *)
     and t =
-      | TpName of name_seg_t NonEmptyList.t
+      | TpName of M.type_t * name_seg_t NonEmptyList.t
       (* NOTE: this representation allows singleton tuples; use the smart
          constructor *)
       | TpTup  of t list
     [@@deriving show, eq]
 
-    let simple_generic (id: id_t) (gen_inst: t list) =
-      TpName (NonEmptyList.singleton
+    let simple_generic (id: id_t) (gen_inst: t list) (t_ann: M.type_t) =
+      TpName (t_ann
+             , NonEmptyList.singleton
                 (TpIdSeg {id = id; gen_inst = gen_inst}))
 
-    let simple (id: id_t): t = simple_generic id []
+    let simple (id: id_t) (t_ann: M.type_t): t = simple_generic id [] t_ann
 
     let int    = simple "int"
     let bool   = simple "bool"
@@ -541,7 +524,8 @@ module AST (M : MetaData) = struct
     [@@deriving show, eq]
 
     type datatype_t =
-      Prog.attribute_t list
+      M.datatype_decl_t
+      * Prog.attribute_t list
       * id_t * Type.generic_params_t
       * datatype_ctor_t NonEmptyList.t
     [@@deriving show, eq]
@@ -549,12 +533,13 @@ module AST (M : MetaData) = struct
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-type-definition
        NOTE: no type parameter characteristics, witness clauses *)
     type synonym_type_rhs_t =
-    | Synonym of Type.t
+      | Synonym of Type.t
       | Subset  of id_t * Type.t option * Prog.expr_t
     [@@deriving show, eq]
 
     type synonym_type_t =
-      { attrs: Prog.attribute_t list
+      { ann: M.synonym_type_decl_t
+      ; attrs: Prog.attribute_t list
       ; id: id_t
       ; params: Type.generic_params_t
       ; rhs: synonym_type_rhs_t
@@ -658,62 +643,119 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
   type attr_handler_t =
     Src.Prog.attribute_t list -> Tgt.Prog.attribute_t list
 
-  let rec typ (tp: Src.Type.t): Tgt.Type.t =
-    let aux_ns (ns: Src.Type.name_seg_t): Tgt.Type.name_seg_t =
-      let TpIdSeg {id = id; gen_inst = gen_inst} = ns in
-      TpIdSeg {id = id; gen_inst = List.map typ gen_inst}
-    in
-    match tp with
-    | TpTup tps -> TpTup (List.map typ tps)
-    | TpName nss -> TpName (NonEmptyList.map aux_ns nss)
+  type tp_handler_t =
+    M1.type_t -> M2.type_t
 
-  let rec extended_pattern (pat: Src.Prog.extended_pattern_t)
+  let rec typ (tp_h: tp_handler_t) (tp: Src.Type.t) : Tgt.Type.t =
+    match tp with
+    | TpTup tps -> TpTup (List.map (typ tp_h) tps)
+    | TpName (t_ann, nss) ->
+      TpName
+        ( tp_h t_ann
+        , NonEmptyList.map (typ_name_seg tp_h) nss)
+
+  and typ_name_seg (tp_h: tp_handler_t) (nsegs: Src.Type.name_seg_t)
+    : Tgt.Type.name_seg_t =
+    let TpIdSeg {id = id; gen_inst = gen_inst} = nsegs in
+    TpIdSeg {id = id; gen_inst = List.map (typ tp_h) gen_inst}
+
+  let rec extended_pattern
+      (tp_h: tp_handler_t) (pat: Src.Prog.extended_pattern_t)
     : Tgt.Prog.extended_pattern_t =
     match pat with
     | EPatLit lit -> EPatLit lit
     | EPatVar (id, tp) ->
-      EPatVar (id, Option.map typ tp)
+      EPatVar (id, Option.map (typ tp_h) tp)
     | EPatCtor (id, pats) ->
-      EPatCtor (id, List.map extended_pattern pats)
+      EPatCtor (id, List.map (extended_pattern tp_h) pats)
 
-  let rec pattern (pat: Src.Prog.pattern_t): Tgt.Prog.pattern_t =
+  let rec pattern
+      (tp_h: tp_handler_t) (pat: Src.Prog.pattern_t)
+    : Tgt.Prog.pattern_t =
     match pat with
-    | PatVar (id, tp) -> PatVar (id, Option.map typ tp)
-    | PatCtor (id, pats) -> PatCtor (id, List.map pattern pats)
+    | PatVar (id, tp) -> PatVar (id, Option.map (typ tp_h) tp)
+    | PatCtor (id, pats) -> PatCtor (id, List.map (pattern tp_h) pats)
 
-  let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t =
-    let Formal (id, tp) = p in
-    Formal (id, typ tp)
+  (* let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t = *)
+  (*   let Formal (id, tp) = p in *)
+  (*   Formal (id, typ tp) *)
 
-  let method_signature (s: Src.TopDecl.method_signature_t)
-    : Tgt.TopDecl.method_signature_t =
-    let ps = List.map formal s.params in
-    { generic_params = s.generic_params; params = ps }
+  (* let method_signature (s: Src.TopDecl.method_signature_t) *)
+  (*   : Tgt.TopDecl.method_signature_t = *)
+  (*   let ps = List.map formal s.params in *)
+  (*   { generic_params = s.generic_params; params = ps } *)
 
-  let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t)
-    : Tgt.TopDecl.datatype_ctor_t =
-    let DataCtor (attrs, id, params) = ctor in
-    DataCtor (attr_handler attrs, id, List.map formal params)
+  (* let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t) *)
+  (*   : Tgt.TopDecl.datatype_ctor_t = *)
+  (*   let DataCtor (attrs, id, params) = ctor in *)
+  (*   DataCtor (attr_handler attrs, id, List.map formal params) *)
 
-  let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t)
-    : Tgt.TopDecl.datatype_t =
-    let (attrs, id, tpparams, ctors) = d in
-    (attr_handler attrs, id, tpparams
-    , NonEmptyList.map (datatype_ctor attr_handler) ctors)
+  (* let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t) *)
+  (*   : Tgt.TopDecl.datatype_t = *)
+  (*   let (attrs, id, tpparams, ctors) = d in *)
+  (*   (attr_handler attrs, id, tpparams *)
+  (*   , NonEmptyList.map (datatype_ctor attr_handler) ctors) *)
 
-  let synonym_typ_rhs (rhs: Src.TopDecl.synonym_type_rhs_t)
-    : Tgt.TopDecl.synonym_type_rhs_t =
-    match rhs with
-    | Synonym tp -> Tgt.TopDecl.Synonym (typ tp)
-    | Subset (_, _, _) ->
-      failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs))
+  (* let synonym_typ_rhs (tp_h: tp_handler_t) (rhs: Src.TopDecl.synonym_type_rhs_t) *)
+  (*   : Tgt.TopDecl.synonym_type_rhs_t = *)
+  (*   match rhs with *)
+  (*   | Synonym tp -> Tgt.TopDecl.Synonym (typ tp_h tp) *)
+  (*   | Subset (_, _, _) -> *)
+  (*     failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs)) *)
 
-  let synonym_type (attr_handler: attr_handler_t) (d: Src.TopDecl.synonym_type_t)
-    : Tgt.TopDecl.synonym_type_t =
-    { attrs = attr_handler d.attrs
-    ; id = d.id
-    ; params = d.params
-    ; rhs = synonym_typ_rhs d.rhs
-    }
+  (* let synonym_type *)
+  (*     (attr_handler: attr_handler_t) (tp_h: tp_handler_t) (d: Src.TopDecl.synonym_type_t) *)
+  (*   : Tgt.TopDecl.synonym_type_t = *)
+  (*   { attrs = attr_handler d.attrs *)
+  (*   ; id = d.id *)
+  (*   ; params = d.params *)
+  (*   ; rhs = synonym_typ_rhs tp_h d.rhs *)
+  (*   } *)
+end
+
+(* AutoMan annotations *)
+module Annotation = struct
+  type mode_t = Input | Output
+  [@@deriving show, eq]
+
+  type t =
+    | Module    of module_t
+    | Predicate of predicate_t
+    | TypeAlias of tp_alias_t
+  [@@deriving show, eq]
+
+  and predicate_t = id_t * mode_t list
+  and module_t = id_t * t list
+  and tp_alias_t = id_t * ParserPass.Type.t
+
+  type qualified_tp_alias_t = Common.module_qualified_name_t * ParserPass.Type.t
+  [@@deriving show, eq]
+
+  type toplevel_t = t list
+  [@@deriving show, eq]
+
+  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Module (m_id, _) -> m_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Predicate (p_id, _) -> p_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_tp_alias_tgt
+      (tp: ParserPass.Type.t) (anns: toplevel_t)
+    : toplevel_t =
+    List.filter
+      (function
+        | TypeAlias (_, tp') -> tp = tp'
+        | _ -> false)
+      anns
+
 end
 

@@ -398,19 +398,19 @@ lit: /* TODO: character literals */
 /* Types  */
 tp_prim:
   | SET; LANGLE; t = tp; RANGLE
-    { Syntax.ParserPass.Type.set t }
+    { Syntax.ParserPass.Type.set t () }
   | SEQ; LANGLE; t = tp; RANGLE
-    { Syntax.ParserPass.Type.seq t }
+    { Syntax.ParserPass.Type.seq t () }
   | MAP; LANGLE; t1 = tp; COMMA; t2 = tp; RANGLE
-    { Syntax.ParserPass.Type.map t1 t2 }
+    { Syntax.ParserPass.Type.map t1 t2 () }
   | INT
-    { Syntax.ParserPass.Type.int }
+    { Syntax.ParserPass.Type.int () }
   | BOOL
-    { Syntax.ParserPass.Type.bool }
+    { Syntax.ParserPass.Type.bool () }
   | NAT
-    { Syntax.ParserPass.Type.nat }
+    { Syntax.ParserPass.Type.nat () }
   | STR
-    { Syntax.ParserPass.Type.bool }
+    { Syntax.ParserPass.Type.bool () }
 
 tp_tup:
   | tps = delimited(LPAREN, separated_nonempty_list(COMMA, tp), RPAREN)
@@ -424,7 +424,7 @@ tp:
   | t = tp_prim { t }
   | t = tp_tup  { t }
   | nss = separated_nonempty_list(DOT, tp_name_seg)
-    { Syntax.ParserPass.Type.TpName (Internal.NonEmptyList.coerce nss) }
+    { Syntax.ParserPass.Type.TpName ((), Internal.NonEmptyList.coerce nss) }
 
 gen_inst:
   | tps = delimited(LANGLE, separated_nonempty_list(COMMA, tp), RANGLE) { tps }
@@ -615,7 +615,8 @@ synonym_type_decl:
     params = gen_params; SGEQ;
     tp = tp
     { Syntax.ParserPass.TopDecl.(
-        { attrs = attrs
+        { ann = ()
+        ; attrs = attrs
         ; id = n
         ; params = params
         ; rhs = Synonym tp
@@ -647,7 +648,7 @@ datatype_decl:
     d = ID; tp_ps = gen_params;
     SGEQ;
     ctors = datatype_ctors;
-    { (attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
+    { ((), attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
 
 /* TODO: declaration modifiers (abstract, ghost, static, opaque) */
 module_decl:
