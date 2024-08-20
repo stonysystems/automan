@@ -4,23 +4,16 @@ open Syntax
 open Internal
 
 module Definitions = struct
-  type predicate_decl_t =
-    | Predicate
-    | Function of
-        { in_vars:  ParserPass.TopDecl.formal_t list
-        ; out_vars: ParserPass.TopDecl.formal_t NonEmptyList.t
-        ; requires: ParserPass.Prog.expr_t list }
-  [@@deriving show, eq]
 
   type ite_functionalize_t =
-    { assigned_vars: Common.member_qualified_name_t NonEmptyList.t
-    ; then_permutation: Common.member_qualified_name_t NonEmptyList.t
-    ; else_permutation: Common.member_qualified_name_t NonEmptyList.t }
+    { assigned_vars: Moder.Definitions.outvar_lhs_t NonEmptyList.t
+    ; branch_permutations: Moder.Definitions.ite_functionalize_t
+    }
   [@@deriving show, eq]
 
   type match_functionalize_t =
-    { assigned_vars: Common.member_qualified_name_t NonEmptyList.t
-    ; permutations:  (Common.member_qualified_name_t NonEmptyList.t) NonEmptyList.t
+    { assigned_vars: Moder.Definitions.outvar_lhs_t NonEmptyList.t
+    ; permutations:  Moder.Definitions.match_functionalize_t
     }
   [@@deriving show, eq]
 
@@ -31,41 +24,34 @@ module Definitions = struct
   [@@deriving show, eq]
 
   type quantification_forall_functionalize_t =
-    { out_var: Common.member_qualified_name_t
+    { out_var: Moder.Definitions.quantification_functionalize_t
     ; collection: quantification_forall_functionalize_collection_t
     }
   [@@deriving show, eq]
 
-  type unary_op_for_outvar_t = Cardinality
+  type binary_op_functionalize_t = Moder.Definitions.binary_op_functionalize_t
   [@@deriving show, eq]
 
-  type binary_op_eq_functionalize_t =
-    { outvar_is_left: bool
-    ; outvar: Common.member_qualified_name_t
-    ; outvar_op: unary_op_for_outvar_t option
-    }
-  [@@deriving show, eq]
-
-  type arglist_functionalize_t =
-    { callee: id_t NonEmptyList.t
-    ; input: ParserPass.Prog.expr_t list
-    ; output: Common.member_qualified_name_t NonEmptyList.t
-    }
+  type arglist_functionalize_t = Moder.Definitions.arglist_functionalize_t
   [@@deriving show, eq]
 end
 
 module TranslationMetaData : MetaData
-  with type predicate_decl_t = Definitions.predicate_decl_t
+  with type predicate_decl_t    = Moder.ModingMetaData.predicate_decl_t
+  with type datatype_decl_t     = Annotator.AnnotationMetaData.datatype_decl_t
+  with type synonym_type_decl_t = Annotator.AnnotationMetaData.synonym_type_decl_t
+
+  with type type_t = Annotator.AnnotationMetaData.type_t
 
   with type ite_t     = Definitions.ite_functionalize_t option
   with type match_t   = Definitions.match_functionalize_t option
   with type quantification_t =
          Definitions.quantification_forall_functionalize_collection_t option
-  with type binary_op_t = Definitions.binary_op_eq_functionalize_t option
+  with type binary_op_t = Definitions.binary_op_functionalize_t option
 
   with type arglist_t = Definitions.arglist_functionalize_t option
 = struct
-  type predicate_decl_t = Definitions.predicate_decl_t
+  type predicate_decl_t = Moder.ModingMetaData.predicate_decl_t
   [@@deriving show, eq]
 
   type datatype_decl_t = Annotator.AnnotationMetaData.datatype_decl_t
@@ -87,7 +73,7 @@ module TranslationMetaData : MetaData
     Definitions.quantification_forall_functionalize_collection_t option
   [@@deriving show, eq]
 
-  type binary_op_t = Definitions.binary_op_eq_functionalize_t option
+  type binary_op_t = Definitions.binary_op_functionalize_t option
   [@@deriving show, eq]
 
   type arglist_t = Definitions.arglist_functionalize_t option
