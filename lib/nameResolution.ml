@@ -79,12 +79,12 @@ module TopLevel = struct
      follow #include directives and parse the whole Dafny project for that. *)
   let rec maybe_find_tp_alias
     (tp: ParserPass.Type.t) (anns: Annotation.toplevel_t)
-    : (Annotation.qualified_tp_alias_t option, string) Result.t =
+    : (Syntax.Common.module_qualified_name_t option, string) Result.t =
     (* 1. Look for type aliases at the current level whose target matches `tp` *)
     let aliases_here = Annotation.filter_by_tp_alias_tgt tp anns in
     match aliases_here with
     | (TypeAlias (id, _) :: []) ->
-      Result.Ok (Some (NonEmptyList.singleton id, tp))
+      Result.Ok (Some (NonEmptyList.singleton id))
     | [] ->
       (* 2. Search modules in scope for target matching `tp`, and add qualifications *)
       (* 2.1. Pick out the module annotations *)
@@ -112,8 +112,8 @@ module TopLevel = struct
           | (Some acc', _) ->
             Result.Ok (Some acc')
           (* 2.2.4. We found it now, so qualify with that module id *)
-          | (_, Some (ids, tgt)) ->
-            Result.Ok (Some (NonEmptyList.cons id ids, tgt))
+          | (_, Some ids) ->
+            Result.Ok (Some (NonEmptyList.cons id ids))
           end
           (Result.Ok None) m_anns
     | _ ->
@@ -250,7 +250,7 @@ module NameSpace = struct
      module, for a datatype (also declared in this module) that appears after
      some predicates in which the target of the alias appears. *)
   let maybe_find_tp_alias_local_decl (ns: t) (tp: ParserPass.Type.t)
-    : (Annotation.tp_alias_t option, string) Result.t =
+    : (id_t option, string) Result.t =
     match ns with
     | TopLevel ->
       Result.Error
@@ -259,16 +259,15 @@ module NameSpace = struct
     | Module ns' ->
       let< t_alias = TopLevel.maybe_find_tp_alias tp ns'.locals in
       let ensure_is_local
-        : Annotation.qualified_tp_alias_t ->
-          Annotation.tp_alias_t option =
-        function (q_id, tp) ->
+        : Syntax.Common.module_qualified_name_t -> id_t option =
+        function q_id ->
           let (qs, id) = NonEmptyList.unsnoc q_id in
-          if List.length qs = 0 then Some (id, tp) else None
+          if List.length qs = 0 then Some id else None
       in
       Result.Ok (Option.fold ~none:None ~some:ensure_is_local t_alias)
 
   let rec maybe_find_tp_alias (ns: t) (tp: ParserPass.Type.t)
-      : (Annotation.qualified_tp_alias_t option, string) Result.t =
+      : (Syntax.Common.module_qualified_name_t option, string) Result.t =
     match ns with
     | TopLevel -> Result.Ok None
     | Module ns' ->
@@ -333,11 +332,11 @@ module Resolver = struct
       State.return (TopLevel.maybe_find_predicate qp_id anns)
 
   let maybe_find_tp_alias (tp: ParserPass.Type.t)
-    : (Annotation.qualified_tp_alias_t option) m =
+    : (Syntax.Common.module_qualified_name_t option) m =
     StateError.gets (fun ns -> NameSpace.maybe_find_tp_alias ns tp)
 
   let maybe_find_tp_alias_local_decl (tp: ParserPass.Type.t)
-    : (Annotation.tp_alias_t option) m =
+    : (id_t option) m =
     StateError.map_error
       ((^) "NameResolution.Resolver.maybe_find_tp_alias_local_decl:\n")
       begin

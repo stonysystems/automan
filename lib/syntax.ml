@@ -439,6 +439,13 @@ module AST (M : MetaData) = struct
         let res = chain_bop and_ann e2 es in
         Binary (and_ann, And, Binary (ann, o, e1, e2), res)
 
+    let rec to_conjuncts (e: expr_t): expr_t list =
+      match e with
+      | Binary (_, Common.And, e1, e2) ->
+        to_conjuncts e1 @ to_conjuncts e2
+      | _ ->
+        [e]
+
     let assoc_right_bop
         (o_ann: M.binary_op_t) (o: Common.bop_t)
         (es: expr_t NonEmptyList.t)

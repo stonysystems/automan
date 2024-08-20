@@ -6,7 +6,7 @@ module AnnotationMetaData : MetaData
   with type datatype_decl_t     = id_t option
   with type synonym_type_decl_t = id_t option
 
-  with type type_t = Annotation.qualified_tp_alias_t option
+  with type type_t = Syntax.Common.member_qualified_name_t option
 
   with type ite_t            = unit
   with type match_t          = unit
@@ -32,7 +32,7 @@ module AnnotationMetaData : MetaData
   type synonym_type_decl_t = id_t option
   [@@deriving show, eq]
 
-  type type_t = Annotation.qualified_tp_alias_t option
+  type type_t = Syntax.Common.member_qualified_name_t option
   [@@deriving show, eq]
 
   type ite_t = unit
@@ -471,12 +471,8 @@ let annotate_type_id_for_alias
     StateError.return None
   else
     (* 2. loook for a local alias for this declaration *)
-    let<* t_local_alias =
-      Resolver.maybe_find_tp_alias_local_decl
-        ParserPass.Type.(simple t_id ())
-    in
-    StateError.return
-      Option.(map (function (id, _) -> id) t_local_alias)
+    Resolver.maybe_find_tp_alias_local_decl
+      ParserPass.Type.(simple t_id ())
 
 let annotate_datatype_ctor (ctor: ParserPass.TopDecl.datatype_ctor_t)
   : AnnotationPass.TopDecl.datatype_ctor_t Resolver.m =
@@ -579,6 +575,7 @@ let rec annotate_topdecl
     StateError.return (AnnotationPass.TopDecl.ModuleImport imp)
   | ParserPass.TopDecl.ModuleDef (m_attrs, m_id, m_decls) ->
     Resolver.within_module m_id anns begin
+      (* TODO: module-level annotation indicating a new type should be introduced *)
       let<* m_decls' = annotate_topdecls anns m_decls in
       StateError.return
         AnnotationPass.TopDecl.(
