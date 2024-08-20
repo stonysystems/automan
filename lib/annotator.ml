@@ -575,6 +575,7 @@ let rec annotate_topdecl
     StateError.return (AnnotationPass.TopDecl.ModuleImport imp)
   | ParserPass.TopDecl.ModuleDef (m_attrs, m_id, m_decls) ->
     Resolver.within_module m_id anns begin
+      (* TODO: module-level annotation indicating a new type should be introduced *)
       let<* m_decls' = annotate_topdecls anns m_decls in
       StateError.return
         AnnotationPass.TopDecl.(
