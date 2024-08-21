@@ -28,6 +28,7 @@ open Internal
   *
   * id_of_tp
   * tp_of_id
+  * id_and_gen_inst_of_tp
   *
   * move_one_expr_from_suffix_to_prefix: 
   *                     h :: suffix, prefix -> suffix, preffix @ [h]
@@ -45,6 +46,21 @@ module TranslatorCommon = struct
   let is_primitive id = 
     List.exists (fun x -> x = id)
       [ "int"; "bool"; "nat"; "string" ] 
+
+  let is_built_in_collection id = 
+    List.exists (fun x -> x = id)
+    [ "seq"; "set"; "map" ] 
+
+  let id_and_gen_inst_of_tp (x : AST.Type.t) = 
+    match x with 
+    | TpName name_seg -> begin 
+      let rest, h = NonEmptyList.unsnoc name_seg in
+      assert ((List.length rest) = 0);
+      let AST.Type.TpIdSeg {id = id; gen_inst = gen_inst} = h in
+      assert ((List.length gen_inst) = 0);
+      (id, gen_inst)
+    end
+    | TpTup _ -> assert false
 
   let id_of_tp (x : AST.Type.t) = 
     match x with 

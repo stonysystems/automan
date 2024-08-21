@@ -15,15 +15,19 @@ module Refinement  = struct
   let i = TCommon.expr_of_str i_id
 
   let is_valid_token = "IsValid"
+  let is_abstractable_token = "IsAbstractable"
+  let abstractify_seq_token = TCommon.expr_of_str "AbstractifySeq"
 
   let generate_token t_id token = 
     TCommon.expr_of_str (Printf.sprintf "%s%s" t_id token)
 
-  let is_valid_template t_id = 
-    generate_token t_id is_valid_token
+  let generate_abstractify_token t_id id = 
+    TCommon.expr_of_str 
+      (Printf.sprintf "Abstractify%sTo%s" t_id id)
 
-  let rec generate_is_valid_4_fmls 
-    (fmls : AST.TopDecl.formal_t list) = 
+  let rec generate_checker_4_fmls 
+    (fmls : AST.TopDecl.formal_t list)
+    (token : string) = 
     match fmls with 
     | [] -> []
     | h :: rest -> begin
@@ -34,16 +38,24 @@ module Refinement  = struct
         let name_seg, _ = NonEmptyList.uncons name_seg_lst in
         let TpIdSeg {id = t_id; gen_inst = gen_inst} = name_seg in
         (
+          match begin
+            (
+              (List.length gen_inst) > 0 &&
+              not (TCommon.is_built_in_collection t_id)
+            ) ||
+            (TCommon.is_primitive t_id)
+          end with 
+          | true -> []
+          | false -> (
           match List.length gen_inst with 
           | 0 -> begin 
             [AST.Prog.Suffixed (
-              is_valid_template t_id, 
+              generate_token t_id token, 
               let e = 
                 TCommon.expr_lst_to_dot_expr 
                 [s; TCommon.expr_of_str fml_id] in
                 AST.Prog.ArgList (([e], None))
-              )
-            ]
+              )]
           end
           | 1 -> begin (* id is set/seq or an alias to them *)
             let _, param_tp = List.unsnoc gen_inst in
@@ -65,7 +77,7 @@ module Refinement  = struct
                     TCommon.expr_lst_to_dot_expr 
                       [s; TCommon.expr_of_str fml_id])), 
                   Suffixed (
-                    is_valid_template param_tp_id, 
+                    generate_token param_tp_id token, 
                     AST.Prog.ArgList ([i], None)
                   )
                 );
@@ -74,32 +86,125 @@ module Refinement  = struct
           end
           | 2 -> assert false
           | _ -> assert false
-        ) @ (generate_is_valid_4_fmls rest)
+        )) @ (generate_checker_4_fmls rest token)
       end
     end
 
-  let generate_is_valid_4_ctors 
-    (ctors : AST.TopDecl.datatype_ctor_t list) = 
+  let generate_checker_4_ctors
+    (ctors : AST.TopDecl.datatype_ctor_t list)
+    (token : string) = 
     match List.length ctors with
     | 1 -> begin 
       let ctors = NonEmptyList.coerce ctors in
       let ctor, _ = NonEmptyList.uncons ctors in
-      match ctor with AST.TopDecl.DataCtor (_, _, fmls) ->
-      let is_formals_valid_lst = generate_is_valid_4_fmls fmls in
-      TCommon.expr_lst_to_and is_formals_valid_lst
+      match ctor with AST.TopDecl.DataCtor (_, t_id, fmls) ->
+      let is_formals_valid_lst = generate_checker_4_fmls fmls token in
+      let extended_lst = 
+        match token with 
+        | "IsValid" -> begin 
+          AST.Prog.Suffixed (
+            generate_token t_id is_abstractable_token, 
+            AST.Prog.ArgList ([s], None)
+          ) :: is_formals_valid_lst
+        end
+        | _ -> is_formals_valid_lst in
+      TCommon.expr_lst_to_and extended_lst
     end
-    | _ -> assert false
+    | _ -> assert false (* To be added later *)
 
-  let generate_is_valid_4_datatype (dtp : AST.TopDecl.datatype_t) = 
+  let generate_checker_4_datatype 
+    (dtp : AST.TopDecl.datatype_t)
+    (token : string) = 
     let _, t_id, _, ctors = dtp in
-    let expr = generate_is_valid_4_ctors (NonEmptyList.as_list ctors) in
+    let expr = generate_checker_4_ctors 
+      (NonEmptyList.as_list ctors) token in
     AST.TopDecl.Predicate (
       None, 
       false, 
-      [], TCommon.expr_to_id (is_valid_template t_id), 
+      [], TCommon.expr_to_id (generate_token t_id token), 
       [], [AST.TopDecl.Formal (s_id, TCommon.tp_of_id t_id)], 
       [], 
       expr
     )
 
-end
+  let generate_is_valid_4_datatype dtp = 
+    generate_checker_4_datatype dtp is_valid_token
+
+  let generate_is_abstractable_4_datatype dtp = 
+    generate_checker_4_datatype dtp is_abstractable_token
+
+  (* ------- Below is for abstractify ------- *)
+  
+  let generate_abstractify_4_formals
+    (fmls   : AST.TopDecl.formal_t list)
+    (t_fmls : AST.TopDecl.formal_t list) = 
+    let rec aux lst =
+      match lst with
+      | [] -> []
+      | h :: rest -> (
+        let fml, t_fml = h in
+        match fml   with AST.TopDecl.Formal (fml_id,     tp) ->
+        match t_fml with AST.TopDecl.Formal (t_fml_id, t_tp) ->
+        let _ = t_fml_id in
+        let tp_id,    tp_gen_inst   = TCommon.id_and_gen_inst_of_tp tp    in
+        let t_tp_id,  t_tp_gen_inst = TCommon.id_and_gen_inst_of_tp t_tp  in
+        match (
+          (List.length tp_gen_inst) > 0 &&
+          not (TCommon.is_built_in_collection tp_id)
+        ) with 
+        | true (* Leave it for user *) -> TCommon.expr_blank 
+        | false ->
+        let member_access = 
+          TCommon.expr_lst_to_dot_expr [s; TCommon.expr_of_str fml_id] in
+        match TCommon.is_primitive tp_id with 
+        | true -> member_access
+        | false -> begin
+          match List.length tp_gen_inst with 
+          | 0 -> begin 
+            (* AbstractifyCReplicaConstantsToLReplicaConstants(s.constants) *)
+            AST.Prog.Suffixed (
+              generate_abstractify_token t_tp_id tp_id, 
+              let e = member_access in AST.Prog.ArgList (([e], None))
+              )
+          end
+          | 1 -> begin 
+            (* AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber),  *)
+            let _, param_tp   = List.unsnoc tp_gen_inst   in
+            let param_tp_id   = TCommon.id_of_tp param_tp in
+            let _, param_tp   = List.unsnoc t_tp_gen_inst in
+            let t_param_tp_id = TCommon.id_of_tp param_tp in
+            match TCommon.is_primitive param_tp_id with
+            | true -> member_access
+            | false -> begin 
+              AST.Prog.Suffixed (
+                abstractify_seq_token, 
+                AST.Prog.ArgList (([
+                  member_access; 
+                  generate_abstractify_token t_param_tp_id param_tp_id
+                ], None))
+              )
+            end
+          end
+          | _ -> assert false
+        end
+
+      ) :: (aux rest)
+    in
+    let zipped_fmls = List.combine fmls t_fmls in
+    aux zipped_fmls
+
+  (*
+    function AbstractifyCAcceptorToLAcceptor(
+		  s : CAcceptor) : LAcceptor
+		requires CAcceptorIsAbstractable(s)
+    {
+      LAcceptor(
+        AbstractifyCReplicaConstantsToLReplicaConstants(s.constants), 
+        AbstractifyCBallotToBallot(s.max_bal), 
+        AbstractifyCVotesToVotes(s.votes), 
+        AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber), 
+        AbstractifyCOperationNumberToOperationNumber(s.log_truncation_point))
+    }
+  *)
+
+  end
