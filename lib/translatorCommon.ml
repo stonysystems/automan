@@ -57,7 +57,7 @@ module TranslatorCommon = struct
       let rest, h = NonEmptyList.unsnoc name_seg in
       assert ((List.length rest) = 0);
       let AST.Type.TpIdSeg {id = id; gen_inst = gen_inst} = h in
-      assert ((List.length gen_inst) = 0);
+      (* assert ((List.length gen_inst) = 0); *)
       (id, gen_inst)
     end
     | TpTup _ -> assert false

@@ -466,6 +466,20 @@ module PrettyPrinter (M : MetaData) = struct
             specs_str
             idnt_str (Prog.print_expr e (idnt_lvl+1)) idnt_str
       )
+      | Function (is_fm, _, id, [], fs, rtn_tp, specs, e) -> (
+        let fs' = List.map print_formal fs in
+        let fs_str = String.concat ", " fs' in
+        let specs' = List.map 
+          (fun x -> print_function_spec x (idnt_lvl + 1)) specs in 
+        let specs_str = String.concat "" specs' in
+        Printf.sprintf 
+          "\n%s%s %s(%s) : %s %s%s{%s%s}" 
+            idnt_str 
+            (match is_fm with | true -> "function method" | false -> "function") 
+            id fs_str (Type.print rtn_tp)
+            specs_str
+            idnt_str (Prog.print_expr e (idnt_lvl+1)) idnt_str
+      )
       | _ -> ""
 
     let rec print' (x : AST.TopDecl.t') (idnt_lvl : int) = 

@@ -110,7 +110,7 @@ module Refinement  = struct
         | _ -> is_formals_valid_lst in
       TCommon.expr_lst_to_and extended_lst
     end
-    | _ -> assert false (* To be added later *)
+    | _ -> assert false (* Multi-ctors; To be added later *)
 
   let generate_checker_4_datatype 
     (dtp : AST.TopDecl.datatype_t)
@@ -193,18 +193,71 @@ module Refinement  = struct
     let zipped_fmls = List.combine fmls t_fmls in
     aux zipped_fmls
 
-  (*
-    function AbstractifyCAcceptorToLAcceptor(
-		  s : CAcceptor) : LAcceptor
-		requires CAcceptorIsAbstractable(s)
-    {
-      LAcceptor(
-        AbstractifyCReplicaConstantsToLReplicaConstants(s.constants), 
-        AbstractifyCBallotToBallot(s.max_bal), 
-        AbstractifyCVotesToVotes(s.votes), 
-        AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber), 
-        AbstractifyCOperationNumberToOperationNumber(s.log_truncation_point))
-    }
-  *)
+  let generate_abstractify_4_ctors 
+    (ctors   : AST.TopDecl.datatype_ctor_t list)
+    (t_ctors : AST.TopDecl.datatype_ctor_t list) = 
+    let rec aux lst = 
+      match lst with 
+      | [] -> []
+      | h :: rest -> (
+        let ctor, t_ctor = h in 
+        match ctor    with AST.TopDecl.DataCtor (_, id,     fmls) ->
+        match t_ctor  with AST.TopDecl.DataCtor (_, t_id, t_fmls) ->
+          let abs_4_fmls = generate_abstractify_4_formals fmls t_fmls in
+          let _ = t_id in
+          AST.Prog.Suffixed (
+            TCommon.expr_of_str id, 
+            AST.Prog.ArgList ((abs_4_fmls, None))
+          )
+      ) :: (aux rest)
+    in
+    let zipped_ctors = List.combine ctors t_ctors in
+    let abs_4_ctors = aux zipped_ctors in
+    abs_4_ctors
+
+  let generate_abstractify_4_datatype 
+    (dtp    : AST.TopDecl.datatype_t)
+    (t_dtp  : AST.TopDecl.datatype_t) = 
+    let (_,   id, _,    ctors) =    dtp in 
+    let (_, t_id, _,  t_ctors) =  t_dtp in
+    let   ctors = NonEmptyList.as_list    ctors in
+    let t_ctors = NonEmptyList.as_list  t_ctors in 
+    let abs_4_ctors = generate_abstractify_4_ctors ctors t_ctors in
+    let e = 
+      match List.length abs_4_ctors with 
+      | 0 -> TCommon.expr_blank
+      | 1 -> let _, h = List.unsnoc abs_4_ctors in h
+      | _ -> (
+        let rec aux lst = 
+          match lst with
+          | [] -> []
+          | h :: rest -> (
+            let t_id, abs_4_ctor = h in
+            AST.Prog.Case ([], AST.Prog.EPatVar (t_id, None), abs_4_ctor) 
+          ) :: (aux rest)
+        in
+        let t_ctors_ids = List.map (
+          fun x -> match x with AST.TopDecl.DataCtor (_, id, _) -> id
+        ) t_ctors in
+        let zipped = List.combine t_ctors_ids abs_4_ctors in
+        AST.Prog.Match (s, aux zipped)
+      )
+    in
+    AST.TopDecl.Function(
+      false, 
+      [], 
+      TCommon.expr_to_id (generate_abstractify_token t_id id), 
+      [], 
+      [AST.TopDecl.Formal (s_id, TCommon.tp_of_id t_id)], 
+      TCommon.tp_of_id id, 
+      [AST.TopDecl.Requires (
+        AST.Prog.Suffixed (
+          generate_token t_id is_abstractable_token, 
+          AST.Prog.ArgList ([s], None)
+        )
+      )], 
+      e
+    )
 
   end
+  

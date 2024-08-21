@@ -52,13 +52,17 @@ module Translator = struct
         )
       in
       let t_datatype = ([], t_id, [], t_ctors) in
-      let is_valid = Refinement.generate_is_valid_4_datatype t_datatype in
+      let is_valid = 
+        Refinement.generate_is_valid_4_datatype         t_datatype in
       let is_abstractable = 
-        Refinement.generate_is_abstractable_4_datatype t_datatype in
+        Refinement.generate_is_abstractable_4_datatype  t_datatype in
+      let abstractify = 
+        Refinement.generate_abstractify_4_datatype    x t_datatype in
       [
-        AST.TopDecl.DatatypeDecl t_datatype;
-        AST.TopDecl.PredFunDecl is_valid;
-        AST.TopDecl.PredFunDecl is_abstractable;
+        AST.TopDecl.DatatypeDecl  t_datatype;
+        AST.TopDecl.PredFunDecl   is_valid;
+        AST.TopDecl.PredFunDecl   is_abstractable;
+        AST.TopDecl.PredFunDecl   abstractify;
       ]
 
     (* type t = Common.topdecl_modifier_t list * t' *)
