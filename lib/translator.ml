@@ -4,6 +4,7 @@ open Internal
 
 module AST = AnnotationPass
 module Refinement = Refinement.Refinement
+module TCommon = TranslatorCommon.TranslatorCommon
 
 module Translator = struct 
   let remapper = new NameRemapper.name_remapper
@@ -59,11 +60,36 @@ module Translator = struct
       let abstractify = 
         Refinement.generate_abstractify_4_datatype    x t_datatype in
       [
-        AST.TopDecl.DatatypeDecl  t_datatype;
-        AST.TopDecl.PredFunDecl   is_valid;
-        AST.TopDecl.PredFunDecl   is_abstractable;
-        AST.TopDecl.PredFunDecl   abstractify;
+        AST.TopDecl.DatatypeDecl  t_datatype      ;
+        AST.TopDecl.PredFunDecl   is_valid        ;
+        AST.TopDecl.PredFunDecl   is_abstractable ;
+        AST.TopDecl.PredFunDecl   abstractify     ;
       ]
+
+    let t_function 
+      (x : AST.TopDecl.function_t) = 
+      match x with 
+      | Predicate (metadata, _, _, id, _, fmls, specs, e) -> begin
+        let _ = metadata, e in
+        let fmls_input, fmls_rtn = (
+          match metadata with 
+          | None -> fmls, TCommon.tp_of_id "bool"
+          | Some metadata -> (
+            assert false
+          )
+        ) in
+        let t_e = TCommon.expr_of_str "HOLDER" in
+        let t_id = remapper#id_remap id in
+        let t_function = AST.TopDecl.Function (
+          true,
+          [], t_id,
+          [], fmls, (TCommon.tp_of_id "bool"),
+          specs, 
+          t_e
+        ) in
+        [AST.TopDecl.PredFunDecl t_function]
+      end
+      | Function _ -> []
 
     (* type t = Common.topdecl_modifier_t list * t' *)
     let rec translate 
@@ -79,7 +105,7 @@ module Translator = struct
       | MethLemDecl _ -> []
       | ModuleDef x -> t_module_def x
       | DatatypeDecl x -> t_data_type_decl x
-      | _ -> []
+      | PredFunDecl x -> t_function x
 
     and t_module_def (x : AST.TopDecl.module_def_t) = 
       let attribute_lst, id, t_lst = x in
