@@ -69,21 +69,53 @@ module Translator = struct
     let t_function 
       (x : AST.TopDecl.function_t) = 
       match x with 
-      | Predicate (metadata, _, _, id, _, fmls, specs, e) -> begin
+      | Predicate (metadata, _, _, id, _, origin_fmls, specs, e) -> begin
         let _ = metadata, e in
         let fmls_input, fmls_rtn = (
           match metadata with 
-          | None -> fmls, TCommon.tp_of_id "bool"
+          | None -> origin_fmls, 
+                      [AST.TopDecl.Formal ("", TCommon.tp_of_id "bool")]
           | Some metadata -> (
-            assert false
+            let rec aux lst = 
+              match lst with 
+              | [] -> [], []
+              | h :: rest -> (
+                let fmls_input', fmls_rtn' = aux rest in
+                let mode, fml = h in 
+                match mode with 
+                | Syntax.Annotation.Input  -> (fml :: fmls_input', fmls_rtn')
+                | Syntax.Annotation.Output -> (fmls_input', fml :: fmls_rtn')
+              )
+            in
+            let mode_lst = metadata in
+            let zipped = List.combine mode_lst origin_fmls in
+            aux zipped
           )
         ) in
+        let rtn = 
+          match List.length fmls_rtn with
+          | 1 -> (
+            let _, h = List.unsnoc fmls_rtn in 
+            match h with AST.TopDecl.Formal (_, tp) -> tp
+          )
+          | _ -> (
+            let rec aux lst = 
+              match lst with 
+              | [] -> []
+              | h :: rest -> (
+                match h with AST.TopDecl.Formal (_, tp) -> 
+                  tp :: (aux rest)
+              )
+            in
+            AST.Type.TpTup (aux fmls_rtn)
+          )
+        in
         let t_e = TCommon.expr_of_str "HOLDER" in
         let t_id = remapper#id_remap id in
         let t_function = AST.TopDecl.Function (
           true,
           [], t_id,
-          [], fmls, (TCommon.tp_of_id "bool"),
+          [], fmls_input, rtn,
           specs, 
           t_e
         ) in
@@ -115,7 +147,6 @@ module Translator = struct
         (remapper#module_id_remap id), 
         List.concat (List.map translate t_lst)
       end]
-
   end
 
   let translate (x : AST.t) = 
