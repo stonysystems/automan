@@ -261,7 +261,7 @@ module PrettyPrinter (M : MetaData) = struct
             (print_expr_in_one_line x.qbody)
       )
       | Let x -> (
-        Printf.sprintf "var %s%s := %s;%s%s" 
+        Printf.sprintf "var %s%s := %s; %s%s" 
           (
             match x.ghost with
             | true -> "ghost "
@@ -270,7 +270,10 @@ module PrettyPrinter (M : MetaData) = struct
           (
             let p_lst = Internal.NonEmptyList.as_list x.pats in
             let p_lst' = List.map print_pattern p_lst in
-            String.concat ", " p_lst'
+            let str = String.concat ", " p_lst' in
+            match List.length p_lst with
+            | 1 -> str
+            | _ -> "(" ^ str ^ ")"
           )
           (
             let defs_lst = Internal.NonEmptyList.as_list x.defs in

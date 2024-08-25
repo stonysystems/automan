@@ -25,9 +25,18 @@ module Refinement  = struct
     TCommon.expr_of_str 
       (Printf.sprintf "Abstractify%sTo%s" t_id id)
 
+  let generate_args wrapped_as_member_access fml_id = 
+    match wrapped_as_member_access with 
+    | true -> (
+      TCommon.expr_lst_to_dot_expr 
+        [s; TCommon.expr_of_str fml_id]
+    )
+    | false -> TCommon.expr_of_str fml_id
+
   let rec generate_checker_4_fmls 
     (fmls : AST.TopDecl.formal_t list)
-    (token : string) = 
+    (token : string)
+    (wrapped_as_member_access : bool) = 
     match fmls with 
     | [] -> []
     | h :: rest -> begin
@@ -51,9 +60,7 @@ module Refinement  = struct
           | 0 -> begin 
             [AST.Prog.Suffixed (
               generate_token t_id token, 
-              let e = 
-                TCommon.expr_lst_to_dot_expr 
-                [s; TCommon.expr_of_str fml_id] in
+              let e = generate_args wrapped_as_member_access fml_id in
                 AST.Prog.ArgList (([e], None))
               )]
           end
@@ -71,11 +78,13 @@ module Refinement  = struct
                 };
                 qbody = Binary (
                   Syntax.Common.Implies,
-                  (AST.Prog.Binary (
-                    Syntax.Common.In, 
-                    i, 
-                    TCommon.expr_lst_to_dot_expr 
-                      [s; TCommon.expr_of_str fml_id])), 
+                  (
+                    AST.Prog.Binary (
+                      Syntax.Common.In, 
+                      i, 
+                      generate_args wrapped_as_member_access fml_id
+                    )
+                  ), 
                   Suffixed (
                     generate_token param_tp_id token, 
                     AST.Prog.ArgList ([i], None)
@@ -86,7 +95,7 @@ module Refinement  = struct
           end
           | 2 -> assert false
           | _ -> assert false
-        )) @ (generate_checker_4_fmls rest token)
+        )) @ (generate_checker_4_fmls rest token wrapped_as_member_access)
       end
     end
 
@@ -98,7 +107,7 @@ module Refinement  = struct
       let ctors = NonEmptyList.coerce ctors in
       let ctor, _ = NonEmptyList.uncons ctors in
       match ctor with AST.TopDecl.DataCtor (_, t_id, fmls) ->
-      let is_formals_valid_lst = generate_checker_4_fmls fmls token in
+      let is_formals_valid_lst = generate_checker_4_fmls fmls token true in
       let extended_lst = 
         match token with 
         | "IsValid" -> begin 
@@ -137,7 +146,8 @@ module Refinement  = struct
   
   let generate_abstractify_4_formals
     (fmls   : AST.TopDecl.formal_t list)
-    (t_fmls : AST.TopDecl.formal_t list) = 
+    (t_fmls : AST.TopDecl.formal_t list)
+    (wrapped_as_member_access : bool) = 
     let rec aux lst =
       match lst with
       | [] -> []
@@ -155,7 +165,7 @@ module Refinement  = struct
         | true (* Leave it for user *) -> TCommon.expr_blank 
         | false ->
         let member_access = 
-          TCommon.expr_lst_to_dot_expr [s; TCommon.expr_of_str fml_id] in
+          generate_args wrapped_as_member_access fml_id in
         match TCommon.is_primitive tp_id with 
         | true -> member_access
         | false -> begin
@@ -168,6 +178,14 @@ module Refinement  = struct
               )
           end
           | 1 -> begin 
+            match t_tp_id with 
+            | "CBroadcast" -> (* Hard coded *)
+              AST.Prog.Suffixed (
+                  TCommon.expr_of_str 
+                    "AbstractifyCBroadcastToRlsPacketSeq", 
+                  let e = member_access in AST.Prog.ArgList (([e], None))
+                )
+            | _ ->
             (* AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber),  *)
             let _, param_tp   = List.unsnoc tp_gen_inst   in
             let param_tp_id   = TCommon.id_of_tp param_tp in
@@ -203,7 +221,7 @@ module Refinement  = struct
         let ctor, t_ctor = h in 
         match ctor    with AST.TopDecl.DataCtor (_, id,     fmls) ->
         match t_ctor  with AST.TopDecl.DataCtor (_, t_id, t_fmls) ->
-          let abs_4_fmls = generate_abstractify_4_formals fmls t_fmls in
+          let abs_4_fmls = generate_abstractify_4_formals fmls t_fmls true in
           let _ = t_id in
           AST.Prog.Suffixed (
             TCommon.expr_of_str id, 

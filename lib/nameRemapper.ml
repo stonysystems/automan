@@ -40,7 +40,7 @@ object (self)
       TCommon.replace_prefix x "Rsl" "C"
     else if self#is_id_kept_kw x then
       x
-    else if x.[0] = 'L' then
+    else if not (TCommon.starts_with x "Leq") && x.[0] = 'L' then
       "C" ^ (String.sub x 1 (String.length x - 1))
     else
     "C" ^ x
