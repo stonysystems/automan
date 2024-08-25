@@ -144,7 +144,7 @@ module PrettyPrinter (M : MetaData) = struct
       )
       | TpTup t_lst -> (
         let t_lst_str_lst = List.map print t_lst in
-        let t_lst_str = String.concat "" t_lst_str_lst in
+        let t_lst_str = String.concat ", " t_lst_str_lst in
         Printf.sprintf "(%s)" t_lst_str
       )
 

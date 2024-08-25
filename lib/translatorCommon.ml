@@ -6,6 +6,10 @@ open Internal
   * **************************************************************************
   * Some helper functions to assist with translation
   * **************************************************************************
+  *
+  * starts_with
+  * replace_prefix
+  *
   * expr_to_suffix : AST.Prog.exprt_t -> AST.Prog.Suffixed 
   * suffix_to_dot_id : x.b -> b; b must be a id_t; return as expr_t
   * suffix_to_data_update : Suffix -> member_binding_upd_lst as list
@@ -42,6 +46,18 @@ module AST = AnnotationPass
 module Printer = Printer.PrinterAnnotation
 
 module TranslatorCommon = struct 
+
+  let starts_with s prefix =
+    let len_s = String.length s in
+    let len_prefix = String.length prefix in
+    len_s >= len_prefix && String.sub s 0 len_prefix = prefix
+
+  let replace_prefix str old_prefix new_prefix =
+    let len_old = String.length old_prefix in
+    if String.length str >= len_old && String.sub str 0 len_old = old_prefix then
+      new_prefix ^ String.sub str len_old (String.length str - len_old)
+    else
+      str
 
   let is_primitive id = 
     List.exists (fun x -> x = id)
