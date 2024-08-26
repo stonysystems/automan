@@ -6,6 +6,7 @@ module Result : sig
   val ( let< ): ('a, 'e) result -> ('a -> ('b, 'e) result) -> ('b, 'e) result
   val map2: ('a -> 'b) -> ('c -> 'd) -> ('a, 'c) t -> ('b, 'd) t
   val map_option: ('a -> ('b, 'e) result) -> 'a option -> ('b option, 'e) result
+  val error_when: bool -> 'e -> (unit, 'e) result
 end = struct
   include Result
   let ( let< ) = bind
@@ -21,6 +22,12 @@ end = struct
     | Some y ->
       let< z = f y in
       Result.Ok (Some z)
+
+  let error_when c e =
+    if c then
+      Result.Error e
+    else
+      Result.Ok ()
 end
 
 module List : sig
@@ -92,12 +99,16 @@ module NonEmptyList = struct
     let ( :: ) (x', xs') = xs in
     (::) (x, x' :: xs')
 
+  let snoc (xs: 'a t) (x: 'a): 'a t =
+    let ( :: ) (hd, tl) = xs in
+    (::) (hd, tl @ [x])
+
   let unsnoc (xs: 'a t): 'a list * 'a =
     List.unsnoc (as_list xs)
 
-  let uncons (xs : 'a t): 'a * 'a list = 
+  let uncons (xs : 'a t): 'a * 'a list =
     let xs = as_list xs in
-    match xs with 
+    match xs with
     | [] -> invalid_arg "NonEmptyList.coerce: arg is empty"
     | x :: xs' -> (x, xs')
 
@@ -121,7 +132,9 @@ end
 
 module Either : sig
   include module type of Either
-  type ('a, 'b) t = ('a, 'b) Either.t
+  type ('a, 'b) t = ('a, 'b) Either.t =
+    | Left  of 'a
+    | Right of 'b
   [@@deriving show, eq]
 end = struct
   include Either

@@ -683,41 +683,6 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
     | PatVar (id, tp) -> PatVar (id, Option.map (typ tp_h) tp)
     | PatCtor (id, pats) -> PatCtor (id, List.map (pattern tp_h) pats)
 
-  (* let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t = *)
-  (*   let Formal (id, tp) = p in *)
-  (*   Formal (id, typ tp) *)
-
-  (* let method_signature (s: Src.TopDecl.method_signature_t) *)
-  (*   : Tgt.TopDecl.method_signature_t = *)
-  (*   let ps = List.map formal s.params in *)
-  (*   { generic_params = s.generic_params; params = ps } *)
-
-  (* let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t) *)
-  (*   : Tgt.TopDecl.datatype_ctor_t = *)
-  (*   let DataCtor (attrs, id, params) = ctor in *)
-  (*   DataCtor (attr_handler attrs, id, List.map formal params) *)
-
-  (* let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t) *)
-  (*   : Tgt.TopDecl.datatype_t = *)
-  (*   let (attrs, id, tpparams, ctors) = d in *)
-  (*   (attr_handler attrs, id, tpparams *)
-  (*   , NonEmptyList.map (datatype_ctor attr_handler) ctors) *)
-
-  (* let synonym_typ_rhs (tp_h: tp_handler_t) (rhs: Src.TopDecl.synonym_type_rhs_t) *)
-  (*   : Tgt.TopDecl.synonym_type_rhs_t = *)
-  (*   match rhs with *)
-  (*   | Synonym tp -> Tgt.TopDecl.Synonym (typ tp_h tp) *)
-  (*   | Subset (_, _, _) -> *)
-  (*     failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs)) *)
-
-  (* let synonym_type *)
-  (*     (attr_handler: attr_handler_t) (tp_h: tp_handler_t) (d: Src.TopDecl.synonym_type_t) *)
-  (*   : Tgt.TopDecl.synonym_type_t = *)
-  (*   { attrs = attr_handler d.attrs *)
-  (*   ; id = d.id *)
-  (*   ; params = d.params *)
-  (*   ; rhs = synonym_typ_rhs tp_h d.rhs *)
-  (*   } *)
 end
 
 (* AutoMan annotations *)
