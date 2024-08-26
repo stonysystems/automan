@@ -13,7 +13,8 @@ module AnnotationMetaData : MetaData
   with type quantification_t = unit
   with type binary_op_t      = unit
 
-  with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+  with type arglist_t =
+         (Syntax.Common.module_qualified_name_t * Annotation.mode_t list) option
 = struct
   (** - When this is Option.None, the user did not provide an annotation for
         this predicate. For now, a sensible default is to assume all arguments are
@@ -54,7 +55,8 @@ module AnnotationMetaData : MetaData
         length as the argument list suffix, and the expression to which the
         call is attached is given the qualified identifier
   *)
-  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
+  type arglist_t =
+    (Syntax.Common.module_qualified_name_t * Annotation.mode_t list) option
   [@@deriving show, eq]
 end
 

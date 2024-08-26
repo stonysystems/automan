@@ -685,6 +685,14 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
 
 end
 
+module Erase (M: MetaData) = struct
+  module C = Convert (TrivMetaData) (M)
+  module Src = AST (M)
+
+  let (* rec *) expr (_e: Src.Prog.expr_t): ParserPass.Prog.expr_t =
+    failwith "TODO: Syntax.Erase.expr"
+end
+
 (* AutoMan annotations *)
 module Annotation = struct
   type mode_t = Input | Output

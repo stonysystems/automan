@@ -94,7 +94,7 @@ module Definitions = struct
   type arglist_functionalize_t =
     { callee: Common.module_qualified_name_t
     ; in_exprs:  ParserPass.Prog.expr_t list
-    ; out_vars: Syntax.Common.member_qualified_name_t list }
+    ; out_vars: outvar_lhs_t list }
   [@@deriving show, eq]
 end
 
@@ -142,6 +142,16 @@ module Convert = struct
   include C
 
   let typ = C.typ (fun x -> x)
+
+  (* pass-through conversion (no interesting annotations added here, just to get
+     the types right) *)
+  let expr (_e: AnnotationPass.Prog.expr_t): ModePass.Prog.expr_t =
+    failwith "Moder.Convert.expr: TODO"
+end
+
+module Erase = struct
+  module E = Syntax.Erase (ModingMetaData)
+  include E
 end
 
 (* NOTE: no support for translating attributes (for now) *)
@@ -156,6 +166,9 @@ type error_sort_t =
       { var: Syntax.Common.member_qualified_name_t
       ; is_out: bool }
   | IOViolationFun of Syntax.Common.module_qualified_name_t
+  | IllegalOutVarLHS of AnnotationPass.Prog.expr_t
+  | UnsupportedNamedArgs of Syntax.Common.module_qualified_name_t
+  | UnsupportedTypeArgs of AnnotationPass.Prog.expr_t
 type error_t = {callstack: string list; sort: error_sort_t}
 type 'a m = ('a, error_t) Result.t
 
@@ -163,6 +176,9 @@ let soft_error_p: error_t -> bool = function
   | {callstack = _; sort = OutVarShadowing _} -> true
   | {callstack = _; sort = IOViolationVar _} -> true
   | {callstack = _; sort = IOViolationFun _} -> true
+  | {callstack = _; sort = IllegalOutVarLHS _} -> true
+  | {callstack = _; sort = UnsupportedNamedArgs _} -> true
+  | {callstack = _; sort = UnsupportedTypeArgs _} -> true
 
 let on_error_push_callstack (loc: string) (comp: 'a m): 'a m =
   Result.map_error
@@ -178,46 +194,155 @@ module Util = struct
     | PositionalPartition of
         { args_in:  AnnotationPass.Prog.expr_t list
         ; args_out: AnnotationPass.Prog.expr_t list }
-    | Unknown
 
   (** The additional `bool` return is for whether named args are used. These are
       not supported, so their presence means we should generate a stub.
   *)
   let partition_args_by_modes
-      (args: AnnotationPass.Prog.arglist_t) (anns: Annotation.mode_t list option)
+      (args: AnnotationPass.Prog.arglist_t) (anns: Annotation.mode_t list)
     : partition_args_by_modes_t * bool =
     let named_args_p = List.length args.named <> 0 in
-    (* NOTE: The annotation pass assures us that the mode list has the same
+    (* NOTE: The annotation pass ensures that the mode list has the same
        length as the argument list *)
-    let ( let< ) = Option.bind in
-    let res = begin
-      let< anns = anns in
-      let anns' = begin
-        if not named_args_p then anns
-        else List.(take (length args.positional) anns)
-      end in
-      let args_with_anns =
-        List.map2 (fun arg mode -> (arg, mode)) args.positional anns' in
-      let (in_args, out_args) =
-        List.partition_map
-          (function (arg, mode) ->
-             if mode = Annotation.Input
-             then Either.left arg
-             else Either.right arg)
-          args_with_anns
-      in
-      Option.Some
-        (PositionalPartition
-           {args_in = in_args; args_out = out_args})
+    let anns' = begin
+      if not named_args_p then anns
+      else List.(take (length args.positional) anns)
     end in
-    ( Option.fold ~none:Unknown ~some:(fun x -> x) res
-    , named_args_p)
+    let args_with_anns =
+      List.map2 (fun arg mode -> (arg, mode)) args.positional anns' in
+    let (in_args, out_args) =
+      List.partition_map
+        (function
+          | (arg, Annotation.Input)  -> Either.left arg
+          | (arg, Annotation.Output) -> Either.right arg)
+        args_with_anns
+    in
+    ( PositionalPartition {args_in = in_args; args_out = out_args}
+    , named_args_p )
 
   let id_in_formals
       (id: id_t) (ps: AnnotationPass.TopDecl.formal_t list)
     : bool =
     List.exists (function AnnotationPass.TopDecl.Formal (p_id, _) -> id = p_id) ps
+
+  (* NOTE: change this when other "members" are allowed (digits, sequence/key
+     selections) *)
+  let outvar_lhs_qualify
+      (out_var: Definitions.outvar_lhs_t)
+      (mem: (id_t, Definitions.unary_op_for_outvar_t) Either.t)
+    : Definitions.outvar_lhs_t option =
+    Option.fold
+      ~none:begin
+        Option.Some begin
+          match mem with
+          | Either.Left id ->
+            { out_var
+              with mq_outvar =
+                     NonEmptyList.snoc out_var.mq_outvar id }
+          | Either.Right uop ->
+            { out_var with uop = Some uop }
+        end
+      end
+      ~some:(fun _ -> Option.None)
+      out_var.uop
 end
+
+let rec mode_expr_only_out_vars
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e: AnnotationPass.Prog.expr_t)
+  : Definitions.outvar_lhs_t m =
+  let here = "Moder.mode_expr_only_out_vars:" in
+
+  match e with
+  | Suffixed (e_pref, e_suff) ->
+    let* e_pref' = mode_expr_only_out_vars vars_out e_pref in
+    let* e_mem'  = mode_expr_only_out_vars_suffix e e_suff in
+    Option.fold
+      ~none:(
+        Result.Error
+          { callstack = [here]
+          ; sort = IllegalOutVarLHS e })
+      ~some:Result.ok
+      (Util.outvar_lhs_qualify e_pref' (Either.Left e_mem'))
+
+  | NameSeg (id, tp_args) ->
+    let* () =
+      Result.error_when (List.length tp_args <> 0)
+        begin
+          { callstack = [here]
+          ; sort = UnsupportedTypeArgs e }
+        end
+    in
+    let* () =
+      Result.error_when (not (Util.id_in_formals id vars_out))
+        begin
+          { callstack = [here]
+          ; sort =
+              IOViolationVar
+                { var = NonEmptyList.singleton id
+                ; is_out = false }}
+        end
+    in
+    Result.Ok
+      Definitions.(
+        { mq_outvar = NonEmptyList.singleton id
+        ; uop = None })
+  | StmtInExpr (_, e') ->
+    (* NOTE: We drop statements in expressions (reveal/assume/assert) *)
+    mode_expr_only_out_vars vars_out e'
+  | Cardinality e as e_orig ->
+    let* e' = mode_expr_only_out_vars vars_out e in
+    (* NOTE: For now we only support cardinality, and stacking cardinality is
+       not sensible *)
+    Option.fold
+      ~none:begin
+        Result.Error
+          { callstack = [here]
+          ; sort = IllegalOutVarLHS e_orig }
+      end
+      ~some:Result.ok
+      (Util.outvar_lhs_qualify e' (Either.Right Definitions.Cardinality))
+  | Tuple _ ->
+    (* NOTE: Consider supporting tuples of outvars *)
+    Result.Error
+      { callstack = [here]
+      ; sort = IllegalOutVarLHS e }
+  | Lemma {lem = _; e = body} ->
+    (* NOTE: we drop lemma invocations *)
+    mode_expr_only_out_vars vars_out body
+
+  | Lambda _
+  | MapDisplay _
+  | SeqDisplay _
+  | SetDisplay _
+  | If (_, _, _, _)
+  | Match (_, _, _)
+  | Quantifier (_, _)
+  | SetComp _
+  | Let _
+  | MapComp _
+  | Lit _
+  | This
+  | Unary (_, _)
+  | Binary (_, _, _, _) ->
+    Result.Error
+      { callstack = [here]
+      ; sort = IllegalOutVarLHS e }
+
+(* TODO: consider sequence/map indices *)
+and mode_expr_only_out_vars_suffix
+    (e_orig: AnnotationPass.Prog.expr_t)
+    (suff: AnnotationPass.Prog.suffix_t)
+  : id_t m =
+  let here = "Moder.mode_expr_only_out_vars_suffix:" in
+
+  match suff with
+  | AugDot (DSId id, []) ->
+    Result.Ok id
+  | _ ->
+    Result.Error
+      { callstack = [here]
+      ; sort = IllegalOutVarLHS e_orig }
 
 let rec mode_expr_no_out_vars_extended_pattern
     (vars_out: AnnotationPass.TopDecl.formal_t list)
@@ -349,8 +474,7 @@ let rec mode_expr_no_out_vars
            Result.Ok (k', v'))
         kvs
     in
-    Result.Ok ModePass.Prog.(
-      MapDisplay kvs')
+    Result.Ok (ModePass.Prog.MapDisplay kvs')
 
   | SeqDisplay seq_disp ->
     let* seq_disp' = begin
@@ -587,68 +711,64 @@ and mode_expr_no_out_vars_qdom
   Result.Ok ModePass.Prog.(
       QDom {qvars = qvars'; qrange = qrange'})
 
-(* let mode_expr_conjunct_funcall *)
-(*     (vars_in:  AnnotationPass.TopDecl.formal_t list) *)
-(*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
-(*     (args: AnnotationPass.Prog.arglist_t) *)
-(*     (ann: AnnotationMetaData.arglist_t) *)
-(*   : ModePass.Prog.expr_t m = *)
-(*   let (pos_args_in, pos_args_out, named_args_p) = begin *)
-(*     let (part, named) = *)
-(*       Util.partition_args_by_modes args *)
-(*         (Option.map (function (_, modes) -> modes) ann) *)
-(*     in *)
-(*     let (pos_args_in, pos_args_out) = begin *)
-(*       match part with *)
-(*       | PositionalPartition {args_in = args_in; args_out = args_out} -> *)
-(*         (args_in, args_out) *)
-(*       | Unknown -> *)
-(*         (\* NOTE: calls without annotations are assumed to be all input-moded *\) *)
-(*         (args.positional, []) *)
-(*     end in *)
-(*     (pos_args_in, pos_args_out, named) *)
-(*   end in *)
-(*   (\* TODO: *)
-(*      1. check input arguments don't contain output variables *)
+let mode_expr_conjunct_arglist
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (qp_id: Syntax.Common.module_qualified_name_t)
+    (args: AnnotationPass.Prog.arglist_t) (modes: Annotation.mode_t list)
+  : (ModePass.Prog.expr_t * Definitions.outvar_lhs_t list) m =
+  let here = "Moder.mode_expr_conjuct_arglist:" in
 
-(*         NOTE: identifiers not declared in the formal parameter list are assumed *)
-(*         to be input-moded (local variables, constructors) *)
-
-(*      2. check output arguments are member-qualified output variables, and *)
-(*         possibly including length *)
-
-(*      3. if there are any named arguments, indicate that a stub should be generated *\) *)
-(*   let* _ = *)
-(*     if named_args_p then make_stub () *)
-(*     else return () *)
-(*   in *)
-(*   foo1 *)
+  let (PositionalPartition {args_in = args_in; args_out = args_out}, named_args_p) =
+    Util.partition_args_by_modes args modes in
+  (* NOTE: We don't support named arguments in our mode analysis *)
+  let* () =
+    Result.error_when named_args_p begin
+      { callstack = [here]
+      ; sort = UnsupportedNamedArgs qp_id }
+    end
+  in
+  (* Check that arguments in the input positions contain no output variables,
+     and arguments in output positions are only member-qualified output
+     variables *)
+  let* (args_in', args_out') =
+    on_error_push_callstack here
+      begin
+        let* args_in' =
+          List.mapMResult (mode_expr_no_out_vars vars_out) args_in in
+        let* args_out' =
+          List.mapMResult (mode_expr_only_out_vars vars_out) args_out in
+        Result.Ok (args_in', args_out')
+      end
+  in
+  let args' = ModePass.Prog.(
+    ArgList
+      ({ positional =
+           List.map Convert.expr args.positional
+       ; named = [] }
+      , Some
+          Definitions.(
+            { callee = qp_id
+            ; in_exprs = List.map Erase.expr args_in'
+            ; out_vars = args_out' })))
+  in
+  Result.Ok
+    ( ModePass.Prog.(
+          Suffixed(from_qualified_id qp_id, args'))
+    , args_out' )
 
 (* let mode_expr_conjunct *)
-(*     (vars_in:  AnnotationPass.TopDecl.formal_t list) *)
 (*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
-(*     (e: AnnotationPass.Prog.expr_t) *)
-(*   : ModePass.Prog.expr_t m = *)
-(*   match e with *)
-(*   | Suffixed (e_callee, suff) -> begin *)
-(*       match suff with *)
-(*       | ArgList (args, anns) -> *)
-(*         let (pos_args_in, pos_args_out, named_args_p) = begin *)
-(*           let (part, named) = *)
-(*             Util.partition_args_by_modes args *)
-(*               (Option.map (function (_, modes) -> modes) anns) *)
-(*           in *)
-(*           let (pos_args_in, pos_args_out) = begin *)
-(*             match part with *)
-(*             | PositionalPartition {args_in = args_in; args_out = args_out} -> *)
-(*               (args_in, args_out) *)
-(*             | Unknown -> *)
-(*               (\* NOTE: calls without annotations are assumed to be all input-moded *\) *)
-(*               (args.positional, []) *)
-(*           end in *)
-(*           (pos_args_in, pos_args_out, named) *)
-(*         end in *)
+(*     (e_con: AnnotationPass.Prog.expr_t) *)
+(*   : (ModePass.Prog.expr_t * Definitions.outvar_lhs_t list) m = *)
+(*   match e_con with *)
+(*   | Suffixed (e_prefix, e_suff) -> *)
+(*     begin *)
+(*       (\* 1. check if this is an argument list suffix attached to a predicate *)
+(*          marked for functionalization *\) *)
+(*       match e_suff with *)
+(*       | ArgList (args, Some (qp_id, modes)) -> *)
+(*         foo0 *)
+(*       | _ -> *)
 (*         foo1 *)
-(*       | _ -> foo01 *)
 (*     end *)
-(*   | _ -> foo1 *)
+(*   | _ -> foo *)
