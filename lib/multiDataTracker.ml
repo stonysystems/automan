@@ -1,6 +1,4 @@
-open Syntax
-
-module AST = AnnotationPass
+module AST = Syntax.AST(Annotator.AnnotationMetaData)
 module TranslatorCommon = TranslatorCommon.TranslatorCommon
 module DataTracker = DataTracker.DataTracker
 

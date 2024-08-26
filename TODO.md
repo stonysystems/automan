@@ -28,7 +28,7 @@
 
 - [ ] `ghost` modifier is not currently parsed
 
-- [ ] Language support for named parameters in argument lists
+- [X] Language support for named parameters in argument lists
 
 - [ ] Consider state relationship (for partial specifications)
 
@@ -37,6 +37,9 @@
 ## Nice-to-haves
 - [ ] annotation files should ideally be searched while processing Dafny
       `include` directives, not presented all upfront as is done currently
-- [ ] following on the previous item, for harmony and saturation its desirable
-      to chase down includes to know type / datatpe definitions (to know what
-      their fields are).
+- [ ] following on the previous item, for harmony and saturation, as well as
+      type user-provided annotations for type indirection, its desirable to
+      chase down includes to know type / datatpe definitions (to know what their
+      fields are).
+
+- [ ] users may want to introduce some indirection to certain types

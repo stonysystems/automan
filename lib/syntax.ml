@@ -4,78 +4,54 @@ open Internal
 
 module type MetaData = sig
   (* Use [@opaque] for instances where we don't want to / can't print this *)
-  type predicate_decl_t [@@deriving show, eq]
+  (* Toplevel declarations *)
+  type predicate_decl_t    [@@deriving show, eq]
+  type datatype_decl_t     [@@deriving show, eq]
+  type synonym_type_decl_t [@@deriving show, eq]
+
+  (* Types *)
+  type type_t [@@deriving show, eq]
+
+  (* Expressions *)
+  type ite_t            [@@deriving show, eq]
+  type match_t          [@@deriving show, eq]
+  type quantification_t [@@deriving show, eq]
+  type binary_op_t      [@@deriving show, eq]
+
+  (* Expression suffixes *)
   type arglist_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
-  with type predicate_decl_t  = unit
+  with type predicate_decl_t    = unit
+  with type datatype_decl_t     = unit
+  with type synonym_type_decl_t = unit
+
+  with type type_t = unit
+
+  with type ite_t            = unit
+  with type match_t          = unit
+  with type quantification_t = unit
+  with type binary_op_t      = unit
+
   with type arglist_t = unit
 = struct
-  type predicate_decl_t  = unit [@@deriving show, eq]
+  type predicate_decl_t    = unit [@@deriving show, eq]
+  type datatype_decl_t     = unit [@@deriving show, eq]
+  type synonym_type_decl_t = unit [@@deriving show, eq]
+
+  type type_t = unit [@@deriving show, eq]
+
+  type ite_t            = unit [@@deriving show, eq]
+  type match_t          = unit [@@deriving show, eq]
+  type quantification_t = unit [@@deriving show, eq]
+  type binary_op_t      = unit [@@deriving show, eq]
+
   type arglist_t = unit [@@deriving show, eq]
 end
 
 type id_t   = string
 [@@deriving show, eq]
-
-(* AutoMan annotations *)
-module Annotation = struct
-  type mode_t = Input | Output
-  [@@deriving show, eq]
-
-  type t =
-    | Module    of module_t
-    | Predicate of predicate_t
-  [@@deriving show, eq]
-
-  and predicate_t = id_t * mode_t list
-
-  and module_t = id_t * t list
-
-  type toplevel_t = t list
-  [@@deriving show, eq]
-
-  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
-    List.filter
-      (function
-        | Module (m_id, _) -> m_id = id
-        | _ -> false)
-      anns
-
-  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
-    List.filter
-      (function
-        | Predicate (p_id, _) -> p_id = id
-        | _ -> false)
-      anns
-end
-
-module AnnotationMetaData : MetaData
-  with type predicate_decl_t  = Annotation.mode_t list option
-  with type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
-= struct
-  (** - When this is Option.None, the user did not provide an annotation for
-        this predicate. For now, a sensible default is to assume all arguments are
-        input moded; however, since this might change it is desirable to
-        distinguish this case from the case where the user provides an explicit
-        annotation indicating all arguments should be input moded
-
-      - When this is Option.Some modes, `List.length modes` is exactly the arity
-        of the predicate *)
-  type predicate_decl_t  = Annotation.mode_t list option
-  [@@deriving show, eq]
-
-  (** - When this is Option.None, the call is not associated with a known
-        predicate. For now, assume this means all arguments are input moded
-
-      - When this is Option.Some, the mode list this contains has the same
-        length as the argument list suffix, and the expression to which the
-        call is attached is given the qualified identifier
-  *)
-  type arglist_t = (id_t NonEmptyList.t * Annotation.mode_t list) option
-  [@@deriving show, eq]
-end
 
 (* Data that does not change during the different passes *)
 module Common = struct
@@ -94,6 +70,10 @@ module Common = struct
     | DSRequires | DSReads
     | DSId  of id_t
     | DSDig of int (* NOTE: natural number*)
+  [@@deriving show, eq]
+
+  (* a.b.c *)
+  type member_qualified_name_t = id_t NonEmptyList.t
   [@@deriving show, eq]
 
   type uop_t = Neg | Not
@@ -115,7 +95,7 @@ module Common = struct
     | Equiv
   [@@deriving show, eq]
 
-  (* Quantifiers *)
+  (* Quantifications *)
   type quantifier_t = Forall | Exists
   [@@deriving show, eq]
 
@@ -161,17 +141,18 @@ module AST (M : MetaData) = struct
 
     (* NOTE: no function types *)
     and t =
-      | TpName of name_seg_t NonEmptyList.t
+      | TpName of M.type_t * name_seg_t NonEmptyList.t
       (* NOTE: this representation allows singleton tuples; use the smart
          constructor *)
       | TpTup  of t list
     [@@deriving show, eq]
 
-    let simple_generic (id: id_t) (gen_inst: t list) =
-      TpName (NonEmptyList.singleton
+    let simple_generic (id: id_t) (gen_inst: t list) (t_ann: M.type_t) =
+      TpName (t_ann
+             , NonEmptyList.singleton
                 (TpIdSeg {id = id; gen_inst = gen_inst}))
 
-    let simple (id: id_t): t = simple_generic id []
+    let simple (id: id_t) (t_ann: M.type_t): t = simple_generic id [] t_ann
 
     let int    = simple "int"
     let bool   = simple "bool"
@@ -255,20 +236,17 @@ module AST (M : MetaData) = struct
          https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-endless-expression *)
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-if-expression
          NOTE: no binding guards*)
-      | If of expr_t * expr_t * expr_t
+      | If of M.ite_t * expr_t * expr_t * expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-match-expression *)
-      | Match of expr_t * case_expr_t list
+      | Match of M.match_t * expr_t * case_expr_t list
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-quantifier-expression
          NOTE: Dafny 3 does not support per-variable quantifier ranges, so we
          aren't either *)
-      | Quantifier of
-          { qt : Common.quantifier_t
-          ; qdom : qdom_t
-          ; qbody : expr_t }
+      | Quantifier of M.quantification_t * quantification_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-set-comprehension-expression
          NOTE: no support for iset
          NOTE: no per-variable quantifier ranges *)
-      | SetComp of qdom_t * expr_t option
+      | SetComp of set_comp_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-statement-in-expression
          NOTE: that an expression follows the statement is part of the endless expression definition *)
       | StmtInExpr of stmt_in_expr_t * expr_t
@@ -282,7 +260,7 @@ module AST (M : MetaData) = struct
           ; body: expr_t }
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-map-comprehension-expression
          NOTE: imap not supported *)
-      | MapComp of { qdom: qdom_t; key: expr_t option; valu: expr_t }
+      | MapComp of map_comp_t
       (* const atom expressions: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-atomic-expression
          NOTE: no fresh, allocated, unchanged, old *)
       | Lit  of Common.lit_t
@@ -301,7 +279,7 @@ module AST (M : MetaData) = struct
          - as/is: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-as-is-expression
          - bitvector: https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-bitvector-expression
       *)
-      | Binary of Common.bop_t * expr_t * expr_t
+      | Binary of M.binary_op_t * Common.bop_t * expr_t * expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-top-level-expression *)
       | Lemma of {lem: expr_t; e: expr_t}
     [@@deriving show, eq]
@@ -377,10 +355,14 @@ module AST (M : MetaData) = struct
          NOTE: multiple indices (for multi-dimensional arrays) not (yet?) supported *)
       | Sel      of expr_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-argument-list-suffix *)
-      | ArgList  of expr_t list * M.arglist_t
+      | ArgList  of arglist_t * M.arglist_t
     [@@deriving show, eq]
 
     and member_binding_upd_t = (id_t, int) Either.t * expr_t
+
+    and arglist_t =
+      { positional: expr_t list
+      ; named: (id_t * expr_t) list }
 
     and seq_display_t =
       | SeqEnumerate of expr_t list
@@ -389,6 +371,20 @@ module AST (M : MetaData) = struct
           ; len: expr_t
           ; func: expr_t
           }
+
+    and quantification_t =
+      { qt: Common.quantifier_t
+      ; qdom: qdom_t
+      ; qbody: expr_t }
+
+    and map_comp_t =
+      { qdom: qdom_t
+      ; key: expr_t option
+      ; valu: expr_t }
+
+    and set_comp_t =
+      { qdom: qdom_t
+      ; body: expr_t option }
 
     and attribute_t = string * expr_t list
 
@@ -432,22 +428,42 @@ module AST (M : MetaData) = struct
 
     (** should only be called with relational operators that support chaining,
         and can be chained together *)
-    let rec chain_bop (e1: expr_t) (es: (Common.bop_t * expr_t) list): expr_t =
+    let rec chain_bop
+        (and_ann: M.binary_op_t) (e1: expr_t)
+        (es: (M.binary_op_t * Common.bop_t * expr_t) list)
+      : expr_t =
       match es with
       | [] -> e1
-      | [(o, e2)] -> Binary (o, e1, e2)
-      | (o, e2) :: es ->
-        let res = chain_bop e2 es in
-        Binary (And, Binary (o, e1, e2), res)
+      | [(ann, o, e2)] -> Binary (ann, o, e1, e2)
+      | (ann, o, e2) :: es ->
+        let res = chain_bop and_ann e2 es in
+        Binary (and_ann, And, Binary (ann, o, e1, e2), res)
 
-    let assoc_right_bop (o: Common.bop_t) (es: expr_t NonEmptyList.t): expr_t =
-      NonEmptyList.fold_right_1 (fun x y -> Binary (o, x, y)) es
+    let rec to_conjuncts (e: expr_t): expr_t list =
+      match e with
+      | Binary (_, Common.And, e1, e2) ->
+        to_conjuncts e1 @ to_conjuncts e2
+      | _ ->
+        [e]
+
+    let assoc_right_bop
+        (o_ann: M.binary_op_t) (o: Common.bop_t)
+        (es: expr_t NonEmptyList.t)
+      : expr_t =
+      NonEmptyList.fold_right_1
+        (fun x y -> Binary (o_ann, o, x, y))
+        es
 
     let foldl1 (f: expr_t -> expr_t -> expr_t) (es: expr_t list): expr_t =
       match es with
       | [] -> assert false      (* TODO: better error handling (integrate with parser (option)) *)
       | init :: es ->
         List.fold_left f init es
+
+    let maybe_to_id (e: expr_t): id_t option =
+      match e with
+      | NameSeg (id, []) -> Some id
+      | _ -> None
 
     let maybe_to_qualified_id (e: expr_t): id_t NonEmptyList.t option =
       (* TODO: handle identifier dot suffixes with generic instantations *)
@@ -465,6 +481,39 @@ module AST (M : MetaData) = struct
       List.fold_left
         (fun qid id -> Suffixed (qid, AugDot (Common.DSId id, [])))
         (NameSeg (hd, [])) tl
+
+    (* Argument lists *)
+    type pseudo_arglist_t = (expr_t * expr_t option) list
+    [@@deriving show, eq]
+
+    let coerce_arglist (args: pseudo_arglist_t): arglist_t =
+      let here = "Syntax.AST.ArgList.coerce: " in
+      let rec aux_name acc_pos acc_name = function
+        | [] -> (acc_pos, acc_name)
+        | (expr_id, Some expr_arg) :: args ->
+          begin
+            match maybe_to_id expr_id with
+            | None ->
+              failwith begin
+                here
+                ^ "invalid parameter name: " ^ (show_expr_t expr_id)
+              end
+            | Some id ->
+              aux_name acc_pos ((id, expr_arg) :: acc_name) args
+          end
+        | _ :: _ ->
+          failwith (here ^ "positional arguments must come before named ones")
+      in
+      let rec aux acc_pos = function
+        | [] -> (acc_pos, [])
+        | (expr, None) :: args ->
+          aux (expr :: acc_pos) args
+        | _ :: _ as args ->
+          aux_name acc_pos [] args
+      in
+      let (positional, named) = aux [] args in
+      { positional = List.rev positional
+      ; named      = List.rev named }
   end
 
   module TopDecl = struct
@@ -482,7 +531,8 @@ module AST (M : MetaData) = struct
     [@@deriving show, eq]
 
     type datatype_t =
-      Prog.attribute_t list
+      M.datatype_decl_t
+      * Prog.attribute_t list
       * id_t * Type.generic_params_t
       * datatype_ctor_t NonEmptyList.t
     [@@deriving show, eq]
@@ -490,12 +540,13 @@ module AST (M : MetaData) = struct
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-type-definition
        NOTE: no type parameter characteristics, witness clauses *)
     type synonym_type_rhs_t =
-    | Synonym of Type.t
+      | Synonym of Type.t
       | Subset  of id_t * Type.t option * Prog.expr_t
     [@@deriving show, eq]
 
     type synonym_type_t =
-      { attrs: Prog.attribute_t list
+      { ann: M.synonym_type_decl_t
+      ; attrs: Prog.attribute_t list
       ; id: id_t
       ; params: Type.generic_params_t
       ; rhs: synonym_type_rhs_t
@@ -590,6 +641,8 @@ module AST (M : MetaData) = struct
   [@@deriving show, eq]
 end
 
+module ParserPass     = AST (TrivMetaData)
+
 module Convert (M1 : MetaData) (M2 : MetaData) = struct
   module Src = AST (M1)
   module Tgt = AST (M2)
@@ -597,64 +650,118 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
   type attr_handler_t =
     Src.Prog.attribute_t list -> Tgt.Prog.attribute_t list
 
-  let rec typ (tp: Src.Type.t): Tgt.Type.t =
-    let aux_ns (ns: Src.Type.name_seg_t): Tgt.Type.name_seg_t =
-      let TpIdSeg {id = id; gen_inst = gen_inst} = ns in
-      TpIdSeg {id = id; gen_inst = List.map typ gen_inst}
-    in
-    match tp with
-    | TpTup tps -> TpTup (List.map typ tps)
-    | TpName nss -> TpName (NonEmptyList.map aux_ns nss)
+  type tp_handler_t =
+    M1.type_t -> M2.type_t
 
-  let rec extended_pattern (pat: Src.Prog.extended_pattern_t)
+  let rec typ (tp_h: tp_handler_t) (tp: Src.Type.t) : Tgt.Type.t =
+    match tp with
+    | TpTup tps -> TpTup (List.map (typ tp_h) tps)
+    | TpName (t_ann, nss) ->
+      TpName
+        ( tp_h t_ann
+        , NonEmptyList.map (typ_name_seg tp_h) nss)
+
+  and typ_name_seg (tp_h: tp_handler_t) (nsegs: Src.Type.name_seg_t)
+    : Tgt.Type.name_seg_t =
+    let TpIdSeg {id = id; gen_inst = gen_inst} = nsegs in
+    TpIdSeg {id = id; gen_inst = List.map (typ tp_h) gen_inst}
+
+  let rec extended_pattern
+      (tp_h: tp_handler_t) (pat: Src.Prog.extended_pattern_t)
     : Tgt.Prog.extended_pattern_t =
     match pat with
     | EPatLit lit -> EPatLit lit
     | EPatVar (id, tp) ->
-      EPatVar (id, Option.map typ tp)
+      EPatVar (id, Option.map (typ tp_h) tp)
     | EPatCtor (id, pats) ->
-      EPatCtor (id, List.map extended_pattern pats)
+      EPatCtor (id, List.map (extended_pattern tp_h) pats)
 
-  let rec pattern (pat: Src.Prog.pattern_t): Tgt.Prog.pattern_t =
+  let rec pattern
+      (tp_h: tp_handler_t) (pat: Src.Prog.pattern_t)
+    : Tgt.Prog.pattern_t =
     match pat with
-    | PatVar (id, tp) -> PatVar (id, Option.map typ tp)
-    | PatCtor (id, pats) -> PatCtor (id, List.map pattern pats)
+    | PatVar (id, tp) -> PatVar (id, Option.map (typ tp_h) tp)
+    | PatCtor (id, pats) -> PatCtor (id, List.map (pattern tp_h) pats)
 
-  let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t =
-    let Formal (id, tp) = p in
-    Formal (id, typ tp)
+  (* let formal (p: Src.TopDecl.formal_t): Tgt.TopDecl.formal_t = *)
+  (*   let Formal (id, tp) = p in *)
+  (*   Formal (id, typ tp) *)
 
-  let method_signature (s: Src.TopDecl.method_signature_t)
-    : Tgt.TopDecl.method_signature_t =
-    let ps = List.map formal s.params in
-    { generic_params = s.generic_params; params = ps }
+  (* let method_signature (s: Src.TopDecl.method_signature_t) *)
+  (*   : Tgt.TopDecl.method_signature_t = *)
+  (*   let ps = List.map formal s.params in *)
+  (*   { generic_params = s.generic_params; params = ps } *)
 
-  let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t)
-    : Tgt.TopDecl.datatype_ctor_t =
-    let DataCtor (attrs, id, params) = ctor in
-    DataCtor (attr_handler attrs, id, List.map formal params)
+  (* let datatype_ctor (attr_handler: attr_handler_t) (ctor: Src.TopDecl.datatype_ctor_t) *)
+  (*   : Tgt.TopDecl.datatype_ctor_t = *)
+  (*   let DataCtor (attrs, id, params) = ctor in *)
+  (*   DataCtor (attr_handler attrs, id, List.map formal params) *)
 
-  let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t)
-    : Tgt.TopDecl.datatype_t =
-    let (attrs, id, tpparams, ctors) = d in
-    (attr_handler attrs, id, tpparams
-    , NonEmptyList.map (datatype_ctor attr_handler) ctors)
+  (* let datatype (attr_handler: attr_handler_t) (d: Src.TopDecl.datatype_t) *)
+  (*   : Tgt.TopDecl.datatype_t = *)
+  (*   let (attrs, id, tpparams, ctors) = d in *)
+  (*   (attr_handler attrs, id, tpparams *)
+  (*   , NonEmptyList.map (datatype_ctor attr_handler) ctors) *)
 
-  let synonym_typ_rhs (rhs: Src.TopDecl.synonym_type_rhs_t)
-    : Tgt.TopDecl.synonym_type_rhs_t =
-    match rhs with
-    | Synonym tp -> Tgt.TopDecl.Synonym (typ tp)
-    | Subset (_, _, _) ->
-      failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs))
+  (* let synonym_typ_rhs (tp_h: tp_handler_t) (rhs: Src.TopDecl.synonym_type_rhs_t) *)
+  (*   : Tgt.TopDecl.synonym_type_rhs_t = *)
+  (*   match rhs with *)
+  (*   | Synonym tp -> Tgt.TopDecl.Synonym (typ tp_h tp) *)
+  (*   | Subset (_, _, _) -> *)
+  (*     failwith ("TODO: subset types: " ^ Src.TopDecl.(show_synonym_type_rhs_t rhs)) *)
 
-  let synonym_type (attr_handler: attr_handler_t) (d: Src.TopDecl.synonym_type_t)
-    : Tgt.TopDecl.synonym_type_t =
-    { attrs = attr_handler d.attrs
-    ; id = d.id
-    ; params = d.params
-    ; rhs = synonym_typ_rhs d.rhs
-    }
+  (* let synonym_type *)
+  (*     (attr_handler: attr_handler_t) (tp_h: tp_handler_t) (d: Src.TopDecl.synonym_type_t) *)
+  (*   : Tgt.TopDecl.synonym_type_t = *)
+  (*   { attrs = attr_handler d.attrs *)
+  (*   ; id = d.id *)
+  (*   ; params = d.params *)
+  (*   ; rhs = synonym_typ_rhs tp_h d.rhs *)
+  (*   } *)
 end
 
-module ParserPass     = AST (TrivMetaData)
-module AnnotationPass = AST (AnnotationMetaData)
+(* AutoMan annotations *)
+module Annotation = struct
+  type mode_t = Input | Output
+  [@@deriving show, eq]
+
+  type t =
+    | Module    of module_t
+    | Predicate of predicate_t
+    | TypeAlias of tp_alias_t
+  [@@deriving show, eq]
+
+  and predicate_t = id_t * mode_t list
+  and module_t = id_t * t list
+  and tp_alias_t = id_t * ParserPass.Type.t
+
+  type qualified_tp_alias_t = Common.module_qualified_name_t * ParserPass.Type.t
+  [@@deriving show, eq]
+
+  type toplevel_t = t list
+  [@@deriving show, eq]
+
+  let filter_by_module_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Module (m_id, _) -> m_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_predicate_id (id: id_t) (anns: toplevel_t) =
+    List.filter
+      (function
+        | Predicate (p_id, _) -> p_id = id
+        | _ -> false)
+      anns
+
+  let filter_by_tp_alias_tgt
+      (tp: ParserPass.Type.t) (anns: toplevel_t)
+    : toplevel_t =
+    List.filter
+      (function
+        | TypeAlias (_, tp') -> tp = tp'
+        | _ -> false)
+      anns
+
+end

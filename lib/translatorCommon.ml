@@ -42,8 +42,10 @@ open Internal
   * **************************************************************************
   *)
 
-module AST = AnnotationPass
-module Printer = Printer.PrinterAnnotation
+
+module AST = Syntax.AST(Annotator.AnnotationMetaData)
+module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+
 
 module TranslatorCommon = struct 
 
@@ -69,7 +71,7 @@ module TranslatorCommon = struct
 
   let id_and_gen_inst_of_tp (x : AST.Type.t) = 
     match x with 
-    | TpName name_seg -> begin 
+    | TpName (_, name_seg) -> begin 
       let rest, h = NonEmptyList.unsnoc name_seg in
       assert ((List.length rest) = 0);
       let AST.Type.TpIdSeg {id = id; gen_inst = gen_inst} = h in
@@ -80,7 +82,7 @@ module TranslatorCommon = struct
 
   let id_of_tp (x : AST.Type.t) = 
     match x with 
-    | TpName name_seg -> begin 
+    | TpName (_, name_seg) -> begin 
       let rest, h = NonEmptyList.unsnoc name_seg in
       assert ((List.length rest) = 0);
       let AST.Type.TpIdSeg {id = id; gen_inst = gen_inst} = h in
@@ -90,7 +92,7 @@ module TranslatorCommon = struct
     | TpTup _ -> assert false
 
   let tp_of_id (x : id_t) = 
-    AST.Type.simple x
+    AST.Type.simple x None
 
   let expr_of_str (x : string) = 
     AST.Prog.NameSeg (x, [])
@@ -209,7 +211,7 @@ module TranslatorCommon = struct
         let r = aux rest in
         match is_expr_blank r with
         | true -> l 
-        | false -> Binary (Syntax.Common.And, l, r)
+        | false -> Binary ((), Syntax.Common.And, l, r)
       end in aux exprs
 
   module Expr = struct 

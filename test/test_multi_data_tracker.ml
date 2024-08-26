@@ -1,11 +1,12 @@
 open Automan
+open Syntax
 
 
-module AST = Syntax.AST(Syntax.AnnotationMetaData)
-module DataTracker = DataTracker.DataTracker
-module Printer = Printer.PrettyPrinter(Syntax.AnnotationMetaData)
-module TranslatorCommon = TranslatorCommon.TranslatorCommon
-module MultiDataTracker = MultiDataTracker.MultiDataTracker
+module AST = AST(Annotator.AnnotationMetaData)
+module Refinement = Refinement.Refinement
+module TCommon = TranslatorCommon.TranslatorCommon
+module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+
 
 let id_to_expr (x : Syntax.id_t) = AST.Prog.NameSeg((x, []))
 

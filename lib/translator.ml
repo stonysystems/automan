@@ -2,10 +2,11 @@ open Syntax
 open Internal
 
 
-module AST = AnnotationPass
+module AST = AST(Annotator.AnnotationMetaData)
 module Refinement = Refinement.Refinement
 module TCommon = TranslatorCommon.TranslatorCommon
-module Printer = Printer.PrinterAnnotation
+module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+
 
 module Translator = struct 
   let remapper = new NameRemapper.name_remapper
@@ -25,10 +26,12 @@ module Translator = struct
 
     and translate (x : AST.Type.t) = 
       match x with
-      | TpName name_seg_lst -> TpName begin 
-        NonEmptyList.coerce begin
-          List.map t_name_seg (NonEmptyList.as_list name_seg_lst)
-        end end
+      | TpName (m, name_seg_lst) -> TpName (
+          m, 
+          NonEmptyList.coerce (
+            List.map t_name_seg (NonEmptyList.as_list name_seg_lst)
+          )
+        )
       | TpTup t_lst -> TpTup (List.map translate t_lst)
 
   end
@@ -129,26 +132,27 @@ module Translator = struct
         let t_x = List.map t_expr x in
         AST.Prog.SetDisplay t_x
       )
-      | If (e1, e2, e3) -> (
+      | If (m, e1, e2, e3) -> (
         let t_e1 = t_expr e1 in
         let t_e2 = t_expr e2 in
         let t_e3 = t_expr e3 in
-        AST.Prog.If (t_e1, t_e2, t_e3)
+        AST.Prog.If (m, t_e1, t_e2, t_e3)
       )
-      | Match (expr, case_exprs) -> AST.Prog.Match (
+      | Match (m, expr, case_exprs) -> AST.Prog.Match (
+        m, 
         t_expr expr,
         List.map t_case_expr case_exprs
       )
-      | Quantifier {qt = qt; qdom = qdom; qbody = qbody} -> 
-        AST.Prog.Quantifier {
+      | Quantifier (m, {qt = qt; qdom = qdom; qbody = qbody}) -> 
+        AST.Prog.Quantifier (m, {
           qt = qt;
           qdom = t_qdom qdom;
           qbody = t_expr qbody
-        }
-      | SetComp (qdom, expro) -> AST.Prog.SetComp (
-        t_qdom qdom,
-        t_expr_option expro
-      )
+        })
+      | SetComp {qdom = qdom; body = body} -> AST.Prog.SetComp {
+        qdom = t_qdom qdom;
+        body = t_expr_option body
+      }
       | StmtInExpr _ -> assert false
       | Let {ghost = ghost; pats = pats; defs = defs; body = body} -> 
         AST.Prog.Let {
@@ -170,7 +174,8 @@ module Translator = struct
         let t_expr = t_expr expr in
         AST.Prog.Unary (uop, t_expr)
       )
-      | Binary (bop, e1, e2) -> AST.Prog.Binary (
+      | Binary (m, bop, e1, e2) -> AST.Prog.Binary (
+        m, 
         bop,
         t_expr e1,
         t_expr e2
@@ -224,14 +229,23 @@ module Translator = struct
         v = t_expr v;
       }
       | Sel expr -> Sel (t_expr expr)
-      | ArgList (exprs, args) -> AST.Prog.ArgList (
-        List.map t_expr exprs,
-        args
+      | ArgList (args, m) -> AST.Prog.ArgList (
+        t_arglist args,
+        m
       )
 
     and t_member_binding_upd (x : AST.Prog.member_binding_upd_t) = 
       let either, e = x in
       (either, t_expr e)
+
+    and t_arglist (x : AST.Prog.arglist_t) : AST.Prog.arglist_t = 
+      match x with {positional = p; named = n} ->
+      {
+        positional = List.map t_expr p;
+        named = List.map (
+          fun x -> let id, expr = x in (id, t_expr expr)
+        ) n
+      }
 
     and t_seq_display (x : AST.Prog.seq_display_t) = 
       match x with
@@ -287,7 +301,7 @@ module Translator = struct
       AST.TopDecl.DataCtor ([], t_id, t_formals)
 
     let t_data_type_decl (x : AST.TopDecl.datatype_t) = 
-      let attr_lst, id, generic_params, ctors = x in
+      let m, attr_lst, id, generic_params, ctors = x in
       let _ = attr_lst in (* IGNORE: attr_lst *)
       let _ = generic_params in (* IGNORE: generic_params *)
       let t_id = remapper#id_remap id in
@@ -296,7 +310,7 @@ module Translator = struct
           List.map t_datatype_ctor (NonEmptyList.as_list ctors)
         )
       in
-      let t_datatype = ([], t_id, [], t_ctors) in
+      let t_datatype = (m, attr_lst, t_id, [], t_ctors) in
       let is_valid = 
         Refinement.generate_is_valid_4_datatype         t_datatype in
       let is_abstractable = 
@@ -341,10 +355,14 @@ module Translator = struct
       let get_self_call_from_func_id_and_args
         (func_id : string)
         (args    : AST.Prog.expr_t list) = 
+        let args : AST.Prog.arglist_t = {
+          positional = args; 
+          named = []
+        } in
         AST.Prog.Suffixed (
           TCommon.expr_of_str func_id, 
           AST.Prog.ArgList (
-            args, None
+            args, None (* Changed for MetaData *)
           )
         )
       in
@@ -438,7 +456,10 @@ module Translator = struct
               let c_call = get_self_call_from_func_id_and_args t_id t_args in
               let l_call = 
                 get_self_call_from_func_id_and_args id args_for_l_call in
-              let check = AST.Prog.Binary (Syntax.Common.Eq, c_call, l_call) in
+              let check = AST.Prog.Binary (
+                (), (* Changed for MetaData *)
+                Syntax.Common.Eq, c_call, l_call
+              ) in
               [AST.TopDecl.Ensures check]
             )
             | _ -> (

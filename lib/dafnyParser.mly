@@ -28,18 +28,17 @@ expr(LEM):
 equiv_expr(LEM):
   | es = separated_nonempty_list(EQUIV, implies_explies_expr(LEM))
     { Syntax.ParserPass.Prog.(
-        assoc_right_bop Equiv (Internal.NonEmptyList.coerce es))
+        assoc_right_bop () Equiv (Internal.NonEmptyList.coerce es))
     }
 
 implies_explies_expr(LEM):
   | e = logic_expr(LEM); es = nonempty_list(implies_before_expr(LEM))
     { Syntax.ParserPass.Prog.(
-        assoc_right_bop Implies (Internal.NonEmptyList.(e :: es)))
+        assoc_right_bop () Implies (Internal.NonEmptyList.(e :: es)))
     }
   | e = logic_expr(LEM); es = nonempty_list(explies_before_expr(LEM))
     { Syntax.ParserPass.Prog.(
-        assoc_right_bop
-          Implies
+        assoc_right_bop () Implies
           (Internal.NonEmptyList.coerce (List.rev (e :: es)))
       )}
   | e = logic_expr(LEM) { e }
@@ -51,19 +50,19 @@ explies_before_expr(LEM): EXPLIES; e = logic_expr(LEM) { e }
 logic_expr(LEM):
   | es = nonempty_list(and_before_rel_expr(LEM))
     { Syntax.ParserPass.Prog.(
-        assoc_right_bop And (Internal.NonEmptyList.coerce es))
+        assoc_right_bop () And (Internal.NonEmptyList.coerce es))
     }
   | e = rel_expr(LEM); es = nonempty_list(and_before_rel_expr(LEM))
     { Syntax.ParserPass.Prog.(
-        assoc_right_bop And (Internal.NonEmptyList.(::) (e, es)))
+        assoc_right_bop () And (Internal.NonEmptyList.(::) (e, es)))
     }
   | es = nonempty_list(or_before_rel_expr(LEM))
     { Syntax.ParserPass.Prog.(
-        assoc_right_bop Or (Internal.NonEmptyList.coerce es))
+        assoc_right_bop () Or (Internal.NonEmptyList.coerce es))
     }
   | e = rel_expr(LEM); es = nonempty_list(or_before_rel_expr(LEM))
     { Syntax.ParserPass.Prog.(
-        assoc_right_bop Or (Internal.NonEmptyList.(::) (e, es)))
+        assoc_right_bop () Or (Internal.NonEmptyList.(::) (e, es)))
     }
   | e = rel_expr(LEM) { e }
 
@@ -98,21 +97,21 @@ rel_expr(LEM):
   | e = rel_expr_chain_eq(LEM)     { e }
   | e1 = term_expr(LEM);
     o  = rel_op_nonchaining;
-    e2 = term_expr(LEM);           { Syntax.ParserPass.Prog.(Binary (o, e1, e2)) }
+    e2 = term_expr(LEM);           { Syntax.ParserPass.Prog.(Binary ((), o, e1, e2)) }
   | e = term_expr(LEM)             { e }
 
 rel_expr_chain_lte_lt(LEM):
-  | e1 = term_expr(LEM); es = nonempty_list(o = rel_op_lt_lte; e = term_expr(LEM) { (o, e) })
-    { Syntax.ParserPass.Prog.chain_bop e1 es }
+  | e1 = term_expr(LEM); es = nonempty_list(o = rel_op_lt_lte; e = term_expr(LEM) { ((), o, e) })
+    { Syntax.ParserPass.Prog.chain_bop () e1 es }
 
 rel_expr_chain_gte_gt(LEM):
-  | e1 = term_expr(LEM); es = nonempty_list(o = rel_op_gt_gte; e = term_expr(LEM) { (o, e) })
-    { Syntax.ParserPass.Prog.chain_bop e1 es }
+  | e1 = term_expr(LEM); es = nonempty_list(o = rel_op_gt_gte; e = term_expr(LEM) { ((), o, e) })
+    { Syntax.ParserPass.Prog.chain_bop () e1 es }
 
 rel_expr_chain_eq(LEM):
   | e1 = term_expr(LEM);
-    es = nonempty_list(EQ; e = term_expr(LEM) { (Syntax.Common.Eq, e) })
-    { Syntax.ParserPass.Prog.chain_bop e1 es }
+    es = nonempty_list(EQ; e = term_expr(LEM) { ((), Syntax.Common.Eq, e) })
+    { Syntax.ParserPass.Prog.chain_bop () e1 es }
 
 term_op:
   | ADD { Syntax.Common.Add }
@@ -125,7 +124,7 @@ term_expr(LEM):
         List.fold_left
           (fun x y ->
             let (top, y') = y in
-            Binary (top, x, y'))
+            Binary ((), top, x, y'))
           e es)
     }
 
@@ -143,7 +142,7 @@ factor_expr(LEM):
         List.fold_left
           (fun x y ->
             let (top, y') = y in
-            Binary (top, x, y'))
+            Binary ((), top, x, y'))
           e es)
     }
 
@@ -240,13 +239,13 @@ set_disp_expr:
 /* TODO: StmtInExpr */
 endless_expr(LEM):
   | IF; c = expr(yeslem); THEN; t = expr(yeslem); ELSE; e = expr(LEM)
-    { Syntax.ParserPass.Prog.If (c, t, e) }
+    { Syntax.ParserPass.Prog.If ((), c, t, e) }
   | e = match_expr(LEM)
     { e }
   | e = quantifier_expr(LEM)
     { e }
   | SET; qd = qvar_dom(LEM); e = option(QUANTIFY_SEP; e = expr(yeslem) { e })
-    { Syntax.ParserPass.Prog.SetComp (qd, e) }
+    { Syntax.ParserPass.Prog.SetComp {qdom = qd; body = e} }
   /* let
      NOTE: no ghost, let-fail, assign-such-that */
   | e = let_expr(LEM) { e }
@@ -295,7 +294,7 @@ case_tree:
 match_expr(LEM):
   | MATCH; e = expr(LEM); tree = case_tree /* (LEM) needed if curly-less matches supported */
     { Syntax.ParserPass.Prog.(
-        Match (e, tree))
+        Match ((), e, tree))
     }
 
 quantifier:
@@ -317,7 +316,7 @@ qvar_dom(LEM):
 
 quantifier_expr(LEM):
   | q = quantifier; qd = qvar_dom(LEM); QUANTIFY_SEP; e = expr(LEM)
-    { Syntax.ParserPass.Prog.Quantifier { qt = q; qdom = qd; qbody = e } }
+    { Syntax.ParserPass.Prog.Quantifier ((), { qt = q; qdom = qd; qbody = e }) }
 
 let_expr(LEM):
     | VAR
@@ -379,9 +378,15 @@ member_binding_upd:
   | x = ID; ASSIGN; e = expr(yeslem)  { (Either.Left x, e) }
   | n = NUM; ASSIGN; e = expr(yeslem) { (Either.Right n, e) }
 
+parameter_binding:
+  | e1 = expr(yeslem); e2 = option(ASSIGN; e2 = expr(yeslem) { e2 })
+    { (e1, e2) }
+
 call_suffix:
-  | args = delimited(LPAREN, separated_list(COMMA, expr(yeslem)), RPAREN)
-    { Syntax.ParserPass.Prog.ArgList (args, ()) }
+  | args = delimited(LPAREN, separated_list(COMMA, parameter_binding), RPAREN)
+    { Syntax.ParserPass.Prog.(
+        ArgList (coerce_arglist args, ()))
+    }
 
 lit: /* TODO: character literals */
   | TRUE  { Syntax.Common.True }
@@ -393,19 +398,19 @@ lit: /* TODO: character literals */
 /* Types  */
 tp_prim:
   | SET; LANGLE; t = tp; RANGLE
-    { Syntax.ParserPass.Type.set t }
+    { Syntax.ParserPass.Type.set t () }
   | SEQ; LANGLE; t = tp; RANGLE
-    { Syntax.ParserPass.Type.seq t }
+    { Syntax.ParserPass.Type.seq t () }
   | MAP; LANGLE; t1 = tp; COMMA; t2 = tp; RANGLE
-    { Syntax.ParserPass.Type.map t1 t2 }
+    { Syntax.ParserPass.Type.map t1 t2 () }
   | INT
-    { Syntax.ParserPass.Type.int }
+    { Syntax.ParserPass.Type.int () }
   | BOOL
-    { Syntax.ParserPass.Type.bool }
+    { Syntax.ParserPass.Type.bool () }
   | NAT
-    { Syntax.ParserPass.Type.nat }
+    { Syntax.ParserPass.Type.nat () }
   | STR
-    { Syntax.ParserPass.Type.bool }
+    { Syntax.ParserPass.Type.bool () }
 
 tp_tup:
   | tps = delimited(LPAREN, separated_nonempty_list(COMMA, tp), RPAREN)
@@ -419,7 +424,7 @@ tp:
   | t = tp_prim { t }
   | t = tp_tup  { t }
   | nss = separated_nonempty_list(DOT, tp_name_seg)
-    { Syntax.ParserPass.Type.TpName (Internal.NonEmptyList.coerce nss) }
+    { Syntax.ParserPass.Type.TpName ((), Internal.NonEmptyList.coerce nss) }
 
 gen_inst:
   | tps = delimited(LANGLE, separated_nonempty_list(COMMA, tp), RANGLE) { tps }
@@ -610,7 +615,8 @@ synonym_type_decl:
     params = gen_params; SGEQ;
     tp = tp
     { Syntax.ParserPass.TopDecl.(
-        { attrs = attrs
+        { ann = ()
+        ; attrs = attrs
         ; id = n
         ; params = params
         ; rhs = Synonym tp
@@ -642,7 +648,7 @@ datatype_decl:
     d = ID; tp_ps = gen_params;
     SGEQ;
     ctors = datatype_ctors;
-    { (attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
+    { ((), attrs, d, tp_ps, Internal.NonEmptyList.coerce ctors) }
 
 /* TODO: declaration modifiers (abstract, ghost, static, opaque) */
 module_decl:

@@ -3,7 +3,7 @@ open Internal
 open TranslatorCommon
 
 
-module AST = AnnotationPass
+module AST = Syntax.AST(Annotator.AnnotationMetaData)
 module TranslatorCommon = TranslatorCommon
 
 module DataTracker = struct

@@ -5,7 +5,8 @@ open TestCommon
 
 
 module Translator = Translator.Translator
-module Printer    = Printer.PrettyPrinter(Syntax.AnnotationMetaData)
+module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+
 
 let main dafny_fn automan_fn () =
   (* Dafny *)

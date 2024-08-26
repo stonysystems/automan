@@ -1,8 +1,7 @@
-open Syntax
 open Internal
 
 
-module AST = AnnotationPass
+module AST = Syntax.AST(Annotator.AnnotationMetaData)
 module TCommon = TranslatorCommon.TranslatorCommon
 
 module Refinement  = struct
@@ -43,7 +42,7 @@ module Refinement  = struct
       match h with AST.TopDecl.Formal (fml_id, fml_tp) ->
       match fml_tp with 
       | TpTup _ -> assert false
-      | TpName name_seg_lst -> begin
+      | TpName (_, name_seg_lst) -> begin
         let name_seg, _ = NonEmptyList.uncons name_seg_lst in
         let TpIdSeg {id = t_id; gen_inst = gen_inst} = name_seg in
         (
@@ -61,7 +60,7 @@ module Refinement  = struct
             [AST.Prog.Suffixed (
               generate_token t_id token, 
               let e = generate_args wrapped_as_member_access fml_id in
-                AST.Prog.ArgList (([e], None))
+                AST.Prog.ArgList (({positional=[e]; named=[]}, None))
               )]
           end
           | 1 -> begin (* id is set/seq or an alias to them *)
@@ -70,16 +69,18 @@ module Refinement  = struct
             match TCommon.is_primitive param_tp_id with 
             | true -> []
             | false -> [
-              Quantifier {
+              Quantifier ((), {
                 qt = Syntax.Common.Forall;
                 qdom = QDom {
                   qvars = [QVar (i_id, None, None, [])];
                   qrange = None
                 };
                 qbody = Binary (
+                  (), 
                   Syntax.Common.Implies,
                   (
                     AST.Prog.Binary (
+                      (),
                       Syntax.Common.In, 
                       i, 
                       generate_args wrapped_as_member_access fml_id
@@ -87,10 +88,10 @@ module Refinement  = struct
                   ), 
                   Suffixed (
                     generate_token param_tp_id token, 
-                    AST.Prog.ArgList ([i], None)
+                    AST.Prog.ArgList ({positional=[i]; named=[]}, None)
                   )
                 );
-              }
+              })
             ]
           end
           | 2 -> assert false
@@ -113,7 +114,7 @@ module Refinement  = struct
         | "IsValid" -> begin 
           AST.Prog.Suffixed (
             generate_token t_id is_abstractable_token, 
-            AST.Prog.ArgList ([s], None)
+            AST.Prog.ArgList ({positional=[s]; named=[]}, None)
           ) :: is_formals_valid_lst
         end
         | _ -> is_formals_valid_lst in
@@ -124,11 +125,12 @@ module Refinement  = struct
   let generate_checker_4_datatype 
     (dtp : AST.TopDecl.datatype_t)
     (token : string) = 
-    let _, t_id, _, ctors = dtp in
+    let m, attrs, t_id, params, ctors = dtp in
+    let _ = m, attrs, params in
     let expr = generate_checker_4_ctors 
       (NonEmptyList.as_list ctors) token in
     AST.TopDecl.Predicate (
-      None, 
+      None (* Changed for MetaData *), 
       false, 
       [], TCommon.expr_to_id (generate_token t_id token), 
       [], [AST.TopDecl.Formal (s_id, TCommon.tp_of_id t_id)], 
@@ -174,7 +176,7 @@ module Refinement  = struct
             (* AbstractifyCReplicaConstantsToLReplicaConstants(s.constants) *)
             AST.Prog.Suffixed (
               generate_abstractify_token t_tp_id tp_id, 
-              let e = member_access in AST.Prog.ArgList (([e], None))
+              let e = member_access in AST.Prog.ArgList (({positional=[e]; named=[]}, None))
               )
           end
           | 1 -> begin 
@@ -183,7 +185,7 @@ module Refinement  = struct
               AST.Prog.Suffixed (
                   TCommon.expr_of_str 
                     "AbstractifyCBroadcastToRlsPacketSeq", 
-                  let e = member_access in AST.Prog.ArgList (([e], None))
+                  let e = member_access in AST.Prog.ArgList (({positional=[e]; named=[]}, None))
                 )
             | _ ->
             (* AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber),  *)
@@ -196,10 +198,14 @@ module Refinement  = struct
             | false -> begin 
               AST.Prog.Suffixed (
                 abstractify_seq_token, 
-                AST.Prog.ArgList (([
-                  member_access; 
-                  generate_abstractify_token t_param_tp_id param_tp_id
-                ], None))
+                AST.Prog.ArgList ((
+                  {
+                    positional = [                 
+                      member_access; 
+                      generate_abstractify_token t_param_tp_id param_tp_id]; 
+                    named = []
+                  }
+                , None))
               )
             end
           end
@@ -225,7 +231,7 @@ module Refinement  = struct
           let _ = t_id in
           AST.Prog.Suffixed (
             TCommon.expr_of_str id, 
-            AST.Prog.ArgList ((abs_4_fmls, None))
+            AST.Prog.ArgList (({positional=abs_4_fmls; named=[]}, None))
           )
       ) :: (aux rest)
     in
@@ -236,8 +242,8 @@ module Refinement  = struct
   let generate_abstractify_4_datatype 
     (dtp    : AST.TopDecl.datatype_t)
     (t_dtp  : AST.TopDecl.datatype_t) = 
-    let (_,   id, _,    ctors) =    dtp in 
-    let (_, t_id, _,  t_ctors) =  t_dtp in
+    let (_, _,   id, _,    ctors) =    dtp in 
+    let (_, _, t_id, _,  t_ctors) =  t_dtp in
     let   ctors = NonEmptyList.as_list    ctors in
     let t_ctors = NonEmptyList.as_list  t_ctors in 
     let abs_4_ctors = generate_abstractify_4_ctors ctors t_ctors in
@@ -258,7 +264,7 @@ module Refinement  = struct
           fun x -> match x with AST.TopDecl.DataCtor (_, id, _) -> id
         ) t_ctors in
         let zipped = List.combine t_ctors_ids abs_4_ctors in
-        AST.Prog.Match (s, aux zipped)
+        AST.Prog.Match ((), s, aux zipped)
       )
     in
     AST.TopDecl.Function(
@@ -271,7 +277,7 @@ module Refinement  = struct
       [AST.TopDecl.Requires (
         AST.Prog.Suffixed (
           generate_token t_id is_abstractable_token, 
-          AST.Prog.ArgList ([s], None)
+          AST.Prog.ArgList ({positional=[s]; named=[]}, None)
         )
       )], 
       e

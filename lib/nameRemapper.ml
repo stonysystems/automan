@@ -1,5 +1,4 @@
-(* TRANSLATOR_TODO : It would be preferable to be able to read a config file. *)
-module AST = Syntax.AnnotationPass
+module AST = Syntax.AST(Annotator.AnnotationMetaData)
 module TCommon = TranslatorCommon.TranslatorCommon
 
 
