@@ -204,7 +204,7 @@ module Translator = struct
                     (remapper#get_from_config id)
                 | false -> remapper#id_remap id
               ) in
-              Syntax.Common.DSId t_id
+              Syntax.Common.DSId (t_id ^ "?")
             )
             | false -> dotsuffix
           )
@@ -484,6 +484,15 @@ module Translator = struct
               [AST.TopDecl.Ensures binding]
             )
           ) in
+        let t_rtn = 
+          match t_rtn with
+          | TpName _ -> t_rtn
+          | TpTup lst -> (
+            match List.length lst with 
+            | 0 -> TCommon.tp_of_id "bool"
+            | _ -> t_rtn
+          )
+        in
         let t_function = AST.TopDecl.Function (
           true,
           [], t_id,
