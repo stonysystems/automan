@@ -689,8 +689,271 @@ module Erase (M: MetaData) = struct
   module C = Convert (TrivMetaData) (M)
   module Src = AST (M)
 
-  let (* rec *) expr (_e: Src.Prog.expr_t): ParserPass.Prog.expr_t =
-    failwith "TODO: Syntax.Erase.expr"
+  let rec typ (tp: Src.Type.t): ParserPass.Type.t =
+    match tp with
+    | TpName (_, segs) ->
+      let tp_name_seg (tp_seg: Src.Type.name_seg_t): ParserPass.Type.name_seg_t =
+        let TpIdSeg {id = id; gen_inst = tp_args} = tp_seg in
+        let tp_args' = List.map typ tp_args in
+        TpIdSeg {id = id; gen_inst = tp_args'}
+      in
+      let segs' = NonEmptyList.map tp_name_seg segs in
+      TpName ((), segs')
+    | TpTup tps ->
+      let tps' = List.map typ tps in
+      TpTup tps'
+
+  let rec expr (e: Src.Prog.expr_t): ParserPass.Prog.expr_t =
+    match e with
+    | Suffixed (e_pref, e_suff) ->
+      let e_pref' = expr e_pref in
+      let e_suff' = suffix e_suff in
+      ParserPass.Prog.Suffixed (e_pref', e_suff')
+    | NameSeg (id, tp_args) ->
+      let tp_args' = List.map typ tp_args in
+      NameSeg (id, tp_args')
+    | Lambda (ps, body) ->
+      let (ps', body') =
+        ( List.map
+            (function (id, tp_opt) -> (id, Option.map typ tp_opt))
+            ps
+        , expr body)
+      in
+      Lambda (ps', body')
+    | MapDisplay kvs ->
+      let kvs' =
+        List.map (function (k, v) -> (expr k, expr v)) kvs in
+      MapDisplay kvs'
+    | SeqDisplay sdisp ->
+      let sdisp' =
+        begin
+          match sdisp with
+          | SeqEnumerate es ->
+            let es' = List.map expr es in
+            ParserPass.Prog.SeqEnumerate es'
+          | SeqTabulate {gen_inst = tp_args; len = len; func = func} ->
+            let (tp_args', len', func') =
+              ( List.map typ tp_args
+              , expr len
+              , expr func )
+            in
+            ParserPass.Prog.SeqTabulate
+              { gen_inst = tp_args'
+              ; len = len'
+              ; func = func' }
+        end
+      in
+      SeqDisplay sdisp'
+    | SetDisplay elems ->
+      let elems' = List.map expr elems in
+      SetDisplay elems'
+    | If (_, g, t, e) ->
+      let (g', t', e') = (expr g, expr t, expr e) in
+      ParserPass.Prog.If ((), g', t', e')
+    | Match (_, scrut, branches) ->
+      let (scrut', branches') =
+        ( expr scrut
+        , List.map
+            (function Src.Prog.Case (_, e_pat, body) ->
+               let (attrs', e_pat', body') =
+                 ([], extended_pattern e_pat, expr body) in
+               ParserPass.Prog.Case (attrs', e_pat', body'))
+            branches )
+      in
+      Match ((), scrut', branches')
+    | Quantifier (_, q) ->
+      let (qdom', qbody') = (qdom q.qdom, expr q.qbody) in
+      Quantifier ((), {qt = q.qt; qdom = qdom'; qbody = qbody'})
+    | SetComp scomp ->
+      let (qdom', body') = (qdom scomp.qdom, Option.map expr scomp.body) in
+      SetComp {qdom = qdom'; body = body'}
+    | StmtInExpr (st, e) ->
+      let stmt' = begin
+        match st with
+        | Assert (_attrs, assrt, by_block) ->
+          let assrt' = expr assrt in
+          let by_block' = List.map stmt by_block in
+          ParserPass.Prog.Assert ([], assrt', by_block')
+        | Assume (_attrs, assme) ->
+          let assme' = expr assme in
+          ParserPass.Prog.Assume([], assme')
+      end in
+      let e' = expr e in
+      StmtInExpr (stmt', e')
+    | Let {ghost = ghost; pats = pats; defs = defs; body = body} ->
+      let (pats', defs', body') =
+        ( NonEmptyList.map pattern pats
+        , NonEmptyList.map expr defs
+        , expr body )
+      in
+      ParserPass.Prog.Let
+        { ghost = ghost
+        ; pats = pats'
+        ; defs = defs'
+        ; body = body' }
+    | MapComp mcomp ->
+      let (qdom', key', valu') =
+        ( qdom mcomp.qdom
+        , Option.map expr mcomp.key
+        , expr mcomp.valu )
+      in
+      MapComp {qdom = qdom'; key = key'; valu = valu'}
+    | Lit l ->
+      Lit l
+    | This ->
+      ParserPass.Prog.This
+    | Cardinality e ->
+      let e' = expr e in
+      Cardinality e'
+    | Tuple comps ->
+      let comps' = List.map expr comps in
+      Tuple comps'
+    | Unary (op, e) ->
+      let e' = expr e in
+      Unary (op, e')
+    | Binary (_, op, e1, e2) ->
+      let (e1', e2') = (expr e1, expr e2) in
+      Binary ((), op, e1', e2')
+    | Lemma l ->
+      let (lem', body') = (expr l.lem, expr e) in
+      Lemma {lem = lem'; e = body'}
+
+  and stmt (s: Src.Prog.stmt_t): ParserPass.Prog.stmt_t =
+    match s with
+    | SAssert (_, assertion, by_block) ->
+      let assertion' = expr assertion in
+      let by_block' = List.map stmt by_block in
+      SAssert ([], assertion', by_block')
+    | SAssume (_, assumption) ->
+      let assumption' = expr assumption in
+      SAssume ([], assumption')
+    | SBlock sblock ->
+      let sblock' = List.map stmt sblock in
+      SBlock sblock'
+    | SIf sif ->
+      let rec stmt_if (s: Src.Prog.stmt_if_t): ParserPass.Prog.stmt_if_t =
+        let Src.Prog.({guard = g; then_br = t; footer = e}) = s in
+        let g' = expr g in
+        let t' = List.map stmt t in
+        let e' =
+          Option.map
+            (function
+              | Src.Prog.ElseIf sub_s ->
+                ParserPass.Prog.ElseIf (stmt_if sub_s)
+              | Src.Prog.ElseBlock e_block ->
+                ParserPass.Prog.ElseBlock (List.map stmt e_block))
+            e
+        in
+        ParserPass.Prog.({guard = g'; then_br = t'; footer = e'})
+      in
+      let sif' = stmt_if sif in
+      SIf sif'
+    | SMatch (scrut, tree) ->
+      let scrut' = expr scrut in
+      let tree' =
+        List.map
+          (function (e_pat, stmts) ->
+             let e_pat' = extended_pattern e_pat in
+             let stmts' = List.map stmt stmts in
+             (e_pat', stmts'))
+          tree
+      in
+      SMatch (scrut', tree')
+    | SReturn rets ->
+      (* NOTE: this has to change if we want to support more rhs kinds *)
+      let rets' = List.map (function (e, _) -> (expr e, [])) rets in
+      SReturn rets'
+    | SUpdAndCall (lhss, rhss) ->
+      let lhss' = NonEmptyList.map expr lhss in
+      let rhss' = List.map (function (e, _) -> (expr e, [])) rhss in
+      SUpdAndCall (lhss', rhss')
+    | SVarDecl (DeclIds (vars, rhss)) ->
+      let vars' =
+        List.map
+          (function Src.Prog.({id = id; tp = tp_opt; attrs = _}) ->
+             let tp_opt' = Option.map typ tp_opt in
+             ParserPass.Prog.({id = id; tp = tp_opt'; attrs = []}))
+          vars
+      in
+      let rhss' =
+        Option.map (function
+            | Src.Prog.Assign rhss ->
+              let rhss' =
+                List.map (function (rhs, _) -> (expr rhs, [])) rhss in
+              ParserPass.Prog.Assign rhss')
+          rhss
+      in
+      SVarDecl (DeclIds (vars', rhss'))
+
+  and suffix (s: Src.Prog.suffix_t): ParserPass.Prog.suffix_t =
+    match s with
+    | AugDot (dotsuff, tp_args) ->
+      let tp_args' = List.map typ tp_args in
+      AugDot (dotsuff, tp_args')
+    | DataUpd upd ->
+      let upd' =
+        NonEmptyList.map
+          (function (mem, vlu) ->
+             let vlu' = expr vlu in
+             (mem, vlu'))
+          upd
+      in
+      DataUpd upd'
+    | Subseq {lb = lb; ub = ub} ->
+      let lb' = Option.map expr lb in
+      let ub' = Option.map expr ub in
+      Subseq {lb = lb'; ub = ub'}
+    | SliceLen {sublens = sublens; to_end = to_end} ->
+      let sublens' = NonEmptyList.map expr sublens in
+      SliceLen {sublens = sublens'; to_end = to_end}
+    | SeqUpd {idx = idx; v = v} ->
+      let idx' = expr idx in
+      let v' = expr v in
+      SeqUpd {idx = idx'; v = v'}
+    | Sel e ->
+      let e' = expr e in
+      Sel e'
+    | ArgList ({positional = pos; named = nam}, _ann) ->
+      let pos' = List.map expr pos in
+      let nam' = List.map (function (id, e) -> (id, expr e)) nam in
+      ArgList ({positional = pos'; named = nam'}, ())
+
+  and pattern (pat: Src.Prog.pattern_t): ParserPass.Prog.pattern_t =
+    match pat with
+    | PatVar (id, tp_opt) ->
+      let tp_opt' = Option.map typ tp_opt in
+      PatVar (id, tp_opt')
+    | PatCtor (id_opt, pats) ->
+      let pats' = List.map pattern pats in
+      PatCtor (id_opt, pats')
+
+  and extended_pattern(epat: Src.Prog.extended_pattern_t)
+    : ParserPass.Prog.extended_pattern_t =
+    match epat with
+    | EPatLit l ->
+      EPatLit l
+    | EPatVar (id, tp_opt) ->
+      let tp_opt' = Option.map typ tp_opt in
+      EPatVar (id, tp_opt')
+    | EPatCtor (ctor, epats) ->
+      let epats' = List.map extended_pattern epats in
+      EPatCtor (ctor, epats')
+
+  and qdom (qdom: Src.Prog.qdom_t): ParserPass.Prog.qdom_t =
+    let qvar_decl (qvar: Src.Prog.qvar_decl_t): ParserPass.Prog.qvar_decl_t =
+      let Src.Prog.QVar (id, tp_opt, coll_opt, _) = qvar in
+      let (tp_opt', coll_opt', attrs') =
+        ( Option.map typ tp_opt
+        , Option.map expr coll_opt
+        , [] )
+      in
+      ParserPass.Prog.QVar (id, tp_opt', coll_opt', attrs')
+    in
+
+    let Src.Prog.QDom qd = qdom in
+    let (qvars', qrange') =
+      (List.map qvar_decl qd.qvars, Option.map expr qd.qrange) in
+    ParserPass.Prog.QDom {qvars = qvars'; qrange = qrange'}
 end
 
 (* AutoMan annotations *)
@@ -738,4 +1001,3 @@ module Annotation = struct
       anns
 
 end
-
