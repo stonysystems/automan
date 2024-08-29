@@ -28,16 +28,16 @@ object (self)
     in
     aux config
 
-  method is_id_kept_kw (id : string) = 
+  method is_id_basic_type (id : string) = 
     List.exists (fun x -> x = id)
     [
-      "seq"; "map"; "set"
+      "seq"; "map"; "set"; "int"; "bool"
     ]
 
   method id_remap (x : string) = 
     if TCommon.starts_with x "Rsl" then
       TCommon.replace_prefix x "Rsl" "C"
-    else if self#is_id_kept_kw x then
+    else if self#is_id_basic_type x then
       x
     else if not (TCommon.starts_with x "Leq") && x.[0] = 'L' then
       "C" ^ (String.sub x 1 (String.length x - 1))
