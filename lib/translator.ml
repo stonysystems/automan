@@ -204,7 +204,7 @@ module Translator = struct
                     (remapper#get_from_config id)
                 | false -> remapper#id_remap id
               ) in
-              Syntax.Common.DSId t_id
+              Syntax.Common.DSId (t_id ^ "?")
             )
             | false -> dotsuffix
           )
@@ -366,48 +366,129 @@ module Translator = struct
           )
         )
       in
+      let get_fmls_input_and_rtn origin_fmls metadata = 
+        match metadata with 
+        | None -> 
+          origin_fmls, [AST.TopDecl.Formal ("", TCommon.tp_of_id "bool")]
+        | Some metadata -> (
+          let rec aux lst = 
+            match lst with 
+            | [] -> [], []
+            | h :: rest -> (
+              let fmls_input', fmls_rtn' = aux rest in
+              let mode, fml = h in 
+              match mode with 
+              | Syntax.Annotation.Input  -> (fml :: fmls_input', fmls_rtn')
+              | Syntax.Annotation.Output -> (fmls_input', fml :: fmls_rtn')
+            )
+          in
+          let mode_lst = metadata in
+          let zipped = List.combine mode_lst origin_fmls in
+          aux zipped
+        )
+      in
+      let get_rtn_from_fmls fmls_rtn =
+        match List.length fmls_rtn with
+        | 1 -> (
+          let _, h = List.unsnoc fmls_rtn in 
+          match h with AST.TopDecl.Formal (_, tp) -> tp
+        )
+        | _ -> (
+          let rec aux lst = 
+            match lst with 
+            | [] -> []
+            | h :: rest -> (
+              match h with AST.TopDecl.Formal (_, tp) -> 
+                tp :: (aux rest)
+            )
+          in
+          AST.Type.TpTup (aux fmls_rtn)
+        )
+      in
+      let get_specs_4_refinement
+        origin_fmls t_original_fmls
+        fmls_rtn t_fmls_rtn
+        id t_id
+        original_specs 
+        t_fmls_input
+        metadata
+        = 
+      (
+        let valids = 
+          Refinement.generate_checker_4_fmls 
+            t_fmls_input 
+            Refinement.is_valid_token
+            false
+        in
+        List.map (
+          fun x -> AST.TopDecl.Requires x
+        ) valids
+      ) @
+      (List.map t_function_spec original_specs) @ (
+        let t_args = get_args_from_fmls t_fmls_input in
+        let modes = (
+          match metadata with 
+          | None -> []
+          | Some modes -> modes
+        ) in
+        let pos_of_output = 
+          let rec aux lst idx = 
+            match lst with 
+            | [] -> []
+            | h :: rest -> (
+              match h with 
+              | Syntax.Annotation.Input -> aux rest (idx + 1)
+              | Syntax.Annotation.Output -> 
+                idx :: (aux rest (idx + 1))
+            ) in
+          aux modes 0
+        in
+        let args_for_l_call = 
+          Refinement.generate_abstractify_4_formals
+            origin_fmls 
+            t_original_fmls 
+            false
+        in
+        match List.length pos_of_output with
+        | 0 -> (
+          let c_call = get_self_call_from_func_id_and_args t_id t_args in
+          let l_call = 
+            get_self_call_from_func_id_and_args id args_for_l_call in
+          let check = AST.Prog.Binary (
+            (), (* Changed for MetaData *)
+            Syntax.Common.Eq, c_call, l_call
+          ) in
+          [AST.TopDecl.Ensures check]
+        )
+        | _ -> (
+          let t_rtn = get_args_from_fmls fmls_rtn in
+          let assignee = args_to_assignee t_rtn in
+          let self_call = get_self_call_from_func_id_and_args t_id t_args in
+          let rtn_valids = 
+            Refinement.generate_checker_4_fmls 
+              t_fmls_rtn
+              Refinement.is_valid_token
+              false
+          in
+          let binding = AST.Prog.Let {
+            ghost = false;
+            pats = assignee;
+            defs = NonEmptyList.coerce [self_call];
+            body = TCommon.expr_lst_to_and [
+              TCommon.expr_lst_to_and rtn_valids;
+              get_self_call_from_func_id_and_args id args_for_l_call
+            ]
+          } in
+          [AST.TopDecl.Ensures binding]
+        )
+      )
+      in
       match x with 
       | Predicate (metadata, _, _, id, _, origin_fmls, specs, e) -> begin
         let _ = metadata, e in
-        let fmls_input, fmls_rtn = (
-          match metadata with 
-          | None -> 
-            origin_fmls, [AST.TopDecl.Formal ("", TCommon.tp_of_id "bool")]
-          | Some metadata -> (
-            let rec aux lst = 
-              match lst with 
-              | [] -> [], []
-              | h :: rest -> (
-                let fmls_input', fmls_rtn' = aux rest in
-                let mode, fml = h in 
-                match mode with 
-                | Syntax.Annotation.Input  -> (fml :: fmls_input', fmls_rtn')
-                | Syntax.Annotation.Output -> (fmls_input', fml :: fmls_rtn')
-              )
-            in
-            let mode_lst = metadata in
-            let zipped = List.combine mode_lst origin_fmls in
-            aux zipped
-          )
-        ) in
-        let rtn = 
-          match List.length fmls_rtn with
-          | 1 -> (
-            let _, h = List.unsnoc fmls_rtn in 
-            match h with AST.TopDecl.Formal (_, tp) -> tp
-          )
-          | _ -> (
-            let rec aux lst = 
-              match lst with 
-              | [] -> []
-              | h :: rest -> (
-                match h with AST.TopDecl.Formal (_, tp) -> 
-                  tp :: (aux rest)
-              )
-            in
-            AST.Type.TpTup (aux fmls_rtn)
-          )
-        in
+        let fmls_input, fmls_rtn = 
+          get_fmls_input_and_rtn origin_fmls metadata in
+        let rtn = get_rtn_from_fmls fmls_rtn in
         let t_e = TCommon.expr_of_str "HOLDER" in
         let t_id = remapper#id_remap id in
         let t_original_fmls = List.map t_formal origin_fmls in
@@ -415,75 +496,23 @@ module Translator = struct
         let t_fmls_rtn = List.map t_formal fmls_rtn in
         let t_rtn = Type.translate rtn in
         let t_specs = 
-          (
-            let valids = 
-              Refinement.generate_checker_4_fmls 
-                t_fmls_input 
-                Refinement.is_valid_token
-                false
-            in
-            List.map (
-              fun x -> AST.TopDecl.Requires x
-            ) valids
-          ) @
-          (List.map t_function_spec specs) @ (
-            let t_args = get_args_from_fmls t_fmls_input in
-            let modes = (
-              match metadata with 
-              | None -> []
-              | Some modes -> modes
-            ) in
-            let pos_of_output = 
-              let rec aux lst idx = 
-                match lst with 
-                | [] -> []
-                | h :: rest -> (
-                  match h with 
-                  | Syntax.Annotation.Input -> aux rest (idx + 1)
-                  | Syntax.Annotation.Output -> 
-                    idx :: (aux rest (idx + 1))
-                ) in
-              aux modes 0
-            in
-            let args_for_l_call = 
-              Refinement.generate_abstractify_4_formals
-                origin_fmls 
-                t_original_fmls 
-                false
-            in
-            match List.length pos_of_output with
-            | 0 -> (
-              let c_call = get_self_call_from_func_id_and_args t_id t_args in
-              let l_call = 
-                get_self_call_from_func_id_and_args id args_for_l_call in
-              let check = AST.Prog.Binary (
-                (), (* Changed for MetaData *)
-                Syntax.Common.Eq, c_call, l_call
-              ) in
-              [AST.TopDecl.Ensures check]
-            )
-            | _ -> (
-              let t_rtn = get_args_from_fmls fmls_rtn in
-              let assignee = args_to_assignee t_rtn in
-              let self_call = get_self_call_from_func_id_and_args t_id t_args in
-              let rtn_valids = 
-                Refinement.generate_checker_4_fmls 
-                  t_fmls_rtn
-                  Refinement.is_valid_token
-                  false
-              in
-              let binding = AST.Prog.Let {
-                ghost = false;
-                pats = assignee;
-                defs = NonEmptyList.coerce [self_call];
-                body = TCommon.expr_lst_to_and [
-                  TCommon.expr_lst_to_and rtn_valids;
-                  get_self_call_from_func_id_and_args id args_for_l_call
-                ]
-              } in
-              [AST.TopDecl.Ensures binding]
-            )
-          ) in
+          get_specs_4_refinement
+            origin_fmls t_original_fmls
+            fmls_rtn t_fmls_rtn
+            id t_id
+            specs 
+            t_fmls_input
+            metadata
+        in
+        let t_rtn = 
+          match t_rtn with
+          | TpName _ -> t_rtn
+          | TpTup lst -> (
+            match List.length lst with 
+            | 0 -> TCommon.tp_of_id "bool"
+            | _ -> t_rtn
+          )
+        in
         let t_function = AST.TopDecl.Function (
           true,
           [], t_id,
@@ -493,7 +522,57 @@ module Translator = struct
         ) in
         [AST.TopDecl.PredFunDecl t_function]
       end
-      | Function _ -> []
+      | Function (
+        is_method, 
+        attrs, id, 
+        params, origin_fmls, origin_rtn,
+        specs,
+        e
+      ) ->
+        let rtn_to_fmls rtn base_name = 
+          match rtn with 
+          | AST.Type.TpName _ -> [AST.TopDecl.Formal (base_name, rtn)]
+          | AST.Type.TpTup tps -> (
+            let rec aux lst cnt = 
+              match lst with
+              | [] -> []
+              | h :: rest -> (
+                (
+                  AST.TopDecl.Formal (
+                    base_name ^ (string_of_int cnt), 
+                    h
+                  ) :: (aux rest (cnt + 1))
+                )
+              )
+            in
+            aux tps 0
+          )
+        in
+        let _ = attrs, params, is_method in
+        let t_e = Prog.t_expr e in
+        let t_id = remapper#id_remap id in
+        let t_original_fmls = List.map t_formal origin_fmls in
+        let t_fmls_input = List.map t_formal origin_fmls in
+        let t_rtn = Type.translate origin_rtn in
+        let fmls_rtn = rtn_to_fmls origin_rtn "lr" in
+        let t_fmls_rtn = rtn_to_fmls t_rtn "cr" in
+        let t_specs = 
+          get_specs_4_refinement
+            origin_fmls t_original_fmls
+            fmls_rtn t_fmls_rtn
+            id t_id
+            specs 
+            t_fmls_input
+            None
+        in
+        let t_function = AST.TopDecl.Function (
+          true,
+          [], t_id,
+          [], t_fmls_input, t_rtn,
+          t_specs, 
+          t_e
+        ) in
+        [AST.TopDecl.PredFunDecl t_function]
 
     let rec translate 
       (x : Syntax.Common.topdecl_modifier_t list * AST.TopDecl.t') = 

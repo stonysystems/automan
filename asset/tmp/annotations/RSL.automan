@@ -14,6 +14,12 @@ module LiveRSL__Acceptor_i {
 module LiveRSL__Broadcast_i {
     LBroadcastToEveryone(+,+,+,-);
 }
+module LiveRSL__Configuration_i {
+  
+}
 module LiveRSL__Constants_i {
     LReplicaConstantsValid(+);
+}
+module LiveRSL__Parameters_i {
+  
 }
