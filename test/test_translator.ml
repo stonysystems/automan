@@ -205,6 +205,41 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
        , if_then_eq_sent_packets
        , if_then_eq_s' ))
   in
+  let if_else: AST.Prog.expr_t =
+    let if_else_conj_ann =
+      Moder.Definitions.(
+        And
+          { conj_left =
+              [{ mq_outvar = NonEmptyList.singleton "s'"
+               ; uop = None }]
+          ; conj_right =
+              [{ mq_outvar = NonEmptyList.singleton "sent_packets"
+               ; uop = None }]})
+    in
+    AST.Prog.Binary
+      ( Some if_else_conj_ann
+      , Syntax.Common.And
+      , AST.Prog.Binary
+          ( Some Moder.Definitions.(
+                Eq
+                  { outvar_is_left = true
+                  ; outvar =
+                      { mq_outvar = NonEmptyList.singleton "s'"
+                      ; uop = None }})
+          , Syntax.Common.Eq
+          , (AST.Prog.NameSeg ("s'", []))
+          , (AST.Prog.NameSeg ("s", [])))
+      , AST.Prog.Binary
+          ( Some Moder.Definitions.(
+                Eq
+                  { outvar_is_left = true
+                  ; outvar =
+                      { mq_outvar = NonEmptyList.singleton "sent_packets"
+                      ; uop = None }})
+          , Syntax.Common.Eq
+          , (AST.Prog.NameSeg ("sent_packets", []))
+          , (AST.Prog.SeqDisplay(AST.Prog.SeqEnumerate []))))
+  in
   AST.Prog.Let
     { ghost = false
     ; pats =(NonEmptyList.(::) ((AST.Prog.PatVar ("m", None)), []))
@@ -215,38 +250,4 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
                 , (AST.Prog.AugDot((Syntax.Common.DSId "msg"), []))))
            , []))
     ; body =
-        (AST.Prog.If
-           ( Some if_ann
-           , if_guard
-           , if_then
-           , (AST.Prog.Binary
-                ( Some Moder.Definitions.(
-                      And
-                        { conj_left =
-                            [{ mq_outvar = NonEmptyList.singleton "s'"
-                             ; uop = None }]
-                        ; conj_right =
-                            [{ mq_outvar = NonEmptyList.singleton "sent_packets"
-                             ; uop = None }]})
-              , Syntax.Common.And
-              , (AST.Prog.Binary
-                   ( Some Moder.Definitions.(
-                         Eq
-                           { outvar_is_left = true
-                           ; outvar =
-                               { mq_outvar = NonEmptyList.singleton "s'"
-                               ; uop = None }})
-                   , Syntax.Common.Eq
-                   , (AST.Prog.NameSeg ("s'", []))
-                   , (AST.Prog.NameSeg ("s", []))))
-              , (AST.Prog.Binary
-                   ( Some Moder.Definitions.(
-                         Eq
-                           { outvar_is_left = true
-                           ; outvar =
-                               { mq_outvar = NonEmptyList.singleton "sent_packets"
-                               ; uop = None }})
-                   , Syntax.Common.Eq
-                   , (AST.Prog.NameSeg ("sent_packets", []))
-                   , (AST.Prog.SeqDisplay(AST.Prog.SeqEnumerate []))))))))
-    }
+        (AST.Prog.If (Some if_ann, if_guard, if_then, if_else)) }
