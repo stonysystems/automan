@@ -7,6 +7,7 @@ module Result : sig
   val map2: ('a -> 'b) -> ('c -> 'd) -> ('a, 'c) t -> ('b, 'd) t
   val map_option: ('a -> ('b, 'e) result) -> 'a option -> ('b option, 'e) result
   val error_when: bool -> 'e -> (unit, 'e) result
+  val try_catch: ('a, 'e) result -> ('e -> ('a, 'e) result) -> ('a, 'e) result
 end = struct
   include Result
   let ( let< ) = bind
@@ -28,6 +29,11 @@ end = struct
       Result.Error e
     else
       Result.Ok ()
+
+  let try_catch r h =
+    match r with
+    | Ok _ -> r
+    | Error e -> h e
 end
 
 module List : sig
