@@ -1,29 +1,101 @@
 open Syntax
-open Printer
 open Internal
 
 
 (**
-  * expr_to_suffix
-  * suffix_to_dot_id
-  * suffix_to_data_update
-  * is_expr_tp_aug_dot
-  * is_expr_tp_data_update
+  * **************************************************************************
+  * Some helper functions to assist with translation
+  * **************************************************************************
+  *
+  * starts_with
+  * replace_prefix
+  *
+  * expr_to_suffix : AST.Prog.exprt_t -> AST.Prog.Suffixed 
+  * suffix_to_dot_id : x.b -> b; b must be a id_t; return as expr_t
+  * suffix_to_data_update : Suffix -> member_binding_upd_lst as list
+  *
+  * is_expr_tp_aug_dot : Whether an expr_t is Suffix with AugDot
+  * is_expr_tp_data_update : Whether an expr_t is Suffix with DataUpd
+  *
+  * is_primitive 
+  *
+  * debug_print
+  * debug_print_expr
   * str_of_expr
+  * expr_of_str
   * expr_blank
-  * is_expr_eq
+  * is_expr_eq 
   * is_expr_neq
   * is_expr_blank
   * is_expr_n_blank
-  * expr_to_id
-  * move_one_expr_from_suffix_to_prefix
-  * convert_expr_lst_to_dot_expr
-  * convert_dot_expr_to_expr_lst
+  * expr_to_id : expr -> id; The expr must be a id_t
+  *
+  * id_of_tp
+  * tp_of_id
+  * id_and_gen_inst_of_tp
+  *
+  * move_one_expr_from_suffix_to_prefix: 
+  *                     h :: suffix, prefix -> suffix, preffix @ [h]
+  * expr_lst_to_dot_expr : [a, b, c, d] -> a.b.c.d
+  * dot_expr_to_expr_lst : a.b.c.d -> [a, b, c, d]
+  * expr_lst_to_and
+  * **************************************************************************
   *)
 
-module TranslatorCommon (M : MetaData) = struct 
-  module AST = AST(M)
-  module Printer = PrettyPrinter(M)
+
+module AST = Syntax.AST(Annotator.AnnotationMetaData)
+module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+
+
+module TranslatorCommon = struct 
+
+  let starts_with s prefix =
+    let len_s = String.length s in
+    let len_prefix = String.length prefix in
+    len_s >= len_prefix && String.sub s 0 len_prefix = prefix
+
+  let replace_prefix str old_prefix new_prefix =
+    let len_old = String.length old_prefix in
+    if String.length str >= len_old && String.sub str 0 len_old = old_prefix then
+      new_prefix ^ String.sub str len_old (String.length str - len_old)
+    else
+      str
+
+  let is_primitive id = 
+    List.exists (fun x -> x = id)
+      [ "int"; "bool"; "nat"; "string" ] 
+
+  let is_built_in_collection id = 
+    List.exists (fun x -> x = id)
+    [ "seq"; "set"; "map" ] 
+
+  let id_and_gen_inst_of_tp (x : AST.Type.t) = 
+    match x with 
+    | TpName (_, name_seg) -> begin 
+      let rest, h = NonEmptyList.unsnoc name_seg in
+      assert ((List.length rest) = 0);
+      let AST.Type.TpIdSeg {id = id; gen_inst = gen_inst} = h in
+      (* assert ((List.length gen_inst) = 0); *)
+      (id, gen_inst)
+    end
+    | TpTup _ -> assert false
+
+  let id_of_tp (x : AST.Type.t) = 
+    match x with 
+    | TpName (_, name_seg) -> begin 
+      let rest, h = NonEmptyList.unsnoc name_seg in
+      assert ((List.length rest) = 0);
+      let AST.Type.TpIdSeg {id = id; gen_inst = gen_inst} = h in
+      assert ((List.length gen_inst) = 0);
+      id
+    end
+    | TpTup _ -> assert false
+
+  let tp_of_id (x : id_t) = 
+    AST.Type.simple x None
+
+  let expr_of_str (x : string) = 
+    AST.Prog.NameSeg (x, [])
 
   let expr_to_suffix (e : AST.Prog.expr_t) = 
     match e with
@@ -97,7 +169,7 @@ module TranslatorCommon (M : MetaData) = struct
     let prefix_list = prefix_list @ [h] in
     prefix_list, suffix_list
   
-  let convert_expr_lst_to_dot_expr
+  let expr_lst_to_dot_expr
     (lst : AST.Prog.expr_t list) : AST.Prog.expr_t = 
     let lst = NonEmptyList.coerce lst in
     NonEmptyList.fold_left_1 begin
@@ -111,7 +183,7 @@ module TranslatorCommon (M : MetaData) = struct
     end lst
   
   (* The expr occured can only be id *)  
-  let convert_dot_expr_to_expr_lst (x : AST.Prog.expr_t) = 
+  let dot_expr_to_expr_lst (x : AST.Prog.expr_t) = 
     let rec aux x = 
       match is_expr_tp_aug_dot x with
       | true -> begin
@@ -130,6 +202,17 @@ module TranslatorCommon (M : MetaData) = struct
   
   let debug_print_expr (e) = 
     Printf.printf "[+] %s \n" (str_of_expr e)
+
+  let expr_lst_to_and exprs = 
+    let rec aux lst = 
+      match lst with 
+      | [] -> expr_blank
+      | l :: rest -> begin
+        let r = aux rest in
+        match is_expr_blank r with
+        | true -> l 
+        | false -> Binary ((), Syntax.Common.And, l, r)
+      end in aux exprs
 
   module Expr = struct 
     type t = AST.Prog.expr_t

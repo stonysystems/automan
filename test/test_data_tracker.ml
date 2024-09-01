@@ -1,11 +1,13 @@
 open Automan
+open Syntax
+open DataTracker
 
 
-module AST = Syntax.AST(Annotator.AnnotationMetaData)
-module DataTracker = DataTracker.DataTracker(Annotator.AnnotationMetaData)
+module AST = AST(Annotator.AnnotationMetaData)
+module Refinement = Refinement.Refinement
+module TCommon = TranslatorCommon.TranslatorCommon
 module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
-module TranslatorCommon = 
-  TranslatorCommon.TranslatorCommon(Annotator.AnnotationMetaData)
+
 
 let id_to_expr (x : Syntax.id_t) = AST.Prog.NameSeg((x, []))
 
@@ -40,12 +42,12 @@ let test3 =
       Internal.NonEmptyList.coerce (
         [
           (let x : (Syntax.id_t, int) Either.t = Left "a" in x,
-            TranslatorCommon.convert_expr_lst_to_dot_expr [
+            TranslatorCommon.expr_lst_to_dot_expr [
               (id_to_expr "s'");
               (id_to_expr "a")
             ]);
           (let x : (Syntax.id_t, int) Either.t = Left "b" in x,
-            TranslatorCommon.convert_expr_lst_to_dot_expr [
+            TranslatorCommon.expr_lst_to_dot_expr [
               (id_to_expr "s");
               (id_to_expr "b")
             ]);

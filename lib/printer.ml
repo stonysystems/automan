@@ -144,7 +144,7 @@ module PrettyPrinter (M : MetaData) = struct
       )
       | TpTup t_lst -> (
         let t_lst_str_lst = List.map print t_lst in
-        let t_lst_str = String.concat "" t_lst_str_lst in
+        let t_lst_str = String.concat ", " t_lst_str_lst in
         Printf.sprintf "(%s)" t_lst_str
       )
 
@@ -263,7 +263,7 @@ module PrettyPrinter (M : MetaData) = struct
             (print_expr_in_one_line x.qbody)
       )
       | Let x -> (
-        Printf.sprintf "var %s%s := %s;%s%s" 
+        Printf.sprintf "var %s%s := %s; %s%s" 
           (
             match x.ghost with
             | true -> "ghost "
@@ -272,7 +272,10 @@ module PrettyPrinter (M : MetaData) = struct
           (
             let p_lst = Internal.NonEmptyList.as_list x.pats in
             let p_lst' = List.map print_pattern p_lst in
-            String.concat ", " p_lst'
+            let str = String.concat ", " p_lst' in
+            match List.length p_lst with
+            | 1 -> str
+            | _ -> "(" ^ str ^ ")"
           )
           (
             let defs_lst = Internal.NonEmptyList.as_list x.defs in
@@ -429,7 +432,7 @@ module PrettyPrinter (M : MetaData) = struct
               let fmls' = List.map print_formal fmls in 
               String.concat (", " ^ idnt_str) fmls'
             )
-            idnt_str
+            (get_indt_str_with_new_line (idnt_lvl - 1))
         )
 
     let print_datatype 
@@ -470,6 +473,20 @@ module PrettyPrinter (M : MetaData) = struct
         Printf.sprintf 
           "\n%spredicate %s(%s) %s%s{%s%s}" 
             idnt_str p fs_str 
+            specs_str
+            idnt_str (Prog.print_expr e (idnt_lvl+1)) idnt_str
+      )
+      | Function (is_fm, _, id, [], fs, rtn_tp, specs, e) -> (
+        let fs' = List.map print_formal fs in
+        let fs_str = String.concat ", " fs' in
+        let specs' = List.map 
+          (fun x -> print_function_spec x (idnt_lvl + 1)) specs in 
+        let specs_str = String.concat "" specs' in
+        Printf.sprintf 
+          "\n%s%s %s(%s) : %s %s%s{%s%s}" 
+            idnt_str 
+            (match is_fm with | true -> "function method" | false -> "function") 
+            id fs_str (Type.print rtn_tp)
             specs_str
             idnt_str (Prog.print_expr e (idnt_lvl+1)) idnt_str
       )
@@ -514,3 +531,5 @@ module PrettyPrinter (M : MetaData) = struct
         (String.concat "\n" decls')
 
 end
+
+
