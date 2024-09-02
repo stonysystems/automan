@@ -252,6 +252,14 @@ module Util = struct
     | Some Definitions.Cardinality ->
       ParserPass.Prog.Cardinality e
 
+  (* FIXME: DRY *)
+  let outvar_lhs_to_modepass_expr (var: Definitions.outvar_lhs_t): ModePass.Prog.expr_t =
+    let e = ModePass.Prog.from_qualified_id var.mq_outvar in
+    match var.uop with
+    | None -> e
+    | Some Definitions.Cardinality ->
+      ModePass.Prog.Cardinality e
+
 end
 
 (* Checks whether the given expression is a legal LHS for an assignment to an
@@ -379,10 +387,12 @@ let mode_expr_outvar_lhs
     (fun e -> {callstack = [here]; sort = e})
     (aux_expr e)
 
+type error_outvar_occur_t =
+  { occurring_outvar: id_t
+  ; shadowed: bool }
+
 type error_mode_expr_no_out_vars_t =
-  | OutVarOccur of
-      { occuring_outvar: id_t
-      ; shadowed: bool }
+  | OutVarOccur of error_outvar_occur_t
   | FunctionalizedPredOccur of Syntax.Common.module_qualified_name_t
 
 let mode_expr_no_out_vars
@@ -401,7 +411,7 @@ let mode_expr_no_out_vars
       let* () =
         Result.error_when (Util.id_in_formals seg_id vars_out)
           { callstack = [here]
-          ; sort = OutVarOccur {occuring_outvar = seg_id; shadowed = false} }
+          ; sort = OutVarOccur {occurring_outvar = seg_id; shadowed = false} }
       in
       let seg_tp_args' = List.map Convert.typ seg_tp_args in
       Result.Ok
@@ -414,7 +424,7 @@ let mode_expr_no_out_vars
             let* () =
               Result.error_when (Util.id_in_formals p_id vars_out)
                 { callstack = [here]
-                ; sort = OutVarOccur {occuring_outvar = p_id; shadowed = true} }
+                ; sort = OutVarOccur {occurring_outvar = p_id; shadowed = true} }
             in
             Result.Ok (p_id, Option.map Convert.typ p_tp_opt)
           end
@@ -613,7 +623,7 @@ let mode_expr_no_out_vars
       let* () =
         Result.error_when (Util.id_in_formals pv_id vars_out)
           { callstack = [here]
-          ; sort = OutVarOccur {occuring_outvar = pv_id; shadowed = true} }
+          ; sort = OutVarOccur {occurring_outvar = pv_id; shadowed = true} }
       in
       let pv_tp_opt' = Option.map Convert.typ pv_tp_opt in
       Result.Ok (ModePass.Prog.EPatVar (pv_id, pv_tp_opt'))
@@ -644,7 +654,7 @@ let mode_expr_no_out_vars
       let* () =
         Result.error_when (Util.id_in_formals pv_id vars_out)
           { callstack = [here]
-          ; sort = OutVarOccur {occuring_outvar = pv_id; shadowed = true} }
+          ; sort = OutVarOccur {occurring_outvar = pv_id; shadowed = true} }
       in
       let tp_opt' = Option.map Convert.typ tp_opt in
       Result.Ok (ModePass.Prog.PatVar (pv_id, tp_opt'))
@@ -655,6 +665,112 @@ let mode_expr_no_out_vars
   in
 
   aux_expr e
+
+type error_mode_expr_t =
+  | UnsupportedTypeArgs of Definitions.outvar_lhs_t
+  | UnsupportedEquatedOutVars of (Definitions.outvar_lhs_t * Definitions.outvar_lhs_t)
+  | FunctionalizedPredOccur of Syntax.Common.module_qualified_name_t
+  | MixedIO of
+      { input_violation: error_outvar_occur_t
+      ; illegal_outvar_lhs: ParserPass.Prog.expr_t }
+
+let mode_expr_conjunct_eq
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e1: AnnotationPass.Prog.expr_t) (e2: AnnotationPass.Prog.expr_t)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t option
+    , error_mode_expr_t ) m =
+  let here = "Moder.mode_expr_conjunct_eq" in
+
+  let analyze (e: AnnotationPass.Prog.expr_t) =
+    match mode_expr_outvar_lhs vars_out e with
+    | Result.Ok lhs -> Result.Ok (Either.Left lhs)
+    | Result.Error err -> begin
+        match err.sort with
+        | UnsupportedTypeArgs lhs ->
+          Result.Error
+            { callstack = err.callstack
+            ; sort = UnsupportedTypeArgs lhs }
+        | IllegalOutVarLHS offending ->
+          Result.map2 Either.right
+            (fun err2 ->
+               { callstack = err2.callstack
+               ; sort =
+                   match err2.sort with
+                   | OutVarOccur ov_occ ->
+                     MixedIO
+                       { input_violation = ov_occ
+                       ; illegal_outvar_lhs = offending }
+                   | FunctionalizedPredOccur fp_occ ->
+                     FunctionalizedPredOccur fp_occ
+               })
+            (mode_expr_no_out_vars vars_out e)
+      end
+  in
+  on_error_push_callstack here begin
+    let* e1_analysis = analyze e1 in
+    let* e2_analysis = analyze e2 in
+
+    (* Determine the annotation, or error if both are outvar_lhss *)
+    let* ann =
+      match (e1_analysis, e2_analysis) with
+      | (Either.Left e1', Either.Right _) ->
+        Result.Ok
+          (Some Definitions.({outvar_is_left = true; outvar = e1'}))
+      | (Either.Right _, Either.Left e2') ->
+        Result.Ok
+          (Some Definitions.({outvar_is_left = false; outvar = e2'}))
+      | (Either.Right _, Either.Right _) ->
+        Result.Ok None
+      | (Either.Left e1', Either.Left e2') ->
+        Result.Error
+          { callstack = []
+          ; sort = UnsupportedEquatedOutVars (e1', e2') }
+    in
+
+    (* Convert the conjuncts to ModePass expressions *)
+    let e1_mp =
+      Either.fold ~left:Util.outvar_lhs_to_modepass_expr ~right:(fun e -> e)
+        e1_analysis in
+    let e2_mp =
+      Either.fold ~left:Util.outvar_lhs_to_modepass_expr ~right:(fun e -> e)
+        e2_analysis in
+
+    Result.Ok
+      ( ModePass.Prog.Binary
+          ( Option.map (fun x -> Definitions.Eq x) ann
+          , Syntax.Common.Eq, e1_mp, e2_mp)
+      , Option.map (fun ann_eq -> Definitions.(ann_eq.outvar)) ann )
+  end
+
+(* let mode_expr_conjunct *)
+(*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
+(*     (conj: AnnotationPass.Prog.expr_t) *)
+(*   : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list *)
+(*     , error_mode_expr_t ) m = *)
+(*   let here = "Moder.mode_expr_conjunct:" in *)
+
+(*   match conj with *)
+(*   | Suffixed (_, _) -> _ *)
+(*   | NameSeg _ -> _ *)
+(*   | Lambda (_, _) -> _ *)
+(*   | MapDisplay _ -> _ *)
+(*   | SeqDisplay _ -> _ *)
+(*   | SetDisplay _ -> _ *)
+(*   | If (_, _, _, _) -> _ *)
+(*   | Match (_, _, _) -> _ *)
+(*   | Quantifier (_, _) -> _ *)
+(*   | SetComp _ -> _ *)
+(*   | StmtInExpr (_, _) -> _ *)
+(*   | Let _ -> _ *)
+(*   | MapComp _ -> _ *)
+(*   | Lit _ -> _ *)
+(*   | This -> _ *)
+(*   | Cardinality _ -> _ *)
+(*   | Tuple _ -> _ *)
+(*   | Unary (_, _) -> _ *)
+(*   | Binary (_, _, _, _) -> _ *)
+(*   | Lemma _ -> _ *)
+
 
 (* let mode_expr_conjunct_arglist *)
 (*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
@@ -728,6 +844,7 @@ let mode_expr_no_out_vars
    - vars: the (member-qualified) output variables e_conj determines
        if this is [], the expression is purely a requirement on inputs
 *)
+
 (* let mode_expr_conjunct *)
 (*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
 (*     (e_conj: AnnotationPass.Prog.expr_t) *)
@@ -742,7 +859,7 @@ let mode_expr_no_out_vars
 (*       | Mul | Div | Mod | Add | Sub -> *)
 (*         failwith *)
 (*           (here *)
-(*            ^ " invalid binary op (expected boolean, fatal): " *)
+(*            ^ " [FATAL] invalid binary op (expected boolean): " *)
 (*            ^ Common.show_bop_t bop) *)
 (*       | _ -> *)
 (*         foo_bop *)
