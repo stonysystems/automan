@@ -260,6 +260,23 @@ module Util = struct
     | Some Definitions.Cardinality ->
       ModePass.Prog.Cardinality e
 
+  let assemble_positional_args_by_modes
+      (args_in: ModePass.Prog.expr_t list) (args_out: Definitions.outvar_lhs_t list)
+      (anns: Annotation.mode_t list)
+    : ModePass.Prog.expr_t list =
+    (* <= in consideration of named args *)
+    assert List.(length args_in + length args_out <= length anns);
+    let rec aux args_in args_out acc = function
+      | Annotation.Input :: anns ->
+        let (hd, tl) = (List.hd args_in, List.tl args_in) in
+        aux tl args_out (hd :: acc) anns
+      | Annotation.Output :: anns ->
+        let (hd, tl) = (List.hd args_out, List.tl args_out) in
+        aux args_in tl (outvar_lhs_to_modepass_expr hd :: acc) anns
+      | [] -> acc
+    in
+    List.rev (aux args_in args_out [] anns)
+
 end
 
 (* Checks whether the given expression is a legal LHS for an assignment to an
@@ -668,16 +685,22 @@ let mode_expr_no_out_vars
 
 type error_mode_expr_t =
   | UnsupportedTypeArgs of Definitions.outvar_lhs_t
+  | UnsupportedNamedArgs of id_t * AnnotationPass.Prog.expr_t
   | UnsupportedEquatedOutVars of (Definitions.outvar_lhs_t * Definitions.outvar_lhs_t)
   | FunctionalizedPredOccur of Syntax.Common.module_qualified_name_t
   | MixedIO of
       { input_violation: error_outvar_occur_t
       ; illegal_outvar_lhs: ParserPass.Prog.expr_t }
+  | AnnotationViolation of
+      { p_id: Syntax.Common.module_qualified_name_t
+      ; arg: AnnotationPass.Prog.expr_t
+      ; i_or_o_expected:
+          (error_outvar_occur_t, ParserPass.Prog.expr_t) Either.t }
 
 let mode_expr_conjunct_eq
     (vars_out: AnnotationPass.TopDecl.formal_t list)
     (e1: AnnotationPass.Prog.expr_t) (e2: AnnotationPass.Prog.expr_t)
-  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t option
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
     , error_mode_expr_t ) m =
   let here = "Moder.mode_expr_conjunct_eq" in
 
@@ -739,8 +762,88 @@ let mode_expr_conjunct_eq
       ( ModePass.Prog.Binary
           ( Option.map (fun x -> Definitions.Eq x) ann
           , Syntax.Common.Eq, e1_mp, e2_mp)
-      , Option.map (fun ann_eq -> Definitions.(ann_eq.outvar)) ann )
+      , Option.fold ~none:[]
+          ~some:(fun ann_eq -> [Definitions.(ann_eq.outvar)])
+          ann)
   end
+
+let mode_expr_conjunct_funcall
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (pref: Syntax.Common.module_qualified_name_t)
+    (args: AnnotationPass.Prog.arglist_t)
+    (modes: Annotation.mode_t list)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let here = "Moder.mode_expr_conjunct_arglist:" in
+
+  let ( PositionalPartition {args_in = args_in; args_out = args_out}
+      , named_args_p ) =
+    Util.partition_args_by_modes args modes in
+
+  (* TODO: We don't support named arguments in our mode analysis (yet) *)
+  let* () =
+    Result.error_when named_args_p
+      { callstack = [here]
+      ; sort =
+          let (id, arg) = List.nth args.named 0 in
+          UnsupportedNamedArgs (id, arg) }
+  in
+  (* Check arguments in input positions contain not output-moded variables, and
+     arguments in output positions are valid outvar lhs *)
+  let* args_in' =
+    let err_handle arg_in (err: error_mode_expr_no_out_vars_t error_t) =
+      { callstack = here :: err.callstack
+      ; sort = match err.sort with
+          | OutVarOccur ov_occ ->
+            AnnotationViolation
+              { p_id = pref
+              ; arg = arg_in
+              ; i_or_o_expected = Either.Left ov_occ }
+          | FunctionalizedPredOccur fp_id ->
+            FunctionalizedPredOccur fp_id }
+    in
+    List.mapMResult
+      begin fun arg_in ->
+        Result.map_error (err_handle arg_in)
+          (mode_expr_no_out_vars vars_out arg_in)
+      end
+      args_in
+  in
+
+  let* args_out' =
+    let err_handle arg_out (err: error_mode_expr_outvar_lhs_t error_t) =
+      { callstack = here :: err.callstack
+      ; sort = match err.sort with
+          | IllegalOutVarLHS offending ->
+            AnnotationViolation
+              { p_id = pref
+              ; arg = arg_out
+              ; i_or_o_expected = Either.Right offending }
+          | UnsupportedTypeArgs ov ->
+            UnsupportedTypeArgs ov }
+    in
+    List.mapMResult
+      begin fun arg_out ->
+        Result.map_error (err_handle arg_out)
+          (mode_expr_outvar_lhs vars_out arg_out)
+      end
+      args_out
+  in
+
+  Result.Ok
+    ( ModePass.Prog.(
+        Suffixed
+          ( from_qualified_id pref
+          , ArgList
+              ({ positional =
+                   Util.assemble_positional_args_by_modes
+                     args_in' args_out' modes
+               ; named = []     (* TODO: named args *) }
+              , Some
+                  { callee = pref
+                  ; in_exprs = List.map Erase.Modings.expr args_in'
+                  ; out_vars = args_out' })))
+    , args_out' )
 
 (* let mode_expr_conjunct *)
 (*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
