@@ -1,0 +1,12 @@
+module LiveTPC__Coordinator_i {
+    RequestsMatch(+,+);
+    ReceivedAllVotes(+,+);
+    AllVotesAreYes(+);
+    CoordinatorCanNominateUsingOpn(+,+);
+    CoordinatorInit(-,+);
+    CoordinatorProcessRequest(+,-,+,-);
+    CoordinatorProcessVote(+,-,+);
+    CoordinatorGetDecision(+,-,+,+,+);
+    CoordinatorMakeDecision(+,-,-);
+    CoordinatorMaybeEnterCommitPhase(+,-,-);
+}

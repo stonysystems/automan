@@ -1,0 +1,21 @@
+module SHT__Host_i {
+    ValidKeyPlus(+);
+    ValidOptionalValue(+);
+    ValidKeyRange(+);
+    Host_Init(-,+,+,+,+);
+    NextGetRequest_Reply(+,-,+,+,+,-,-,-,-);
+    NextGetRequest(+,-,+,-);
+    NextSetRequest_Complete(+,-,+,+,+,-,-,-,-);
+    NextSetRequest(+,-,+,-);
+    NextDelegate(+,-,+,-);
+    NextShard(+,-,-,+,+,-,-);
+    NextShard_Wrapper(+,-,+,-);
+    NextReply(+,-,+,-);
+    NextRedirect(+,-,+,-);
+    ShouldProcessReceivedMessage(+);
+    Process_Message(+,-,-);
+    ReceivePacket(+,-,+,-,-);
+    ProcessReceivedPacket(+,-,-);
+    SpontaneouslyRetransmit(+,-,-);
+    Host_Next(+,-,+,-);
+}

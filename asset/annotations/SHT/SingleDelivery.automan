@@ -1,0 +1,14 @@
+module SHT__SingleDelivery_i {
+    MessageNotReceived(+,+,+);
+    NewSingleMessage(+,+);
+    ReceiveAck(+,-,+,-);
+    ShouldAckSingleMessage(+,+);
+    SendAck(+,+,-,-);
+    MaybeAckPacket(+,+,-,-);
+    ReceiveRealPacket(+,-,+);
+    UnAckedMsgForDst(+,+,+);
+    ReceiveSingleMessage(+,-,+,-,-);
+    ReceiveNoMessage(+,-);
+    SendSingleMessage(+,-,+,-,+,-);
+    SendNoMessage(+,-);
+}

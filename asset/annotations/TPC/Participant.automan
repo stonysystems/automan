@@ -1,0 +1,5 @@
+module LiveTPC__Participant_i {
+    ParticipantInit(-,+);
+    ParticipantProcessVoteRequest(+,-,+,-);
+    ParticipantProcessDecision(+,-,+,-);
+}

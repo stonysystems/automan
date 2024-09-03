@@ -1,0 +1,4 @@
+module SHT__Configuration_i {
+  HostsDistinct(+,+,+);
+  WFSHTConfiguration(+);
+}

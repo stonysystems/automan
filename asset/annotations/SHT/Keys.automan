@@ -1,0 +1,8 @@
+module SHT__Keys_i {
+    KeyLe(+,+);
+    KeyPlusLt(+,+);
+    KeyPlusLe(+,+);
+    KeyRangeContains(+,+);
+    RangesOverlap(+,+);
+    EmptyKeyRange(+)
+}

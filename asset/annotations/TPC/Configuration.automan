@@ -1,0 +1,5 @@
+module LiveTPC__Configuration_i {
+    NodesDistinct(+,+,+);
+    NodesIsUnique(+);
+    IsNodeIndex(+,+,+);
+}
