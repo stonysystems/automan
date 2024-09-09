@@ -436,6 +436,25 @@ let rec mode_expr_no_out_vars_extended_pattern
     in
     Result.Ok (ModePass.Prog.EPatCtor (c_id_opt, e_pats'))
 
+let rec mode_expr_no_out_vars_pattern
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (pat: AnnotationPass.Prog.pattern_t)
+  : (ModePass.Prog.pattern_t, error_outvar_occur_t) m =
+  let here = "Moder.mode_expr_no_out_vars_pattern" in
+
+  match pat with
+  | PatVar (p_id, tp_opt) ->
+    let* () =
+      Result.error_when (Util.id_in_formals p_id vars_out)
+        { callstack = [here]
+        ; sort = {occurring_outvar = p_id; shadowed = true }}
+    in
+    let tp_opt' = Option.map Convert.typ tp_opt in
+    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt'))
+  | PatCtor (ctor_id, pats) ->
+    let* pats' = List.mapMResult (mode_expr_no_out_vars_pattern vars_out) pats in
+    Result.Ok (ModePass.Prog.PatCtor (ctor_id, pats'))
+
 let mode_expr_no_out_vars
     (vars_out: AnnotationPass.TopDecl.formal_t list)
     (e: AnnotationPass.Prog.expr_t)
@@ -681,19 +700,12 @@ let mode_expr_no_out_vars
     let* qrange' = Result.map_option aux_expr qrange in
     Result.Ok (ModePass.Prog.QDom {qvars = qvars'; qrange = qrange'})
 
-  and aux_pattern = function
-    | AnnotationPass.Prog.PatVar (pv_id, tp_opt) ->
-      let* () =
-        Result.error_when (Util.id_in_formals pv_id vars_out)
-          { callstack = [here]
-          ; sort = OutVarOccur {occurring_outvar = pv_id; shadowed = true} }
-      in
-      let tp_opt' = Option.map Convert.typ tp_opt in
-      Result.Ok (ModePass.Prog.PatVar (pv_id, tp_opt'))
-    | PatCtor (c_id, pats) ->
-      let* pats' = List.mapMResult aux_pattern pats in
-      Result.Ok (ModePass.Prog.PatCtor (c_id, pats'))
-
+  and aux_pattern pat =
+    mode_expr_no_out_vars_pattern vars_out pat
+    |> Result.map_error begin fun err ->
+      { callstack = here :: err.callstack
+      ; sort = OutVarOccur err.sort }
+    end
   in
 
   aux_expr e
@@ -713,6 +725,7 @@ type error_mode_expr_t =
           (error_outvar_occur_t, ParserPass.Prog.expr_t) Either.t }
   (* TODO: Shadowing should be split into its own error *)
   | InputModeViolation of error_outvar_occur_t * ParserPass.Prog.expr_t
+  | OutVarShadowing of id_t
   (* argument is a branch with no output variables assigned *)
   | MixedBranchIO of ParserPass.Prog.expr_t
 
@@ -1036,6 +1049,41 @@ and mode_expr_conjunct
       let* res = mode_expr_ensure_input vars_out orig in
       Result.Ok (res, [])
   in
+  let aux_bop e1 e2 bop =
+    match bop with
+    | Syntax.Common.Eq ->
+      mode_expr_conjunct_eq vars_out e1 e2
+    (* Type errors *)
+    | Mul
+    | Div
+    | Mod
+    | Add
+    | Sub ->
+      failwith
+        (here
+         ^ " [fatal] unexpected arithmetic operator: "
+         ^ Syntax.Common.(show_bop_t bop))
+    (* Not supported for functionalization; ensure input moded *)
+    | Neq
+    | Lt
+    | Gt
+    | Lte
+    | Gte
+    | In
+    | Nin
+    | Disjoint
+    | Or
+    | Implies
+    | Equiv ->
+      let* e1' = mode_expr_ensure_input vars_out e1 in
+      let* e2' = mode_expr_ensure_input vars_out e2 in
+      Result.Ok
+        ( ModePass.Prog.Binary
+            (None, bop, e1', e2')
+        , [] )
+    | And ->
+      invalid_arg (here ^ " expected a single conunct, found a conjunction")
+  in
 
   on_error_push_callstack here begin
     match conj with
@@ -1059,17 +1107,44 @@ and mode_expr_conjunct
     | SetComp _ ->
       failwith (here ^ " [fatal] unexpected set comprehension")
     | StmtInExpr (_, _) -> _
-    | Let _ -> _
+    | Let {ghost = ghost; pats = pats; defs = defs; body = body} ->
+      let* pats' =
+        NonEmptyList.as_list pats
+        |> List.mapMResult
+          (mode_expr_no_out_vars_pattern vars_out)
+        |> Result.map_error begin fun err ->
+          { callstack = err.callstack
+          ; sort =
+              let {occurring_outvar = ov; shadowed = _} = err.sort in
+              OutVarShadowing ov }
+        end
+        |> Result.map NonEmptyList.coerce
+      in
+      let* defs' =
+        NonEmptyList.as_list defs
+        |> List.mapMResult (mode_expr_ensure_input vars_out)
+        |> Result.map NonEmptyList.coerce
+      in
+      let* (body', ovs) = mode_expr vars_out body in
+      Result.Ok
+        ( ModePass.Prog.Let
+            { ghost = ghost; pats = pats'
+            ; defs = defs'
+            ; body = body' }
+        , ovs )
     | MapComp _ ->
       failwith (here ^ " [fatal] unexpected map comprehension")
-    | Lit _ -> _
-    | This -> _
+    | Lit l ->
+      Result.Ok (ModePass.Prog.Lit l, [])
+    | This ->
+      failwith (here ^ " [fatal] unexpected `this`")
     | Cardinality _ ->
       failwith (here ^ " [fatal] unexpected cardinality")
     | Tuple _ ->
       failwith (here ^ " [fatal] unexpected tuple")
     | Unary (_, _) -> _
-    | Binary (_, _, _, _) -> _
+    | Binary (_, bop, e1, e2) ->
+      aux_bop e1 e2 bop
     | Lemma _ -> _
   end
 
