@@ -344,7 +344,7 @@ module AST (M : MetaData) = struct
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-datatype-update-suffix *)
       | DataUpd  of member_binding_upd_t NonEmptyList.t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-subsequence-suffix *)
-      | Subseq   of {lb: expr_t option; ub: expr_t option}
+      | Subseq   of subseq_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-subsequence-slices-suffix *)
       | SliceLen of {sublens: expr_t NonEmptyList.t; to_end: bool }
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-sequence-update-suffix
@@ -357,6 +357,8 @@ module AST (M : MetaData) = struct
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-argument-list-suffix *)
       | ArgList  of arglist_t * M.arglist_t
     [@@deriving show, eq]
+
+    and subseq_t = {lb: expr_t option; ub: expr_t option}
 
     and member_binding_upd_t = (id_t, int) Either.t * expr_t
 
@@ -453,6 +455,23 @@ module AST (M : MetaData) = struct
       NonEmptyList.fold_right_1
         (fun x y -> Binary (o_ann, o, x, y))
         es
+
+    let rec assoc_right_bop_ann
+        (o: Common.bop_t) (es: (expr_t * 'a) list)
+        (ann: 'a -> 'a -> M.binary_op_t * 'a)
+        (neutral: expr_t * 'a) =
+      match es with
+      | [] -> neutral
+      | [(e, a)] ->
+        let (a', x) = ann a (snd neutral) in
+        (Binary (a', o, e, fst neutral), x)
+      | (e1, a1) :: (e2, a2) :: [] ->
+        let (a', x) = ann a1 a2 in
+        (Binary (a', o, e1, e2), x)
+      | (e1, a1) :: es ->
+        let (e2, a2) = assoc_right_bop_ann o es ann neutral in
+        let (a', x) = ann a1 a2 in
+        (Binary (a', o, e1, e2), x)
 
     let foldl1 (f: expr_t -> expr_t -> expr_t) (es: expr_t list): expr_t =
       match es with
@@ -682,6 +701,11 @@ module Convert (M1 : MetaData) (M2 : MetaData) = struct
     match pat with
     | PatVar (id, tp) -> PatVar (id, Option.map (typ tp_h) tp)
     | PatCtor (id, pats) -> PatCtor (id, List.map (pattern tp_h) pats)
+
+  let lambda_params
+      (tp_h: tp_handler_t) (ps: (id_t * Src.Type.t option) list)
+    : (id_t * Tgt.Type.t option) list =
+    List.map (function (p, tp) -> (p, Option.map (typ tp_h) tp)) ps
 
 end
 
