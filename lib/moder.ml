@@ -1563,8 +1563,31 @@ let mode_topdecl_synonym_type
     ; params = sd.params
     ; rhs = sd_rhs })
 
+open struct
+  type ('a, 'e) error_logger = 'a * (error_mode_expr_t error_t) list
+
+  let return (x: 'a): ('a, 'e) error_logger =
+    (x, [])
+
+  let ( let< )
+      (f: ('a, 'e) error_logger) (g: 'a -> ('b, 'e) error_logger)
+    : ('b, 'e) error_logger =
+    let (x, logs1) = f in
+    let (y, logs2) = g x in
+    (y, logs1 @ logs2)
+
+  let log_error (err: 'e error_t): (unit, 'e) error_logger =
+    ((), [err])
+end
+
 let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
-  : (ModePass.TopDecl.t', error_mode_expr_t) m =
+  : (ModePass.TopDecl.t', error_mode_expr_t) error_logger =
+  let here = "Moder.mode_topdecl:" in
+  let report_offending_predicate p_id err =
+    let msg = here ^ " in predicate " ^ p_id in
+    { err with callstack = msg :: err.callstack }
+  in
+
   let aux_spec (spec: AnnotationPass.TopDecl.function_spec_t)
     : ModePass.TopDecl.function_spec_t =
     match spec with
@@ -1575,93 +1598,95 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
   in
 
   match d with
-  | AnnotationPass.TopDecl.ModuleImport imp ->
-    Result.Ok (ModePass.TopDecl.ModuleImport imp)
-  | ModuleDef (_, m_id, m_decls) ->
-    let* m_decls' = mode_topdecls m_decls in
+  | ModuleImport imp ->
+    return (ModePass.TopDecl.ModuleImport imp)
+  | ModuleDef (_attrs, m_id, m_decls) ->
+    let< m_decls' = mode_topdecls m_decls in
     (* NOTE: We drop attributes *)
-    Result.Ok (ModePass.TopDecl.ModuleDef ([], m_id, m_decls'))
-  | DatatypeDecl dat ->
-    let dat' = mode_topdecl_datatype dat in
-    Result.Ok (DatatypeDecl dat')
+    return (ModePass.TopDecl.ModuleDef ([], m_id, m_decls'))
+  | DatatypeDecl dd ->
+    let dd' = mode_topdecl_datatype dd in
+    return (ModePass.TopDecl.DatatypeDecl dd')
   | SynonymTypeDecl syn ->
-    Result.Ok (SynonymTypeDecl (mode_topdecl_synonym_type syn))
-  | MethLemDecl
-      { sort = _sort; attrs = _
-      ; id = _id; signature = _sign
-      ; spec = _spec; body = _body } ->
-    failwith "Moder.mode_topdecl: TODO method/lemma unimplemented"
+    let syn' = mode_topdecl_synonym_type syn in
+    return (ModePass.TopDecl.SynonymTypeDecl syn')
   | PredFunDecl
-      (Function (m_pres, _attrs, id, tp_ps, ps, tp, specs, body)) ->
+      (Function (m_pres, _attrs, f_id, tp_ps, ps, tp, specs, body)) ->
+
     let (ps', _) = mode_topdecl_formals ps None in
     let tp' = Convert.typ tp in
     let specs' = List.map aux_spec specs in
     let body' = Convert.expr body in
 
-    Result.Ok
-      (ModePass.TopDecl.(
-          PredFunDecl
-            (Function (m_pres, [], id, tp_ps, ps', tp', specs', body'))))
+    return (ModePass.TopDecl.(
+      PredFunDecl (Function (m_pres, [], f_id, tp_ps, ps', tp', specs', body'))))
+
   | PredFunDecl
       (Predicate
-         ( p_ann, method_present, _p_attrs
-         , p_id, p_tp_params, p_params
-         , p_specs, p_body )) ->
-    let (ps', p_ann') = mode_topdecl_formals p_params p_ann in
-    let specs' = List.map aux_spec p_specs in
+         ( p_ann, method_present, _attrs
+         , p_id, tp_ps, ps
+         , specs, body )) ->
 
-    let fallback(ann: Definitions.predicate_decl_t) =
-      let p_body' = Convert.expr p_body in
-      Result.Ok
-        (ModePass.TopDecl.PredFunDecl
-           (Predicate
-              ( ann, method_present, []
-              , p_id, p_tp_params, ps'
-              , specs', p_body' )))
+    let (ps', p_ann') = mode_topdecl_formals ps p_ann in
+    let specs' = List.map aux_spec specs in
+
+    let generate_result
+        (ann: Definitions.predicate_decl_t)
+        (p_body: ModePass.Prog.expr_t)
+      : ModePass.TopDecl.t' =
+      ModePass.TopDecl.PredFunDecl
+        (Predicate
+           ( ann, method_present, []
+           , p_id, tp_ps, ps'
+           , specs', p_body ))
+    in
+    let fallback_result() =
+      generate_result Definitions.Predicate (Convert.expr body)
     in
 
-    match p_ann' with
-    | None
-    | Some Definitions.Predicate ->
-      fallback Definitions.Predicate
-    | Some
-        (Definitions.Function
-           { make_stub = _      (* TODO: This field has no semantic meaning when returned from `mode_topdecl_formals` *)
-           ; vars_in = vars_in
-           ; vars_out = vars_out }) ->
-      (* TODO: Consider whether assigned_outvars should be stored in an annotation too *)
-      Result.try_catch
-        begin
+    begin
+      match p_ann' with
+      | None
+      | Some Definitions.Predicate ->
+        return (fallback_result ())
+      | Some
+          (Definitions.Function
+             { make_stub = _      (* TODO: This field has no semantic meaning when
+                                     returned from `mode_topdecl_formals` *)
+             ; vars_in = vars_in
+             ; vars_out = vars_out }) ->
+
+        begin                   (* (ModePass.Prog.expr_t, error_mode_expr_t) m *)
           let* (body', _assigned_outvars) =
-            mode_expr (NonEmptyList.as_list vars_out) p_body in
+            mode_expr (NonEmptyList.as_list vars_out) body in
           Result.Ok
-            (ModePass.TopDecl.PredFunDecl
-               (Predicate
-                  ( Definitions.Function
-                      { make_stub = false
-                      ; vars_in = vars_in
-                      ; vars_out = vars_out }
-                  , method_present, []
-                  , p_id, p_tp_params, ps'
-                  , specs', body' )))
-        end
-        (* TODO: error reporting *)
-        (fun _err ->
-           fallback
-             (Definitions.Function
-                { make_stub = true
-                ; vars_in = vars_in
-                ; vars_out = vars_out }))
+            (generate_result
+               Definitions.(
+                 Function
+                   { make_stub = false
+                   ; vars_in = vars_in
+                   ; vars_out = vars_out })
+               body')
+        end |> Result.fold
+          ~ok:return
+          ~error:begin fun err ->
+            let< () = log_error (report_offending_predicate p_id err) in
+            return (fallback_result ())
+          end
+    end
+  | MethLemDecl _ ->
+    failwith (here ^ " TODO method/lemma unimplemented")
 
 and mode_topdecls (d: AnnotationPass.TopDecl.t list)
-  : (ModePass.TopDecl.t list, error_mode_expr_t) m =
-  List.mapMResult
-    (function (mods, decl) ->
-       let* decl' = mode_topdecl decl in
-       Result.Ok (mods, decl'))
-    d
+  : (ModePass.TopDecl.t list, error_mode_expr_t) error_logger =
+  match d with
+  | [] -> return []
+  | (mods, decl) :: decls ->
+    let< decl' = mode_topdecl decl in
+    let< decls' = mode_topdecls decls in
+    return ((mods, decl') :: decls')
 
-let mode (m: AnnotationPass.t): (ModePass.t, error_mode_expr_t) m =
+let run (m: AnnotationPass.t): (ModePass.t, error_mode_expr_t) error_logger =
   let Dafny {includes = includes; decls = decls} = m in
-  let* decls' = mode_topdecls decls in
-  Result.Ok (ModePass.Dafny {includes = includes; decls = decls'})
+  let< decls' = mode_topdecls decls in
+  return (ModePass.Dafny {includes = includes; decls = decls'})
