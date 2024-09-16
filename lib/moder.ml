@@ -14,7 +14,9 @@ open Annotator
   *   formal parameters
 *)
 module Definitions = struct
-  type unary_op_for_outvar_t = Cardinality
+  type outvar_lhs_fieldlike_t =
+    | Cardinality
+    | Sel of id_t
   [@@deriving show, eq]
 
   (** The LHS of assignments to (members of) out vars. Some operations (for
@@ -23,7 +25,7 @@ module Definitions = struct
   *)
   type outvar_lhs_t =
     { mq_outvar: Common.member_qualified_name_t
-    ; uop: unary_op_for_outvar_t option }
+    ; fieldlike: outvar_lhs_fieldlike_t option }
   [@@deriving show, eq]
 
   (** - Predicate: this predicate will be translated as a predicate in the
@@ -44,7 +46,7 @@ module Definitions = struct
         { make_stub: bool
         ; vars_in:  AnnotationPass.TopDecl.formal_t list
         ; vars_out: AnnotationPass.TopDecl.formal_t NonEmptyList.t
-        ; requires: AnnotationPass.Prog.expr_t list }
+        (* ; requires: AnnotationPass.Prog.expr_t list  *) }
   [@@deriving show, eq]
 
   (** - vars_then: output variables in the `then` branch
@@ -60,6 +62,24 @@ module Definitions = struct
   [@@deriving show, eq]
 
   (** The output variable mentioned in a quantification *)
+  type quantification_functionalize_var_domain_t =
+    | QFVarBounded | QFVarCollection
+
+
+  (* type quantification_functionalize_var_domain_t = *)
+  (*   | QFVarDomRange of ParserPass.Prog.subseq_t *)
+  (*   | QFVarDomColl  of ParserPass.Prog.expr_t *)
+  (* [@@deriving show, eq] *)
+
+  (* type quantification_functionalize_var_t = *)
+  (*   QFVar of *)
+  (*     { id: id_t *)
+  (*     ; tp: AnnotationPass.Type.t option *)
+  (*     ; domain: quantification_functionalize_var_domain_t *)
+  (*     ; domain_mode: outvar_lhs_t option *)
+
+  (*     } *)
+
   type quantification_functionalize_t = outvar_lhs_t
   [@@deriving show, eq]
 
@@ -94,7 +114,7 @@ module Definitions = struct
   type arglist_functionalize_t =
     { callee: Common.module_qualified_name_t
     ; in_exprs:  ParserPass.Prog.expr_t list
-    ; out_vars: Syntax.Common.member_qualified_name_t list }
+    ; out_vars: outvar_lhs_t list }
   [@@deriving show, eq]
 end
 
@@ -137,185 +157,1536 @@ end
 
 module ModePass = AST (ModingMetaData)
 
-type 'a m = (('a * bool), string) Result.t
+module Convert = struct
+  module C = Syntax.Convert (AnnotationMetaData) (ModingMetaData)
+  include C
 
-(* open struct *)
-(*   let return (x: 'a): 'a m = *)
-(*     Result.Ok (x, false) *)
+  let typ = C.typ Fun.id
+  let pattern = C.pattern Fun.id
+  let extended_pattern = C.extended_pattern Fun.id
+  let lambda_params = C.lambda_params Fun.id
 
-(*   let ( let* ) (x: 'a m) (f: 'a -> 'b m): 'b m = *)
-(*     let ( let*! ) = Result.bind in *)
-(*     let*! (x', b1) = x in *)
-(*     let*! (y, b2)  = f x' in *)
-(*     Result.Ok (y, b1 || b2) *)
+  (* pass-through conversion (no interesting annotations added here; this just *)
+  (*    exists to make the typechecker happy) *)
+  let rec expr (e: AnnotationPass.Prog.expr_t): ModePass.Prog.expr_t =
+    let aux_suffix (s: AnnotationPass.Prog.suffix_t): ModePass.Prog.suffix_t =
+      match s with
+      | AugDot (mem, tps) ->
+        AugDot (mem, List.map typ tps)
+      | DataUpd mem_upd ->
+        DataUpd begin
+          NonEmptyList.map
+            (function (mem, newval) -> (mem, expr newval))
+            mem_upd
+        end
+      | Subseq {lb = lb; ub = ub} ->
+        Subseq {lb = Option.map expr lb; ub = Option.map expr ub}
+      | SliceLen {sublens = sublens; to_end = to_end} ->
+        SliceLen
+          { sublens = NonEmptyList.map expr sublens
+          ; to_end = to_end }
+      | SeqUpd {idx = idx; v = v} ->
+        SeqUpd
+          { idx = expr idx
+          ; v = expr v }
+      | Sel sel ->
+        Sel (expr sel)
+      | ArgList ({positional = pos; named = nam}, _) ->
+        ArgList
+          ({ positional = List.map expr pos
+           ; named = List.map (function (id, e) -> (id, expr e)) nam }
+          , None )              (* TODO: reconsider? as in, should this be forbidden? *)
+    in
 
-(*   let make_stub (): unit m = *)
-(*     Result.Ok ((), true) *)
-(* end *)
+    let aux_qdom (qdom: AnnotationPass.Prog.qdom_t): ModePass.Prog.qdom_t =
+      let QDom {qvars = qvars; qrange = qrange} = qdom in
+      let qvars' =
+        List.map
+          begin function
+            | AnnotationPass.Prog.QVar (qv_id, qv_tp, qv_coll, _attrs) ->
+              let qv_tp' = Option.map typ qv_tp in
+              let qv_coll' = Option.map expr qv_coll in
+              ModePass.Prog.QVar (qv_id, qv_tp', qv_coll', [])
+          end
+          qvars
+      in
+      let qrange' = Option.map expr qrange in
+      QDom {qvars = qvars'; qrange = qrange'}
+    in
+
+    match e with
+    | Suffixed (pref, suf) ->
+      Suffixed (expr pref, aux_suffix suf)
+    | NameSeg (id, tps) ->
+      ModePass.Prog.NameSeg (id, List.map typ tps)
+    | Lambda (ps, body) ->
+      let ps' = lambda_params ps in
+      let body' = expr body in
+      Lambda (ps', body')
+    | MapDisplay kvs ->
+      MapDisplay (List.map (function (k, v) -> (expr k, expr v)) kvs)
+    | SeqDisplay sd ->
+        SeqDisplay begin
+          match sd with
+          | SeqEnumerate es ->
+            SeqEnumerate (List.map expr es)
+          | SeqTabulate {gen_inst = tp_args; len = len; func = func} ->
+            SeqTabulate
+              { gen_inst = List.map typ tp_args
+              ; len = expr len
+              ; func = expr func }
+        end
+    | SetDisplay es ->
+      SetDisplay (List.map expr es)
+    | If ((), guard, then_, else_) ->
+      If (None, expr guard, expr then_, expr else_)
+    | Match ((), scrut, tree) ->
+      let scrut' = expr scrut in
+      let tree' =
+        List.map
+          (function
+            | AnnotationPass.Prog.Case (_attrs, epats, body) ->
+              ModePass.Prog.Case ([], extended_pattern epats, expr body))
+          tree
+      in
+      Match (None, scrut', tree')
+    | Quantifier ((), {qt = qt; qdom = qdom; qbody = qbody}) ->
+      let qdom' = aux_qdom qdom in
+      let qbody' = expr qbody in
+      Quantifier (None, {qt = qt; qdom = qdom'; qbody = qbody'})
+    | SetComp {qdom = qdom; body = body} ->
+      SetComp
+        { qdom = aux_qdom qdom
+        ; body = Option.map expr body }
+    | StmtInExpr (_, _) ->
+      failwith "Moder.Convert.expr: TODO statement-in-expression"
+    | Let {ghost = g; pats = p; defs = d; body = b} ->
+      Let
+        { ghost = g
+        ; pats = NonEmptyList.map pattern p
+        ; defs = NonEmptyList.map expr d
+        ; body = expr b}
+    | MapComp {qdom = qdom; key = key; valu = valu} ->
+      MapComp
+        { qdom = aux_qdom qdom
+        ; key = Option.map expr key
+        ; valu = expr valu }
+    | Lit l -> Lit l
+    | This -> This
+    | Cardinality e ->
+      Cardinality (expr e)
+    | Tuple es ->
+      Tuple (List.map expr es)
+    | Unary (uop, e) ->
+      Unary (uop, expr e)
+    | Binary ((), bop, e1, e2) ->
+      Binary (None, bop, expr e1, expr e2)
+    | Lemma {lem = lem; e = e} ->
+      Lemma
+        { lem = expr lem
+        ; e = expr e }
+end
+
+module Erase = struct
+  module Annotations = struct
+    module E = Syntax.Erase (AnnotationMetaData)
+    include E
+  end
+  module Modings = struct
+    module E = Syntax.Erase (ModingMetaData)
+    include E
+  end
+end
+
+(* NOTE: no support for translating attributes (for now) *)
+let attribute_handler
+    (_: AnnotationPass.Prog.attribute_t list)
+  : ModePass.Prog.attribute_t list =
+  []
+
+type 'e error_t = {callstack: string list; sort: 'e}
+type ('a, 'e) m = ('a, 'e error_t) Result.t
+
+let on_error_push_callstack (loc: string) (comp: ('a, 'e) m): ('a, 'e) m =
+  Result.map_error
+    (fun err -> { err with callstack = loc :: err.callstack })
+    comp
+
+open struct
+  let ( let* ) = Result.bind
+end
 
 module Util = struct
   type partition_args_by_modes_t =
     | PositionalPartition of
         { args_in:  AnnotationPass.Prog.expr_t list
         ; args_out: AnnotationPass.Prog.expr_t list }
-    | Unknown
 
   (** The additional `bool` return is for whether named args are used. These are
       not supported, so their presence means we should generate a stub.
   *)
   let partition_args_by_modes
-      (args: AnnotationPass.Prog.arglist_t) (anns: Annotation.mode_t list option)
+      (args: AnnotationPass.Prog.arglist_t) (anns: Annotation.mode_t list)
     : partition_args_by_modes_t * bool =
     let named_args_p = List.length args.named <> 0 in
-    (* NOTE: The annotation pass assures us that the mode list has the same
+    (* NOTE: The annotation pass ensures that the mode list has the same
        length as the argument list *)
-    let ( let< ) = Option.bind in
-    let res = begin
-      let< anns = anns in
-      let anns' = begin
-        if not named_args_p then anns
-        else List.(take (length args.positional) anns)
-      end in
-      let args_with_anns =
-        List.map2 (fun arg mode -> (arg, mode)) args.positional anns' in
-      let (in_args, out_args) =
-        List.partition_map
-          (function (arg, mode) ->
-             if mode = Annotation.Input
-             then Either.left arg
-             else Either.right arg)
-          args_with_anns
-      in
-      Option.Some
-        (PositionalPartition
-           {args_in = in_args; args_out = out_args})
+    let anns' = begin
+      if not named_args_p then anns
+      else List.(take (length args.positional) anns)
     end in
-    ( Option.fold ~none:Unknown ~some:(fun x -> x) res
-    , named_args_p)
+    let args_with_anns =
+      List.map2 (fun arg mode -> (arg, mode)) args.positional anns' in
+    let (in_args, out_args) =
+      List.partition_map
+        (function
+          | (arg, Annotation.Input)  -> Either.left arg
+          | (arg, Annotation.Output) -> Either.right arg)
+        args_with_anns
+    in
+    ( PositionalPartition {args_in = in_args; args_out = out_args}
+    , named_args_p )
+
+  let id_in_formals
+      (id: id_t) (ps: AnnotationPass.TopDecl.formal_t list)
+    : bool =
+    List.exists (function AnnotationPass.TopDecl.Formal (p_id, _) -> id = p_id) ps
+
+  (* NOTE: change this when other "members" are allowed (digits, sequence/key
+     selections) *)
+  let outvar_lhs_qualify
+      (out_var: Definitions.outvar_lhs_t)
+      (mem: (id_t, Definitions.outvar_lhs_fieldlike_t) Either.t)
+      (err: 'e)
+    : (Definitions.outvar_lhs_t, 'e) Result.t =
+    Option.fold
+      ~none:begin
+        Result.Ok begin
+          match mem with
+          | Either.Left id ->
+            { out_var
+              with mq_outvar =
+                     NonEmptyList.snoc out_var.mq_outvar id }
+          | Either.Right fieldlike ->
+            { out_var with fieldlike = Some fieldlike }
+        end
+      end
+      ~some:(fun _ -> Result.Error err)
+      out_var.fieldlike
+
+  let outvar_lhs_to_expr (var: Definitions.outvar_lhs_t): ParserPass.Prog.expr_t =
+    let e = ParserPass.Prog.from_qualified_id var.mq_outvar in
+    match var.fieldlike with
+    | None -> e
+    | Some Definitions.Cardinality ->
+      ParserPass.Prog.Cardinality e
+    | Some Definitions.Sel s ->
+      ParserPass.Prog.(Suffixed (e, Sel (NameSeg (s, []))))
+
+  (* FIXME: DRY *)
+  let outvar_lhs_to_modepass_expr (var: Definitions.outvar_lhs_t): ModePass.Prog.expr_t =
+    let e = ModePass.Prog.from_qualified_id var.mq_outvar in
+    match var.fieldlike with
+    | None -> e
+    | Some Definitions.Cardinality ->
+      ModePass.Prog.Cardinality e
+    | Some (Definitions.Sel s) ->
+      ModePass.Prog.(Suffixed (e, Sel (NameSeg (s, []))))
+
+  let assemble_positional_args_by_modes
+      (args_in: ModePass.Prog.expr_t list) (args_out: Definitions.outvar_lhs_t list)
+      (anns: Annotation.mode_t list)
+    : ModePass.Prog.expr_t list =
+    (* <= in consideration of named args *)
+    assert List.(length args_in + length args_out <= length anns);
+    let rec aux args_in args_out acc = function
+      | Annotation.Input :: anns ->
+        let (hd, tl) = (List.hd args_in, List.tl args_in) in
+        aux tl args_out (hd :: acc) anns
+      | Annotation.Output :: anns ->
+        let (hd, tl) = (List.hd args_out, List.tl args_out) in
+        aux args_in tl (outvar_lhs_to_modepass_expr hd :: acc) anns
+      | [] -> acc
+    in
+    List.rev (aux args_in args_out [] anns)
+
 end
 
-(* Check that an expression contains no output-moded (member-qualified) variables
- * Return value is to be interpreted as follows:
- * - None: no output vars in expression
- *
- * - Some mq_var: mq_var is an output-moded formal paremeter that occurs in the
-   given expression
+(* Checks whether the given expression is a legal LHS for an assignment to an
+   output-moded variable *)
+type error_mode_expr_outvar_lhs_t =
+   | IllegalOutVarLHS of ParserPass.Prog.expr_t
+   | UnsupportedTypeArgs of Definitions.outvar_lhs_t
+
+(**
+   Input:
+   - `vars_out`: the set of output-moded variables
+   - `e`: the expression to check
+   Output:
+    - `Result.Ok` means the expression is a legal output-variable LHS (evidenced
+      by the value)
+    - `Result.Error` means the expression is not a legal output-variable LHS
 *)
-(* let rec no_out_vars_expr *)
+let mode_expr_outvar_lhs
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e: AnnotationPass.Prog.expr_t)
+  : (Definitions.outvar_lhs_t, error_mode_expr_outvar_lhs_t) m =
+  let here = "Moder.mode_expr_outvar_lhs" in
+
+  let rec aux_expr
+      (e: AnnotationPass.Prog.expr_t)
+    : (Definitions.outvar_lhs_t, error_mode_expr_outvar_lhs_t) Result.t =
+    match e with
+    | Suffixed (pref, suff) ->
+      let* pref' = aux_expr pref in
+      aux_suffix pref' suff
+
+    | NameSeg (id, tp_args) ->
+      (* 2.1 id must be an outvar *)
+      let* () =
+        Result.error_when
+          (not (Util.id_in_formals id vars_out))
+          (IllegalOutVarLHS (Erase.Annotations.expr e))
+      in
+      let ov = Definitions.(
+          { mq_outvar = NonEmptyList.singleton id
+          ; fieldlike = None })
+      in
+      (* 2.2 type arguments not supported *)
+      let* () =
+        Result.error_when (List.length tp_args <> 0)
+          (UnsupportedTypeArgs ov)
+      in
+      Result.Ok ov
+
+    | StmtInExpr (_, e') ->
+      (* 3.0 We drop statements in expressionsl (e.g., reveal/assume/assert) *)
+      aux_expr e'
+
+    | Cardinality e as e_orig ->
+      let* e' = aux_expr e in
+      Util.outvar_lhs_qualify
+        e' (Either.Right Definitions.Cardinality)
+        (IllegalOutVarLHS (Erase.Annotations.expr e_orig))
+
+    | Tuple _ ->
+      (* TODO: consider patterns of outvars *)
+      Result.Error (IllegalOutVarLHS (Erase.Annotations.expr e))
+
+    | Lemma {lem = _; e = body} ->
+      (* NOTE: we drop lemma invocations *)
+      aux_expr body
+
+    | Lambda _
+    | MapDisplay _
+    | SeqDisplay _
+    | SetDisplay _
+    | If (_, _, _, _)
+    | Match (_, _, _)
+    | Quantifier (_, _)
+    | SetComp _
+    | Let _
+    | MapComp _
+    | Lit _
+    | This
+    | Unary (_, _)
+    | Binary (_, _, _, _) ->
+      Result.Error (IllegalOutVarLHS (Erase.Annotations.expr e))
+
+  and aux_suffix
+      (pref: Definitions.outvar_lhs_t)
+      (suff: AnnotationPass.Prog.suffix_t)
+    : (Definitions.outvar_lhs_t, error_mode_expr_outvar_lhs_t) Result.t =
+    let e_orig_lazy (_: unit) =
+      ParserPass.Prog.Suffixed
+        ( Util.outvar_lhs_to_expr pref
+        , Erase.Annotations.suffix suff )
+    in
+    match suff with
+    | AugDot (DSId id, tp_args) ->
+      let* ov =
+        Util.outvar_lhs_qualify pref (Either.Left id)
+          (IllegalOutVarLHS
+             (ParserPass.Prog.Suffixed
+                ( Util.outvar_lhs_to_expr pref
+                , AugDot (DSId id, []))))
+      in
+      let* () =
+        Result.error_when
+          (List.length tp_args <> 0)
+          (UnsupportedTypeArgs ov)
+      in
+      Result.Ok ov
+    | Sel (NameSeg (id, tp_args)) ->
+      let* ov =
+        Util.outvar_lhs_qualify pref (Either.right (Definitions.Sel id))
+          (IllegalOutVarLHS
+             (ParserPass.Prog.Suffixed
+                ( Util.outvar_lhs_to_expr pref
+                , Sel (NameSeg (id, [])))))
+      in
+      let* () =
+        Result.error_when
+          (List.length tp_args <> 0)
+          (UnsupportedTypeArgs ov)
+      in
+      Result.Ok ov
+
+    | AugDot _
+    (* TODO: support members with digit identifiers *)
+    | DataUpd _
+    (* TODO: consider whether/how to support data updates on output-moded variables *)
+    | Subseq _
+    (* TODO: could be supported *)
+    | SliceLen _
+    | SeqUpd _
+    (* TODO: consider whether/how to support subsequences on output-moded variables *)
+    | Sel _
+    (* TODO: consider whether/how to support selection on output-moded variables *)
+    | ArgList (_, _) ->
+      Result.Error (IllegalOutVarLHS (e_orig_lazy()))
+
+  in
+  Result.map_error
+    (fun e -> {callstack = [here]; sort = e})
+    (aux_expr e)
+
+type error_outvar_occur_t =
+  { occurring_outvar: id_t
+  ; shadowed: bool }
+
+type error_mode_expr_no_out_vars_t =
+  | OutVarOccur of error_outvar_occur_t
+  | FunctionalizedPredOccur of Syntax.Common.module_qualified_name_t
+
+let rec mode_expr_no_out_vars_extended_pattern
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (epat: AnnotationPass.Prog.extended_pattern_t)
+  : (ModePass.Prog.extended_pattern_t, error_outvar_occur_t) m =
+  match epat with
+  | EPatLit l ->
+    Result.Ok (ModePass.Prog.EPatLit l)
+  | EPatVar (pv_id, pv_tp_opt) ->
+    let* () =
+      Result.error_when (Util.id_in_formals pv_id vars_out)
+        { callstack = []
+        ; sort = {occurring_outvar = pv_id; shadowed = true} }
+    in
+    let pv_tp_opt' = Option.map Convert.typ pv_tp_opt in
+    Result.Ok (ModePass.Prog.EPatVar (pv_id, pv_tp_opt'))
+
+  | EPatCtor (c_id_opt, e_pats) ->
+    let* e_pats' =
+      List.mapMResult
+        (mode_expr_no_out_vars_extended_pattern vars_out)
+        e_pats
+    in
+    Result.Ok (ModePass.Prog.EPatCtor (c_id_opt, e_pats'))
+
+let rec mode_expr_no_out_vars_pattern
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (pat: AnnotationPass.Prog.pattern_t)
+  : (ModePass.Prog.pattern_t, error_outvar_occur_t) m =
+  let here = "Moder.mode_expr_no_out_vars_pattern" in
+
+  match pat with
+  | PatVar (p_id, tp_opt) ->
+    let* () =
+      Result.error_when (Util.id_in_formals p_id vars_out)
+        { callstack = [here]
+        ; sort = {occurring_outvar = p_id; shadowed = true }}
+    in
+    let tp_opt' = Option.map Convert.typ tp_opt in
+    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt'))
+  | PatCtor (ctor_id, pats) ->
+    let* pats' = List.mapMResult (mode_expr_no_out_vars_pattern vars_out) pats in
+    Result.Ok (ModePass.Prog.PatCtor (ctor_id, pats'))
+
+let rec mode_expr_no_out_vars
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e: AnnotationPass.Prog.expr_t)
+  : (ModePass.Prog.expr_t, error_mode_expr_no_out_vars_t) m =
+  let here = "Moder.mode_expr_no_out_vars:" in
+
+  let rec aux_expr = function
+    | AnnotationPass.Prog.Suffixed (pref, suff) ->
+      let* pref' = aux_expr pref in
+      let* suff' = aux_suffix suff in
+      Result.Ok (ModePass.Prog.Suffixed (pref', suff'))
+
+    | NameSeg (seg_id, seg_tp_args) ->
+      let* () =
+        Result.error_when (Util.id_in_formals seg_id vars_out)
+          { callstack = [here]
+          ; sort = OutVarOccur {occurring_outvar = seg_id; shadowed = false} }
+      in
+      let seg_tp_args' = List.map Convert.typ seg_tp_args in
+      Result.Ok
+        (ModePass.Prog.NameSeg (seg_id, seg_tp_args'))
+
+    | Lambda (lam_ps, lam_body) ->
+      let* lam_ps' =
+        List.mapMResult
+          begin function (p_id, p_tp_opt) ->
+            let* () =
+              Result.error_when (Util.id_in_formals p_id vars_out)
+                { callstack = [here]
+                ; sort = OutVarOccur {occurring_outvar = p_id; shadowed = true} }
+            in
+            Result.Ok (p_id, Option.map Convert.typ p_tp_opt)
+          end
+          lam_ps
+      in
+      let* lam_body' = aux_expr lam_body in
+      Result.Ok (ModePass.Prog.Lambda (lam_ps', lam_body'))
+
+    | MapDisplay kvs ->
+      let* kvs' =
+        List.mapMResult
+          begin function (k, v) ->
+            let* k' = aux_expr k in
+            let* v' = aux_expr v in
+            Result.Ok (k', v')
+          end
+          kvs
+      in
+      Result.Ok (ModePass.Prog.MapDisplay kvs')
+
+    | SeqDisplay seqd ->
+      let* seqd' = begin
+        match seqd with
+        | SeqEnumerate seqd_enum ->
+          let* seqd_enum' = List.mapMResult aux_expr seqd_enum in
+          Result.Ok (ModePass.Prog.SeqEnumerate seqd_enum')
+        | SeqTabulate seqd_tab ->
+          let tp_args' = List.map Convert.typ seqd_tab.gen_inst in
+          let* len' = aux_expr seqd_tab.len in
+          let* func' = aux_expr seqd_tab.func in
+          Result.Ok
+            (ModePass.Prog.SeqTabulate
+               { gen_inst = tp_args'
+               ; len = len'
+               ; func = func' })
+      end in
+      Result.Ok (ModePass.Prog.SeqDisplay seqd')
+
+    | SetDisplay setd ->
+      let* setd' = List.mapMResult aux_expr setd in
+      Result.Ok (ModePass.Prog.SetDisplay setd')
+
+    | If (_, g, t, e) ->
+      let* g' = aux_expr g in
+      let* t' = aux_expr t in
+      let* e' = aux_expr e in
+      Result.Ok (ModePass.Prog.If (None, g', t', e'))
+
+    | Match (_, scrut, branches) ->
+      let* scrut' = aux_expr scrut in
+      let* branches' =
+        List.mapMResult begin function
+          | AnnotationPass.Prog.Case (_attrs, e_pat, body) ->
+            let attrs' = [] in
+            let* e_pat' = aux_extended_pattern e_pat in
+            let* body' = aux_expr body in
+            Result.Ok (ModePass.Prog.Case (attrs', e_pat', body'))
+        end branches
+      in
+      Result.Ok (ModePass.Prog.Match (None, scrut', branches'))
+
+    | Quantifier (_, qt) ->
+      let* qdom' =
+        mode_expr_no_out_vars_quantifier_domain vars_out qt.qdom in
+      let* qbody' = aux_expr qt.qbody in
+      Result.Ok ModePass.Prog.(
+          Quantifier (None, {qt = qt.qt; qdom = qdom'; qbody = qbody'}))
+
+    | SetComp setc ->
+      let* setc_qdom' =
+        mode_expr_no_out_vars_quantifier_domain vars_out setc.qdom in
+      let* setc_body' = Result.map_option aux_expr setc.body in
+      Result.Ok (ModePass.Prog.SetComp {qdom = setc_qdom'; body = setc_body'})
+
+    | StmtInExpr (_, e) ->
+    (* NOTE: For now, we (silently) drop statements in expressions TODO:
+       Generate something for the user indicating that the
+       assert/assume/reveal/etc was dropped *)
+      aux_expr e
+
+    | Let {ghost = ghost; pats = pats; defs = defs; body = body} ->
+      let* pats' =
+        Result.map NonEmptyList.coerce
+          (List.mapMResult aux_pattern
+             (NonEmptyList.as_list pats))
+      in
+      let* defs' =
+        Result.map NonEmptyList.coerce
+          (List.mapMResult aux_expr (NonEmptyList.as_list defs)) in
+      let* body' = aux_expr body in
+      Result.Ok (ModePass.Prog.(
+          Let {ghost = ghost; pats = pats'; defs = defs'; body = body'}))
+
+    | MapComp mapc ->
+      let* mapc_qdom' =
+        mode_expr_no_out_vars_quantifier_domain vars_out mapc.qdom in
+      let* mapc_key' = Result.map_option aux_expr mapc.key in
+      let* mapc_valu' = aux_expr mapc.valu in
+      Result.Ok
+        (ModePass.Prog.MapComp
+           { qdom = mapc_qdom'
+           ; key = mapc_key'
+           ; valu = mapc_valu' })
+
+    | Lit l ->
+      Result.Ok (ModePass.Prog.Lit l)
+
+    | This ->
+      failwith (here ^ " `this` not supported (should have been caught earlier!)")
+
+    | Cardinality e ->
+      let* e' = aux_expr e in
+      Result.Ok (ModePass.Prog.Cardinality e')
+    | Tuple es ->
+      let* es' = List.mapMResult aux_expr es in
+      Result.Ok (ModePass.Prog.Tuple es')
+
+    | Unary (uop, e) ->
+      let* e' = aux_expr e in
+      Result.Ok (ModePass.Prog.Unary (uop, e'))
+
+    | Binary (_, bop, e1, e2) ->
+      let* e1' = aux_expr e1 in
+      let* e2' = aux_expr e2 in
+      Result.Ok (ModePass.Prog.Binary (None, bop, e1', e2'))
+
+    | Lemma {lem = lem; e = e} ->
+      let* lem' = aux_expr lem in
+      let* e' = aux_expr e in
+      Result.Ok (ModePass.Prog.Lemma {lem = lem'; e = e'})
+
+  and aux_suffix = function
+    | AnnotationPass.Prog.AugDot (suff, tp_args) ->
+      let tp_args' = List.map Convert.typ tp_args in
+      Result.Ok (ModePass.Prog.AugDot (suff, tp_args'))
+
+    | DataUpd dataupd ->
+      let* dataupd' =
+        Result.map NonEmptyList.coerce
+          begin
+            List.mapMResult (function (m_id, new_val) ->
+                let* new_val' = aux_expr new_val in
+                Result.Ok (m_id, new_val'))
+              (NonEmptyList.as_list dataupd)
+          end
+      in
+      Result.Ok (ModePass.Prog.DataUpd dataupd')
+    | Subseq {lb = lb; ub = ub} ->
+      let* lb' = Result.map_option aux_expr lb in
+      let* ub' = Result.map_option aux_expr ub in
+      Result.Ok (ModePass.Prog.Subseq {lb = lb'; ub = ub'})
+
+    | SliceLen {sublens = sublens; to_end = to_end} ->
+      let* sublens' =
+        Result.map NonEmptyList.coerce
+          (List.mapMResult aux_expr (NonEmptyList.as_list sublens)) in
+      Result.Ok (ModePass.Prog.SliceLen {sublens = sublens'; to_end = to_end})
+    | SeqUpd {idx = idx; v = v} ->
+      let* idx' = aux_expr idx in
+      let* v' = aux_expr v in
+      Result.Ok (ModePass.Prog.SeqUpd {idx = idx'; v = v'})
+    | Sel e ->
+      let* e' = aux_expr e in
+      Result.Ok (ModePass.Prog.Sel e')
+    | ArgList (args, ann) ->
+      (* NOTE: If no output variables are allowed, no predicates marked for
+         functionalization are allowed either *)
+      let exists_output = List.exists ((=) Syntax.Annotation.Output) in
+      let* () =
+        Option.fold ~none:(Result.Ok ())
+          ~some:(function (p_id, arg_modes) ->
+            Result.error_when (exists_output arg_modes)
+              { callstack = [here]
+              ; sort = FunctionalizedPredOccur p_id })
+          ann
+      in
+      let* args_pos' =
+        List.mapMResult aux_expr args.positional in
+      let* args_nam' =
+        List.mapMResult
+          begin function (id, arg) ->
+            let* arg' = aux_expr arg in
+            Result.Ok (id, arg')
+          end
+          args.named in
+      (* NOTE: We delete the annotation here if all arguments are marked input.
+         TODO: This /needs/ changing if we support other user annotations (e.g.,
+         name for functionalized code) *)
+      Result.Ok
+        (ModePass.Prog.ArgList
+           ({ positional = args_pos'
+            ; named = args_nam' }
+           ,None))
+
+  and aux_extended_pattern epat =
+    Result.map_error
+      begin fun err ->
+        { callstack = here :: err.callstack
+        ; sort = OutVarOccur err.sort }
+      end
+      (mode_expr_no_out_vars_extended_pattern vars_out epat)
+
+  and aux_pattern pat =
+    mode_expr_no_out_vars_pattern vars_out pat
+    |> Result.map_error begin fun err ->
+      { callstack = here :: err.callstack
+      ; sort = OutVarOccur err.sort }
+    end
+  in
+
+  aux_expr e
+
+and mode_expr_no_out_vars_quantifier_domain
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (qdom: AnnotationPass.Prog.qdom_t)
+  : ( ModePass.Prog.qdom_t, error_mode_expr_no_out_vars_t) m =
+  let here = "Moder.mode_expr_no_out_vars_quantifier_domain:" in
+
+  let QDom {qvars = qvars; qrange = qrange} = qdom in
+  let* qvars' =
+    List.mapMResult
+      begin function
+        | AnnotationPass.Prog.QVar (id, tp, dom_col, _attrs) ->
+          let* () =
+            Result.error_when (Util.id_in_formals id vars_out)
+              { callstack = [here]
+              ; sort = OutVarOccur {occurring_outvar = id; shadowed = true}}
+          in
+          let tp' = Option.map Convert.typ tp in
+          let* dom_col' = Result.map_option (mode_expr_no_out_vars vars_out) dom_col in
+          let attrs' = [] in
+          Result.Ok (ModePass.Prog.QVar (id, tp', dom_col', attrs'))
+      end
+      qvars
+  in
+  let* qrange' = Result.map_option (mode_expr_no_out_vars vars_out) qrange in
+  Result.Ok (ModePass.Prog.QDom {qvars = qvars'; qrange = qrange'})
+
+type error_mode_expr_illegal_quantifier_domain_sources_t =
+  { collection: bool
+  ; range: bool
+  ; antecedent: bool }
+[@@deriving show, eq]
+
+type error_mode_expr_t =
+  | UnsupportedTypeArgs of Definitions.outvar_lhs_t
+  | UnsupportedNamedArgs of id_t * AnnotationPass.Prog.expr_t
+  | UnsupportedEquatedOutVars of (Definitions.outvar_lhs_t * Definitions.outvar_lhs_t)
+  | UnsupportedMultipleUniversalQuantifications of ParserPass.Prog.expr_t
+  | FunctionalizedPredOccur of Syntax.Common.module_qualified_name_t
+  | MixedIO of
+      { input_violation: error_outvar_occur_t
+      ; illegal_outvar_lhs: ParserPass.Prog.expr_t }
+  | AnnotationViolation of
+      { p_id: Syntax.Common.module_qualified_name_t
+      ; arg: AnnotationPass.Prog.expr_t
+      ; i_or_o_expected:
+          (error_outvar_occur_t, ParserPass.Prog.expr_t) Either.t }
+  | InputModeViolation of error_outvar_occur_t * ParserPass.Prog.expr_t
+  | OutVarShadowing of id_t
+  (* argument is a branch with no output variables assigned *)
+  | MixedBranchIO of ParserPass.Prog.expr_t
+  | IllegalQuantifierDomainForFunctionalization of
+      { domain: ParserPass.Prog.expr_t
+      ; src: error_mode_expr_illegal_quantifier_domain_sources_t
+      ; quantification: ParserPass.Prog.expr_t }
+
+let mode_expr_ensure_input
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e: AnnotationPass.Prog.expr_t)
+  : (ModePass.Prog.expr_t, error_mode_expr_t) m =
+  Result.map2' ~res:(mode_expr_no_out_vars vars_out e)
+    ~ok:Fun.id
+    ~error:begin fun err ->
+      { callstack = err.callstack
+      ; sort =
+          match (err.sort : error_mode_expr_no_out_vars_t) with
+          | OutVarOccur ov_occ ->
+            InputModeViolation (ov_occ, Erase.Annotations.expr e)
+          | FunctionalizedPredOccur fp_id ->
+            FunctionalizedPredOccur fp_id
+      }
+    end
+
+let mode_expr_ensure_output
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e: AnnotationPass.Prog.expr_t)
+    (on_illegal_outvar_lhs: ParserPass.Prog.expr_t -> error_mode_expr_t)
+  : (Definitions.outvar_lhs_t, error_mode_expr_t) m =
+  let here = "Moder.mode_expr_ensure_output:" in
+
+  mode_expr_outvar_lhs vars_out e
+  |> Result.map_error begin fun err ->
+    { callstack = here :: err.callstack
+    ; sort =
+        match (err.sort : error_mode_expr_outvar_lhs_t) with
+        | UnsupportedTypeArgs ov ->
+          UnsupportedTypeArgs ov
+        | IllegalOutVarLHS offending ->
+          on_illegal_outvar_lhs offending }
+    end
+
+let mode_expr_analyze
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e: AnnotationPass.Prog.expr_t)
+  : ((Definitions.outvar_lhs_t, ModePass.Prog.expr_t) Either.t, error_mode_expr_t) m =
+  match mode_expr_outvar_lhs vars_out e with
+  | Result.Ok lhs -> Result.Ok (Either.Left lhs)
+  | Result.Error err -> begin
+      match err.sort with
+      | UnsupportedTypeArgs lhs ->
+        Result.Error
+          { callstack = err.callstack
+          ; sort = UnsupportedTypeArgs lhs }
+      | IllegalOutVarLHS offending ->
+        Result.map2'
+          ~res:(mode_expr_no_out_vars vars_out e)
+          ~ok:Either.right
+          ~error:begin fun err2 ->
+              { callstack = err2.callstack
+              ; sort =
+                  match (err2.sort : error_mode_expr_no_out_vars_t) with
+                  | OutVarOccur ov_occ ->
+                    MixedIO
+                      { input_violation = ov_occ
+                      ; illegal_outvar_lhs = offending }
+                  | FunctionalizedPredOccur fp_occ ->
+                    FunctionalizedPredOccur fp_occ }
+          end
+    end
+
+let rec mode_expr
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (expr: AnnotationPass.Prog.expr_t)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let _here = "Moder.mode_expr" in
+
+  match expr with
+  | Let {ghost = g; pats = pats; defs = defs; body = body} ->
+    let* pats' =
+      NonEmptyList.as_list pats
+      |> List.mapMResult (mode_expr_no_out_vars_pattern vars_out)
+      |> Result.map NonEmptyList.coerce
+      |> Result.map_error (fun err ->
+          { callstack = err.callstack
+          ; sort = OutVarShadowing err.sort.occurring_outvar })
+    in
+    let* defs' =
+      NonEmptyList.as_list defs
+      |> List.mapMResult (mode_expr_ensure_input vars_out)
+      |> Result.map NonEmptyList.coerce
+    in
+    let* (body', ovs) = mode_expr vars_out body in
+    Result.Ok
+      ( ModePass.Prog.(
+            Let { ghost = g
+                ; pats = pats'
+                ; defs = defs'
+                ; body = body' })
+      , ovs )
+  | _ ->
+    let conjs = AnnotationPass.Prog.to_conjuncts expr in
+    let* conjs' =
+      List.mapMResult (mode_expr_conjunct vars_out) conjs
+    in
+
+    Result.Ok
+      (ModePass.Prog.assoc_right_bop_ann
+         Common.And conjs'
+         (fun ovs1 ovs2 ->
+            ( Some (Definitions.And {conj_left = ovs1; conj_right = ovs2})
+            , ovs1 @ ovs2 ))
+         ( ModePass.Prog.Lit Common.True
+         , [] ))
+
+
+and mode_expr_conjunct_eq
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (e1: AnnotationPass.Prog.expr_t) (e2: AnnotationPass.Prog.expr_t)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let here = "Moder.mode_expr_conjunct_eq" in
+
+  on_error_push_callstack here begin
+    let* e1_analysis = mode_expr_analyze vars_out e1 in
+    let* e2_analysis = mode_expr_analyze vars_out e2 in
+
+    (* Determine the annotation, or error if both are outvar_lhss *)
+    let* ann =
+      match (e1_analysis, e2_analysis) with
+      | (Either.Left e1', Either.Right _) ->
+        Result.Ok
+          (Some Definitions.({outvar_is_left = true; outvar = e1'}))
+      | (Either.Right _, Either.Left e2') ->
+        Result.Ok
+          (Some Definitions.({outvar_is_left = false; outvar = e2'}))
+      | (Either.Right _, Either.Right _) ->
+        Result.Ok None
+      | (Either.Left e1', Either.Left e2') ->
+        Result.Error
+          { callstack = []
+          ; sort = UnsupportedEquatedOutVars (e1', e2') }
+    in
+
+    (* Convert the conjuncts to ModePass expressions *)
+    let e1_mp =
+      Either.fold ~left:Util.outvar_lhs_to_modepass_expr ~right:(fun e -> e)
+        e1_analysis in
+    let e2_mp =
+      Either.fold ~left:Util.outvar_lhs_to_modepass_expr ~right:(fun e -> e)
+        e2_analysis in
+
+    Result.Ok
+      ( ModePass.Prog.Binary
+          ( Option.map (fun x -> Definitions.Eq x) ann
+          , Syntax.Common.Eq, e1_mp, e2_mp)
+      , Option.fold ~none:[]
+          ~some:(fun ann_eq -> [Definitions.(ann_eq.outvar)])
+          ann)
+  end
+
+and mode_expr_conjunct_arglist_functionalize
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (pref: Syntax.Common.module_qualified_name_t)
+    (args: AnnotationPass.Prog.arglist_t)
+    (modes: Annotation.mode_t list)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let here = "Moder.mode_expr_conjunct_arglist_functionalize:" in
+
+  let ( PositionalPartition {args_in = args_in; args_out = args_out}
+      , named_args_p ) =
+    Util.partition_args_by_modes args modes in
+
+  (* TODO: We don't support named arguments in our mode analysis (yet) *)
+  let* () =
+    Result.error_when named_args_p
+      { callstack = [here]
+      ; sort =
+          let (id, arg) = List.nth args.named 0 in
+          UnsupportedNamedArgs (id, arg) }
+  in
+  (* Check arguments in input positions contain not output-moded variables, and
+     arguments in output positions are valid outvar lhs *)
+  let* args_in' =
+    let err_handle arg_in (err: error_mode_expr_no_out_vars_t error_t) =
+      { callstack = here :: err.callstack
+      ; sort = match err.sort with
+          | OutVarOccur ov_occ ->
+            AnnotationViolation
+              { p_id = pref
+              ; arg = arg_in
+              ; i_or_o_expected = Either.Left ov_occ }
+          | FunctionalizedPredOccur fp_id ->
+            FunctionalizedPredOccur fp_id }
+    in
+    List.mapMResult
+      begin fun arg_in ->
+        Result.map_error (err_handle arg_in)
+          (mode_expr_no_out_vars vars_out arg_in)
+      end
+      args_in
+  in
+
+  let* args_out' =
+    List.mapMResult
+      begin fun arg_out ->
+        mode_expr_ensure_output vars_out arg_out begin fun illegalLHS ->
+          AnnotationViolation
+            { p_id = pref
+            ; arg = arg_out
+            ; i_or_o_expected = Either.Right illegalLHS }
+        end
+      end
+      args_out
+  in
+
+  Result.Ok
+    ( ModePass.Prog.(
+          Suffixed
+            ( from_qualified_id pref
+            , ArgList
+                ({ positional =
+                     Util.assemble_positional_args_by_modes
+                       args_in' args_out' modes
+                 ; named = []     (* TODO: named args *) }
+                , Some
+                   { callee = pref
+                   ; in_exprs = List.map Erase.Modings.expr args_in'
+                   ; out_vars = args_out' })))
+    , args_out' )
+
+and mode_expr_conjunct_if
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (guard: AnnotationPass.Prog.expr_t)
+    (then_: AnnotationPass.Prog.expr_t)
+    (else_: AnnotationPass.Prog.expr_t)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let here = "Moder.mode_expr_conjunct_if:" in
+
+  on_error_push_callstack here begin
+    (* Check that the guard is correctly input moded *)
+    let* guard' = mode_expr_ensure_input vars_out guard in
+    let* (then_', then_ovs) = mode_expr vars_out then_ in
+    let* (else_', else_ovs) = mode_expr vars_out else_ in
+    let* ann = begin
+      match (then_ovs, else_ovs) with
+      | (_ :: _, _ :: _) ->
+        let ann =
+          Definitions.(
+            { vars_then = NonEmptyList.coerce then_ovs
+            ; vars_else = NonEmptyList.coerce else_ovs }) in
+        Result.Ok (Some ann)
+      | ([], []) -> Result.Ok None
+      | _ ->
+        let outvarless =
+          if List.length then_ovs = 0 then then_' else else_' in
+        Result.Error
+          { callstack = []
+          ; sort = MixedBranchIO (Erase.Modings.expr outvarless) }
+    end in
+
+    Result.Ok
+      ( ModePass.Prog.If (ann, guard', then_', else_')
+      , Option.fold ~none:[]
+          ~some:begin fun an ->
+            let ovs = Definitions.(an.vars_then) in
+            NonEmptyList.as_list ovs
+          end
+          ann )
+  end
+
+and mode_expr_conjunct_match
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (scrut: AnnotationPass.Prog.expr_t)
+    (tree: AnnotationPass.Prog.case_expr_t list)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let orig = AnnotationPass.Prog.Match ((), scrut, tree) in
+  let here = "Moder.mode_expr_conjunct_match:" in
+
+  let* scrut' = mode_expr_ensure_input vars_out scrut in
+  let* tree' =
+    tree |>
+    List.mapMResult
+      begin function AnnotationPass.Prog.Case (_attrs, epat, body) ->
+        let* epat' =
+          Result.map_error
+            begin fun err ->
+              { callstack = here :: err.callstack
+              ; sort =
+                  InputModeViolation (err.sort, Erase.Annotations.expr orig) }
+            end
+            (mode_expr_no_out_vars_extended_pattern vars_out epat)
+        in
+        let* (body', ovs) = mode_expr vars_out body in
+        Result.Ok
+          ( ModePass.Prog.Case([], epat', body')
+          , NonEmptyList.from_list_opt ovs)
+      end
+  in
+
+  let (o_moded, i_moded) =
+    tree' |>
+    List.partition_map
+      (function (ModePass.Prog.Case (_, _, body), ovs) ->
+         Option.fold ~none:(Either.Right body) ~some:Either.left ovs)
+  in
+
+  let* ann: ModingMetaData.match_t =
+    match (o_moded, i_moded) with
+    | (_, []) -> Result.Ok (Some (NonEmptyList.coerce o_moded))
+    | ([], _) -> Result.Ok None
+    | (_, offending :: _) ->
+      Result.Error
+        { callstack = [here]
+        ; sort = MixedBranchIO (Erase.Modings.expr offending) }
+  in
+
+  Result.Ok
+    ( ModePass.Prog.Match (ann, scrut', List.map fst tree')
+    , ann |>
+      Option.fold ~none:[]
+        ~some:(fun a -> NonEmptyList.(as_list (head a))) )
+
+(* BEGIN WIP *)
+(* and mode_expr_conjunct_forall *)
 (*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
-(*     (e: AnnotationPass.Prog.expr_t) *)
-(*   : Syntax.Common.member_qualified_name_t option = *)
-(*   match e with *)
-(*   | Suffixed (e_prefix, suff) -> *)
-(*     let mode_prefix = no_out_vars_expr vars_out e_prefix in *)
-(*     if Option.is_some mode_prefix then mode_prefix else begin *)
-(*       foo_suffixed_suff *)
-(*     end *)
-(*   | NameSeg seg -> *)
-(*     foo_seg *)
-(*   | Lambda (ps, body) -> *)
-(*     foo_lambda *)
-(*   | MapDisplay _ -> *)
-(*     foo_mapdisplay *)
-(*   | SeqDisplay _ -> *)
-(*     foo_seqdisplay *)
-(*   | SetDisplay _ -> *)
-(*     foo_setdisplay *)
-(*   | If (ann, guard, then_, else_) -> *)
-(*     foo_ite *)
-(*   | Match (ann, scrut, branches) -> *)
-(*     foo_match *)
-(*   | Quantifier (_, _) -> *)
-(*     foo_quantifier *)
-(*   | SetComp _ -> *)
-(*     foo_setcomp *)
-(*   | StmtInExpr (_, _) -> *)
-(*     foo_stmtinexpr *)
-(*   | Let _ -> *)
-(*     foo_let *)
-(*   | MapComp _ -> *)
-(*     foo_mapcomp *)
-(*   | Lit _ -> *)
-(*     foo_lit *)
-(*   | This -> *)
-(*     foo_this *)
-(*   | Cardinality _ -> *)
-(*     foo_cardinality *)
-(*   | Tuple _ -> *)
-(*     foo_tuple *)
-(*   | Unary (_, _) -> *)
-(*     foo_unary *)
-(*   | Binary (_, _, _, _) -> *)
-(*     foo_binary *)
-(*   | Lemma _ -> *)
-(*     foo_lemma *)
-
-(* (\* and no_out_vars_expr_suffix *\) *)
-(* (\*   (vars_out: AnnotationPass.TopDecl.formal_t list) *\) *)
-(* (\*   (s: AnnotationPass.) *\) *)
-
-(* let mode_expr_conjunct_funcall *)
-(*     (vars_in:  AnnotationPass.TopDecl.formal_t list) *)
-(*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
-(*     (args: AnnotationPass.Prog.arglist_t) *)
-(*     (ann: AnnotationMetaData.arglist_t) *)
-(*   : ModePass.Prog.expr_t m = *)
-(*   let (pos_args_in, pos_args_out, named_args_p) = begin *)
-(*     let (part, named) = begin *)
-(*       Util.partition_args_by_modes args *)
-(*         (Option.map (function (_, modes) -> modes) ann) *)
-(*     end in *)
-(*     let (pos_args_in, pos_args_out) = begin *)
-(*       match part with *)
-(*       | PositionalPartition {args_in = args_in; args_out = args_out} -> *)
-(*         (args_in, args_out) *)
-(*       | Unknown -> *)
-(*         (\* NOTE: calls without annotations are assumed to be all input-moded *\) *)
-(*         (args.positional, []) *)
-(*     end in *)
-(*     (pos_args_in, pos_args_out, named) *)
-(*   end in *)
-(*   (\* TODO: *)
-(*      1. check input arguments don't contain output variables *)
-
-(*         NOTE: identifiers not declared in the formal parameter list are assumed *)
-(*         to be input-moded (local variables, constructors) *)
-
-(*      2. check output arguments are member-qualified output variables, and *)
-(*         possibly including length *)
-
-(*      3. if there are any named arguments, indicate that a stub should be generated *\) *)
-(*   let* _ = *)
-(*     if named_args_p then make_stub () *)
-(*     else return () *)
+(*     (qdom: AnnotationPass.Prog.qdom_t) *)
+(*     (qbody: AnnotationPass.Prog.expr_t) *)
+(*   : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list *)
+(*     , error_mode_expr_t ) m = *)
+(*   let here = "Moder: mode_expr_conjunct_forall:" in *)
+(*   let orig = *)
+(*     AnnotationPass.Prog.Quantifier *)
+(*       ( () *)
+(*       , { qt = Syntax.Common.Forall *)
+(*         ; qdom = qdom *)
+(*         ; qbody = qbody }) *)
 (*   in *)
-(*   foo1 *)
+(*   let erase_orig() = Erase.Annotations.expr orig in *)
 
-(* let mode_expr_conjunct *)
-(*     (vars_in:  AnnotationPass.TopDecl.formal_t list) *)
-(*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
-(*     (e: AnnotationPass.Prog.expr_t) *)
-(*   : ModePass.Prog.expr_t m = *)
-(*   match e with *)
-(*   | Suffixed (e_callee, suff) -> begin *)
-(*       match suff with *)
-(*       | ArgList (args, anns) -> *)
-(*         let (pos_args_in, pos_args_out, named_args_p) = begin *)
-(*           let (part, named) = *)
-(*             Util.partition_args_by_modes args *)
-(*               (Option.map (function (_, modes) -> modes) anns) *)
-(*           in *)
-(*           let (pos_args_in, pos_args_out) = begin *)
-(*             match part with *)
-(*             | PositionalPartition {args_in = args_in; args_out = args_out} -> *)
-(*               (args_in, args_out) *)
-(*             | Unknown -> *)
-(*               (\* NOTE: calls without annotations are assumed to be all input-moded *\) *)
-(*               (args.positional, []) *)
-(*           end in *)
-(*           (pos_args_in, pos_args_out, named) *)
-(*         end in *)
-(*         foo1 *)
-(*       | _ -> foo01 *)
-(*     end *)
-(*   | _ -> foo1 *)
+(*   let QDom {qvars = qvars; qrange = qrange} = qdom in *)
+
+(*   (\* BEGIN utilities *\) *)
+(*   (\* NOTE: We only support a single output variable *\) *)
+(*   let ensure_single_fresh_qvar *)
+(*       (qvars: AnnotationPass.Prog.qvar_decl_t list) = *)
+(*     match qvars with *)
+(*     | (QVar (qv_id, _, _, _) as qvar) :: [] -> *)
+(*       let* () = *)
+(*         Result.error_when (Util.id_in_formals qv_id vars_out) *)
+(*           { callstack = [here] *)
+(*           ; sort = OutVarShadowing qv_id } *)
+(*       in *)
+(*       Result.Ok qvar *)
+(*     | _ -> *)
+(*       Result.Error *)
+(*         { callstack = [here] *)
+(*         ; sort = *)
+(*             UnsupportedMultipleUniversalQuantifications (erase_orig()) } *)
+(*   in *)
+(*   let is_generated_from_out_var (\* analyze *\) *)
+(*       (qv_dom_coll: AnnotationPass.Prog.expr_t option) *)
+(*       (qrange: AnnotationPass.Prog.expr_t option) *)
+(*       (qbody: AnnotationPass.Prog.expr_t) = *)
+(*     (\* NOTE/TODO: we do not handle the case where the quantified variable is *)
+(*        an alias for an outvar lhs (e.g., qv <- seq_outvar, qv <- set_outvar); *)
+(*        we assume that the quantified variable is to be treated as *)
+(*        "field-like" *\) *)
+(*     match (qv_dom_coll, qrange, qbody) with *)
+(*     | (Some coll, None, qb) -> *)
+(*       let err_illegal_domain() = *)
+(*         IllegalQuantifierDomainForFunctionalization *)
+(*           { domain = Erase.Annotations.expr coll *)
+(*           ; src = {collection = true; range = false; antecedent = false} *)
+(*           ; quantification = erase_orig() } *)
+(*       in *)
+(*       let* ov = *)
+(*         mode_expr_ensure_output vars_out coll *)
+(*           (fun _ -> err_illegal_domain()) in *)
+(*       let* () = *)
+(*         Result.error_when (Option.is_some ov.fieldlike) *)
+(*           { callstack = [here] *)
+(*           ; sort = err_illegal_domain() } *)
+(*       in *)
+(*       Result.Ok foo *)
+(*     | (_, _, _) -> _ *)
+(*   in *)
+(*   (\* END utilities *\) *)
+
+(*   Result.try_catch begin *)
+(*     mode_expr_ensure_input vars_out orig *)
+(*     |> Result.map (fun e -> (e, [])) *)
+(*   end begin fun _ -> *)
+(*     (\* There's an outvar *somewhere* *\) *)
+
+(*     let* QVar (qv_id, qv_tp, qv_dom_coll, _attrs) = *)
+(*       ensure_single_fresh_qvar qvars in *)
+
+(*     _ *)
+(*   end *)
+(* END WIP *)
+
+  (* Questions to answer:
+   *
+   * 1. is the domain of the quantifier generated from something?
+
+   *    a. if so, it should be something we recognize (natural number bound or a
+           collection) involving an outvar
+  *)
+
+  (* NOTE: The type /could/ tell us what collection is being drawn from, but
+     we're unable to perform that kind of analysis *)
+  (* match (qv_dom_coll, qrange, qbody) with *)
+  (* | Some qv_dom_coll, None, _ -> begin *)
+  (*     let* coll_analysis = mode_expr_analyze vars_out qv_dom_coll in *)
+  (*     match coll_analysis with *)
+  (*     | Either.Right _ -> *)
+  (*       (\* If the collection is present and input-moded, check the entire *)
+  (*          quantification is input-moded *\) *)
+  (*       mode_expr_ensure_input vars_out orig *)
+  (*       |> Result.map (fun e -> (e, [])) *)
+  (*     | Either.Left ov -> *)
+  (*       let () = *)
+  (*         Option.fold ~none:() *)
+  (*           ~some:(function Definitions.Cardinality -> *)
+  (*               failwith (here ^ " [fatal] type error: cardinality expressions cannot produce collections")) *)
+  (*           ov.uop *)
+  (*       in *)
+  (*       (\* TODO: The following assumes cardinality is the only field-like *)
+  (*          operation. This is likely to change *\) *)
+  (*       foo12 *)
+  (*   end *)
+  (* | None, Some qrange, _ -> foo2 *)
+  (* | None, None, _ -> foo3 *)
+  (* | Some _, Some _, _ -> _ *)
+
+and mode_expr_conjunct
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (conj: AnnotationPass.Prog.expr_t)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let here = "Moder.mode_expr_conjunct:" in
+
+  let aux_name (e: AnnotationPass.Prog.expr_t) =
+    let* analysis = mode_expr_analyze vars_out e in
+    match analysis with
+    | Either.Left ov ->
+      let orig' = Util.outvar_lhs_to_modepass_expr ov in
+      let inserted_ann =
+        Definitions.(Eq {outvar_is_left = true; outvar = ov}) in
+      Result.Ok
+        ( ModePass.Prog.(
+              Binary
+                ( Some inserted_ann
+                , Common.Eq, orig', Lit True ))
+        , [ov] )
+    | Either.Right e ->
+      Result.Ok (e, [])
+  in
+
+  let aux_suffix pref (suff: AnnotationPass.Prog.suffix_t) =
+    let orig = AnnotationPass.Prog.Suffixed (pref, suff) in
+
+    match suff with
+    | AugDot (_, _) ->
+      aux_name orig
+    | DataUpd _ ->
+      failwith (here ^ " [fatal] unexpected data update")
+    | Subseq _ ->
+      failwith (here ^ " [fatal] unexpected subsequence")
+    | SliceLen _ ->
+      failwith (here ^ " [fatal] unexpected subsequence slices")
+    | SeqUpd _ ->
+      failwith (here ^ " [fatal] unexpected sequence update")
+    | Sel _ ->
+      failwith (here ^ " TODO sequence selection not yet supported")
+
+    | ArgList (args, Some (fp_id, modes)) ->
+      mode_expr_conjunct_arglist_functionalize vars_out fp_id args modes
+    | ArgList (_, None) ->
+      (* NOTE: No annotations means we assume everything is input-moded *)
+      let* res = mode_expr_ensure_input vars_out orig in
+      Result.Ok (res, [])
+  in
+  let aux_bop e1 e2 bop =
+    match bop with
+    | Syntax.Common.Eq ->
+      mode_expr_conjunct_eq vars_out e1 e2
+    (* Type errors *)
+    | Mul
+    | Div
+    | Mod
+    | Add
+    | Sub ->
+      failwith
+        (here
+         ^ " [fatal] unexpected arithmetic operator: "
+         ^ Syntax.Common.(show_bop_t bop))
+    (* Not supported for functionalization; ensure input moded *)
+    | Neq
+    | Lt
+    | Gt
+    | Lte
+    | Gte
+    | In
+    | Nin
+    | Disjoint
+    | Or
+    | Implies
+    | Equiv ->
+      let* e1' = mode_expr_ensure_input vars_out e1 in
+      let* e2' = mode_expr_ensure_input vars_out e2 in
+      Result.Ok
+        ( ModePass.Prog.Binary
+            (None, bop, e1', e2')
+        , [] )
+    | And ->
+      invalid_arg (here ^ " expected a single conunct, found a conjunction")
+  in
+
+  on_error_push_callstack here begin
+    match conj with
+    | Suffixed (pref, suff) ->
+      aux_suffix pref suff
+    | NameSeg _ ->
+      aux_name conj
+    | Lambda (_, _) ->
+      failwith (here ^ " [fatal] unexpected lambda")
+    | MapDisplay _ ->
+      failwith (here ^ " [fatal] unexpected map display")
+    | SeqDisplay _ ->
+      failwith (here ^ " [fatal] unexpected sequence display")
+    | SetDisplay _ ->
+      failwith (here ^ " [fatal] unexpected set display")
+    | If (_, g, t, e) ->
+      mode_expr_conjunct_if vars_out g t e
+    | Match (_, scrut, tree) ->
+      mode_expr_conjunct_match vars_out scrut tree
+    | Quantifier (_, quantification) -> begin
+        match quantification.qt with
+        | Exists ->
+          mode_expr_ensure_input vars_out conj
+          |> Result.map (fun x -> (x, []))
+        | Forall ->
+          (* TODO *)
+          Result.Ok (Convert.expr conj, [])
+          (* mode_expr_conjunct_forall vars_out quantification.qdom quantification.qbody *)
+      end
+    | SetComp _ ->
+      failwith (here ^ " [fatal] unexpected set comprehension")
+    | StmtInExpr (_, body) ->
+      (* NOTE: We drop assert/assume statements (and others) *)
+      mode_expr vars_out body
+    | Let {ghost = ghost; pats = pats; defs = defs; body = body} ->
+      let* pats' =
+        NonEmptyList.as_list pats
+        |> List.mapMResult
+          (mode_expr_no_out_vars_pattern vars_out)
+        |> Result.map_error begin fun err ->
+          { callstack = err.callstack
+          ; sort =
+              let {occurring_outvar = ov; shadowed = _} = err.sort in
+              OutVarShadowing ov }
+        end
+        |> Result.map NonEmptyList.coerce
+      in
+      let* defs' =
+        NonEmptyList.as_list defs
+        |> List.mapMResult (mode_expr_ensure_input vars_out)
+        |> Result.map NonEmptyList.coerce
+      in
+      let* (body', ovs) = mode_expr vars_out body in
+      Result.Ok
+        ( ModePass.Prog.Let
+            { ghost = ghost; pats = pats'
+            ; defs = defs'
+            ; body = body' }
+        , ovs )
+    | MapComp _ ->
+      failwith (here ^ " [fatal] unexpected map comprehension")
+    | Lit l ->
+      Result.Ok (ModePass.Prog.Lit l, [])
+    | This ->
+      failwith (here ^ " [fatal] unexpected `this`")
+    | Cardinality _ ->
+      failwith (here ^ " [fatal] unexpected cardinality")
+    | Tuple _ ->
+      failwith (here ^ " [fatal] unexpected tuple")
+    | Unary (uop, e) -> begin
+        let* (e', ovs) = mode_expr vars_out e in
+        Result.Ok
+          ( ModePass.Prog.Unary (uop, e')
+          , ovs )
+      end
+    | Binary (_, bop, e1, e2) ->
+      aux_bop e1 e2 bop
+    | Lemma {lem = _; e = body} ->
+      (* NOTE: We drop lemma invocations *)
+      mode_expr vars_out body
+  end
+
+let mode_topdecl_formals
+    (ps: AnnotationPass.TopDecl.formal_t list)
+    (ps_ann: AnnotationMetaData.predicate_decl_t)
+  : ( ModePass.TopDecl.formal_t list
+    * ModingMetaData.predicate_decl_t option ) =
+  let ps' =
+    List.map
+      (function
+        | AnnotationPass.TopDecl.Formal (id, tp) ->
+          ModePass.TopDecl.Formal (id, Convert.typ tp))
+      ps
+  in
+  let ps_ann' =
+    Option.map
+      (fun pred_modes ->
+         let (ps_in, ps_out) =
+           List.map2 (fun x y -> (x, y)) ps pred_modes
+           |> List.partition_map
+                (function
+                 | (p, Annotation.Input)  -> Left p
+                 | (p, Annotation.Output) -> Right p)
+         in
+         if List.length ps_out = 0 then
+           Definitions.Predicate
+         else
+           Definitions.Function
+             { make_stub = false (* TODO: Ugly dummy value! *)
+             ; vars_in = ps_in
+             ; vars_out = NonEmptyList.coerce ps_out (* Justified by ite guard *) })
+      ps_ann
+  in
+  (ps', ps_ann')
+
+let mode_topdecl_datatype (dd: AnnotationPass.TopDecl.datatype_t)
+  : ModePass.TopDecl.datatype_t =
+  let aux_ctor (ctor: AnnotationPass.TopDecl.datatype_ctor_t)
+    : ModePass.TopDecl.datatype_ctor_t =
+    let DataCtor (_attrs, ctor_id, ps) = ctor in
+    let (ps', _) = mode_topdecl_formals ps None in
+    (* NOTE: We drop attributes *)
+    DataCtor ([], ctor_id, ps')
+  in
+
+  let (dd_ann, _attrs, dd_id, _tp_ps, dd_ctors) = dd in
+  let dd_ctors' = NonEmptyList.map aux_ctor dd_ctors in
+  (* NOTE: We drop attributes, and assume no type arguments *)
+  (dd_ann, [], dd_id, [], dd_ctors')
+
+let mode_topdecl_synonym_type
+    (sd: AnnotationPass.TopDecl.synonym_type_t)
+  : ModePass.TopDecl.synonym_type_t =
+  let sd_rhs = begin
+    match sd.rhs with
+    | Subset (_, _, _) ->
+      failwith "Annotator.mode_topdecl_synonym_type: [fatal] unsupported subset types"
+    | Synonym t_rhs_tp ->
+      ModePass.TopDecl.Synonym (Convert.typ t_rhs_tp)
+  end in
+  (* NOTE: We drop attributes *)
+  ModePass.TopDecl.(
+    { ann = sd.ann
+    ; attrs = []
+    ; id = sd.id
+    ; params = sd.params
+    ; rhs = sd_rhs })
+
+open struct
+  type ('a, 'e) error_logger = 'a * (error_mode_expr_t error_t) list
+
+  let return (x: 'a): ('a, 'e) error_logger =
+    (x, [])
+
+  let ( let< )
+      (f: ('a, 'e) error_logger) (g: 'a -> ('b, 'e) error_logger)
+    : ('b, 'e) error_logger =
+    let (x, logs1) = f in
+    let (y, logs2) = g x in
+    (y, logs1 @ logs2)
+
+  let log_error (err: 'e error_t): (unit, 'e) error_logger =
+    ((), [err])
+end
+
+let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
+  : (ModePass.TopDecl.t', error_mode_expr_t) error_logger =
+  let here = "Moder.mode_topdecl:" in
+  let report_offending_predicate p_id err =
+    let msg = here ^ " in predicate " ^ p_id in
+    { err with callstack = msg :: err.callstack }
+  in
+
+  let aux_spec (spec: AnnotationPass.TopDecl.function_spec_t)
+    : ModePass.TopDecl.function_spec_t =
+    match spec with
+    | Reads e -> ModePass.TopDecl.Reads (Convert.expr e)
+    | Requires e -> ModePass.TopDecl.Requires (Convert.expr e)
+    | Ensures e -> ModePass.TopDecl.Ensures (Convert.expr e)
+    | Decreases e -> ModePass.TopDecl.Decreases (Convert.expr e)
+  in
+
+  match d with
+  | ModuleImport imp ->
+    return (ModePass.TopDecl.ModuleImport imp)
+  | ModuleDef (_attrs, m_id, m_decls) ->
+    let< m_decls' = mode_topdecls m_decls in
+    (* NOTE: We drop attributes *)
+    return (ModePass.TopDecl.ModuleDef ([], m_id, m_decls'))
+  | DatatypeDecl dd ->
+    let dd' = mode_topdecl_datatype dd in
+    return (ModePass.TopDecl.DatatypeDecl dd')
+  | SynonymTypeDecl syn ->
+    let syn' = mode_topdecl_synonym_type syn in
+    return (ModePass.TopDecl.SynonymTypeDecl syn')
+  | PredFunDecl
+      (Function (m_pres, _attrs, f_id, tp_ps, ps, tp, specs, body)) ->
+
+    let (ps', _) = mode_topdecl_formals ps None in
+    let tp' = Convert.typ tp in
+    let specs' = List.map aux_spec specs in
+    let body' = Convert.expr body in
+
+    return (ModePass.TopDecl.(
+      PredFunDecl (Function (m_pres, [], f_id, tp_ps, ps', tp', specs', body'))))
+
+  | PredFunDecl
+      (Predicate
+         ( p_ann, method_present, _attrs
+         , p_id, tp_ps, ps
+         , specs, body )) ->
+
+    let (ps', p_ann') = mode_topdecl_formals ps p_ann in
+    let specs' = List.map aux_spec specs in
+
+    let generate_result
+        (ann: Definitions.predicate_decl_t)
+        (p_body: ModePass.Prog.expr_t)
+      : ModePass.TopDecl.t' =
+      ModePass.TopDecl.PredFunDecl
+        (Predicate
+           ( ann, method_present, []
+           , p_id, tp_ps, ps'
+           , specs', p_body ))
+    in
+    let fallback_result() =
+      generate_result Definitions.Predicate (Convert.expr body)
+    in
+
+    begin
+      match p_ann' with
+      | None
+      | Some Definitions.Predicate ->
+        return (fallback_result ())
+      | Some
+          (Definitions.Function
+             { make_stub = _      (* TODO: This field has no semantic meaning when
+                                     returned from `mode_topdecl_formals` *)
+             ; vars_in = vars_in
+             ; vars_out = vars_out }) ->
+
+        begin                   (* (ModePass.Prog.expr_t, error_mode_expr_t) m *)
+          let* (body', _assigned_outvars) =
+            mode_expr (NonEmptyList.as_list vars_out) body in
+          Result.Ok
+            (generate_result
+               Definitions.(
+                 Function
+                   { make_stub = false
+                   ; vars_in = vars_in
+                   ; vars_out = vars_out })
+               body')
+        end |> Result.fold
+          ~ok:return
+          ~error:begin fun err ->
+            let< () = log_error (report_offending_predicate p_id err) in
+            return (fallback_result ())
+          end
+    end
+  | MethLemDecl _ ->
+    failwith (here ^ " TODO method/lemma unimplemented")
+
+and mode_topdecls (d: AnnotationPass.TopDecl.t list)
+  : (ModePass.TopDecl.t list, error_mode_expr_t) error_logger =
+  match d with
+  | [] -> return []
+  | (mods, decl) :: decls ->
+    let< decl' = mode_topdecl decl in
+    let< decls' = mode_topdecls decls in
+    return ((mods, decl') :: decls')
+
+let run (m: AnnotationPass.t): (ModePass.t, error_mode_expr_t) error_logger =
+  let Dafny {includes = includes; decls = decls} = m in
+  let< decls' = mode_topdecls decls in
+  return (ModePass.Dafny {includes = includes; decls = decls'})
