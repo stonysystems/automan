@@ -14,6 +14,11 @@
   (libraries core core_unix.command_unix async_unix automan))
 
 (test
+ (name test_moder)
+ (modules test_moder)
+ (libraries core core_unix.command_unix async_unix automan))
+
+(test
  (name test_translator)
  (modules test_translator)
  (libraries core core_unix.command_unix async_unix automan))
