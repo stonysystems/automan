@@ -27,26 +27,26 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
           NonEmptyList.coerce
             [ Moder.Definitions.
                 ({ mq_outvar = NonEmptyList.singleton "sent_packets"
-                 ; uop = None })
+                 ; fieldlike = None })
             ; Moder.Definitions.
                 ({ mq_outvar = NonEmptyList.singleton "s'"
-                 ; uop = None}) ]
+                 ; fieldlike = None}) ]
       ; branch_permutations =
           Moder.Definitions.(
             { vars_then =
                 NonEmptyList.coerce
                   [ { mq_outvar = NonEmptyList.singleton "sent_packets"
-                    ; uop = None }
+                    ; fieldlike = None }
                   ; { mq_outvar = NonEmptyList.singleton "s'"
-                    ; uop = None} ]
+                    ; fieldlike = None} ]
             ; vars_else =
                 (* NOTE: This is a permutation of `assigned_vars`; the order
                    variables are determined differs *)
                 NonEmptyList.coerce
                   [ { mq_outvar = NonEmptyList.singleton "s'"
-                    ; uop = None }
+                    ; fieldlike = None }
                   ; { mq_outvar = NonEmptyList.singleton "sent_packets"
-                    ; uop = None} ]})})
+                    ; fieldlike = None} ]})})
   in
   let if_guard: AST.Prog.expr_t =
     (* NOTE: The binary op annotations are all None; everything here is
@@ -152,7 +152,7 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
             { outvar_is_left = true
             ; outvar =
                 { mq_outvar = NonEmptyList.singleton "sent_packets"
-                ; uop = None }})
+                ; fieldlike = None }})
       in
       (AST.Prog.Binary
          ( Some if_then_eq_sent_packets_ann
@@ -168,7 +168,7 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
             { outvar_is_left = true
             ; outvar =
                 { mq_outvar = NonEmptyList.singleton "s'"
-                ; uop = None }})
+                ; fieldlike = None }})
       in
       AST.Prog.Binary
         ( Some if_then_eq_s'_ann
@@ -192,9 +192,9 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
          requires clause) *)
       Moder.Definitions.(
         { conj_left =
-            [{mq_outvar = NonEmptyList.singleton "sent_packets"; uop = None}]
+            [{mq_outvar = NonEmptyList.singleton "sent_packets"; fieldlike = None}]
         ; conj_right =
-            [{mq_outvar = NonEmptyList.singleton "s'"; uop = None}] })
+            [{mq_outvar = NonEmptyList.singleton "s'"; fieldlike = None}] })
     in
     (AST.Prog.Binary
        (* NOTE: You should first check the annotation (if present) to determine
@@ -211,10 +211,10 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
         And
           { conj_left =
               [{ mq_outvar = NonEmptyList.singleton "s'"
-               ; uop = None }]
+               ; fieldlike = None }]
           ; conj_right =
               [{ mq_outvar = NonEmptyList.singleton "sent_packets"
-               ; uop = None }]})
+               ; fieldlike = None }]})
     in
     AST.Prog.Binary
       ( Some if_else_conj_ann
@@ -225,7 +225,7 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
                   { outvar_is_left = true
                   ; outvar =
                       { mq_outvar = NonEmptyList.singleton "s'"
-                      ; uop = None }})
+                      ; fieldlike = None }})
           , Syntax.Common.Eq
           , (AST.Prog.NameSeg ("s'", []))
           , (AST.Prog.NameSeg ("s", [])))
@@ -235,7 +235,7 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
                   { outvar_is_left = true
                   ; outvar =
                       { mq_outvar = NonEmptyList.singleton "sent_packets"
-                      ; uop = None }})
+                      ; fieldlike = None }})
           , Syntax.Common.Eq
           , (AST.Prog.NameSeg ("sent_packets", []))
           , (AST.Prog.SeqDisplay(AST.Prog.SeqEnumerate []))))
