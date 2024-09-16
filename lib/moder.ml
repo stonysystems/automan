@@ -305,7 +305,9 @@ let attribute_handler
   []
 
 type 'e error_t = {callstack: string list; sort: 'e}
+[@@deriving show]
 type ('a, 'e) m = ('a, 'e error_t) Result.t
+[@@deriving show]
 
 let on_error_push_callstack (loc: string) (comp: ('a, 'e) m): ('a, 'e) m =
   Result.map_error
@@ -417,7 +419,7 @@ end
 type error_mode_expr_outvar_lhs_t =
    | IllegalOutVarLHS of ParserPass.Prog.expr_t
    | UnsupportedTypeArgs of Definitions.outvar_lhs_t
-
+[@@deriving show]
 (**
    Input:
    - `vars_out`: the set of output-moded variables
@@ -446,7 +448,7 @@ let mode_expr_outvar_lhs
       let* () =
         Result.error_when
           (not (Util.id_in_formals id vars_out))
-          (IllegalOutVarLHS (Erase.Annotations.expr e))
+          (lazy (IllegalOutVarLHS (Erase.Annotations.expr e)))
       in
       let ov = Definitions.(
           { mq_outvar = NonEmptyList.singleton id
@@ -455,7 +457,7 @@ let mode_expr_outvar_lhs
       (* 2.2 type arguments not supported *)
       let* () =
         Result.error_when (List.length tp_args <> 0)
-          (UnsupportedTypeArgs ov)
+          (lazy (UnsupportedTypeArgs ov))
       in
       Result.Ok ov
 
@@ -514,7 +516,7 @@ let mode_expr_outvar_lhs
       let* () =
         Result.error_when
           (List.length tp_args <> 0)
-          (UnsupportedTypeArgs ov)
+          (lazy (UnsupportedTypeArgs ov))
       in
       Result.Ok ov
     | Sel (NameSeg (id, tp_args)) ->
@@ -528,7 +530,7 @@ let mode_expr_outvar_lhs
       let* () =
         Result.error_when
           (List.length tp_args <> 0)
-          (UnsupportedTypeArgs ov)
+          (lazy (UnsupportedTypeArgs ov))
       in
       Result.Ok ov
 
@@ -554,10 +556,12 @@ let mode_expr_outvar_lhs
 type error_outvar_occur_t =
   { occurring_outvar: id_t
   ; shadowed: bool }
+[@@deriving show]
 
 type error_mode_expr_no_out_vars_t =
   | OutVarOccur of error_outvar_occur_t
   | FunctionalizedPredOccur of Syntax.Common.module_qualified_name_t
+[@@deriving show]
 
 let rec mode_expr_no_out_vars_extended_pattern
     (vars_out: AnnotationPass.TopDecl.formal_t list)
@@ -569,8 +573,9 @@ let rec mode_expr_no_out_vars_extended_pattern
   | EPatVar (pv_id, pv_tp_opt) ->
     let* () =
       Result.error_when (Util.id_in_formals pv_id vars_out)
-        { callstack = []
-        ; sort = {occurring_outvar = pv_id; shadowed = true} }
+        (lazy
+          { callstack = []
+          ; sort = {occurring_outvar = pv_id; shadowed = true} })
     in
     let pv_tp_opt' = Option.map Convert.typ pv_tp_opt in
     Result.Ok (ModePass.Prog.EPatVar (pv_id, pv_tp_opt'))
@@ -593,8 +598,9 @@ let rec mode_expr_no_out_vars_pattern
   | PatVar (p_id, tp_opt) ->
     let* () =
       Result.error_when (Util.id_in_formals p_id vars_out)
-        { callstack = [here]
-        ; sort = {occurring_outvar = p_id; shadowed = true }}
+        (lazy
+          { callstack = [here]
+          ; sort = {occurring_outvar = p_id; shadowed = true }})
     in
     let tp_opt' = Option.map Convert.typ tp_opt in
     Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt'))
@@ -617,8 +623,9 @@ let rec mode_expr_no_out_vars
     | NameSeg (seg_id, seg_tp_args) ->
       let* () =
         Result.error_when (Util.id_in_formals seg_id vars_out)
-          { callstack = [here]
-          ; sort = OutVarOccur {occurring_outvar = seg_id; shadowed = false} }
+          (lazy
+            { callstack = [here]
+            ; sort = OutVarOccur {occurring_outvar = seg_id; shadowed = false} })
       in
       let seg_tp_args' = List.map Convert.typ seg_tp_args in
       Result.Ok
@@ -630,8 +637,12 @@ let rec mode_expr_no_out_vars
           begin function (p_id, p_tp_opt) ->
             let* () =
               Result.error_when (Util.id_in_formals p_id vars_out)
-                { callstack = [here]
-                ; sort = OutVarOccur {occurring_outvar = p_id; shadowed = true} }
+                (lazy
+                  { callstack = [here]
+                  ; sort =
+                      OutVarOccur
+                        { occurring_outvar = p_id
+                        ; shadowed = true }})
             in
             Result.Ok (p_id, Option.map Convert.typ p_tp_opt)
           end
@@ -804,8 +815,9 @@ let rec mode_expr_no_out_vars
         Option.fold ~none:(Result.Ok ())
           ~some:(function (p_id, arg_modes) ->
             Result.error_when (exists_output arg_modes)
-              { callstack = [here]
-              ; sort = FunctionalizedPredOccur p_id })
+              (lazy
+                { callstack = [here]
+                ; sort = FunctionalizedPredOccur p_id }))
           ann
       in
       let* args_pos' =
@@ -857,8 +869,12 @@ and mode_expr_no_out_vars_quantifier_domain
         | AnnotationPass.Prog.QVar (id, tp, dom_col, _attrs) ->
           let* () =
             Result.error_when (Util.id_in_formals id vars_out)
-              { callstack = [here]
-              ; sort = OutVarOccur {occurring_outvar = id; shadowed = true}}
+              (lazy
+                { callstack = [here]
+                ; sort =
+                    OutVarOccur
+                      { occurring_outvar = id
+                      ; shadowed = true }})
           in
           let tp' = Option.map Convert.typ tp in
           let* dom_col' = Result.map_option (mode_expr_no_out_vars vars_out) dom_col in
@@ -884,7 +900,8 @@ type error_mode_expr_t =
   | FunctionalizedPredOccur of Syntax.Common.module_qualified_name_t
   | MixedIO of
       { input_violation: error_outvar_occur_t
-      ; illegal_outvar_lhs: ParserPass.Prog.expr_t }
+      ; illegal_outvar_lhs: ParserPass.Prog.expr_t
+      ; expr: ParserPass.Prog.expr_t }
   | AnnotationViolation of
       { p_id: Syntax.Common.module_qualified_name_t
       ; arg: AnnotationPass.Prog.expr_t
@@ -898,6 +915,7 @@ type error_mode_expr_t =
       { domain: ParserPass.Prog.expr_t
       ; src: error_mode_expr_illegal_quantifier_domain_sources_t
       ; quantification: ParserPass.Prog.expr_t }
+[@@deriving show]
 
 let mode_expr_ensure_input
     (vars_out: AnnotationPass.TopDecl.formal_t list)
@@ -957,7 +975,8 @@ let mode_expr_analyze
                   | OutVarOccur ov_occ ->
                     MixedIO
                       { input_violation = ov_occ
-                      ; illegal_outvar_lhs = offending }
+                      ; illegal_outvar_lhs = offending
+                      ; expr = Erase.Annotations.expr e }
                   | FunctionalizedPredOccur fp_occ ->
                     FunctionalizedPredOccur fp_occ }
           end
@@ -1070,10 +1089,11 @@ and mode_expr_conjunct_arglist_functionalize
   (* TODO: We don't support named arguments in our mode analysis (yet) *)
   let* () =
     Result.error_when named_args_p
-      { callstack = [here]
-      ; sort =
-          let (id, arg) = List.nth args.named 0 in
-          UnsupportedNamedArgs (id, arg) }
+      (lazy
+        { callstack = [here]
+        ; sort =
+            let (id, arg) = List.nth args.named 0 in
+            UnsupportedNamedArgs (id, arg) })
   in
   (* Check arguments in input positions contain not output-moded variables, and
      arguments in output positions are valid outvar lhs *)
@@ -1565,6 +1585,7 @@ let mode_topdecl_synonym_type
 
 open struct
   type ('a, 'e) error_logger = 'a * (error_mode_expr_t error_t) list
+  [@@deriving show]
 
   let return (x: 'a): ('a, 'e) error_logger =
     (x, [])

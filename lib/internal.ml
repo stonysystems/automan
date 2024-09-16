@@ -3,16 +3,26 @@ let curry (f: ('a * 'b) -> 'c) (x: 'a) (y: 'b) =
 
 module Result : sig
   include module type of Result
+  type ('a, 'e) t = ('a, 'e) Result.t =
+    | Ok of 'a
+    | Error of 'e
+  [@@deriving show, eq]
+
   val ( let< ): ('a, 'e) result -> ('a -> ('b, 'e) result) -> ('b, 'e) result
   val map2: ('a -> 'b) -> ('c -> 'd) -> ('a, 'c) t -> ('b, 'd) t
   val map2'
     : ok:('a1 -> 'a2) -> error:('e1 -> 'e2) -> res:(('a1, 'e1) result)
       -> ('a2, 'e2) result
   val map_option: ('a -> ('b, 'e) result) -> 'a option -> ('b option, 'e) result
-  val error_when: bool -> 'e -> (unit, 'e) result
+  val error_when: bool -> 'e Lazy.t -> (unit, 'e) result
   val try_catch: ('a, 'e) result -> ('e -> ('a, 'e) result) -> ('a, 'e) result
 end = struct
   include Result
+  type ('a, 'e) t = ('a, 'e) Result.t =
+    | Ok of 'a
+    | Error of 'e
+  [@@deriving show, eq]
+
   let ( let< ) = bind
 
   let map2 f g =
@@ -31,7 +41,7 @@ end = struct
 
   let error_when c e =
     if c then
-      Result.Error e
+      Result.Error (Lazy.force e)
     else
       Result.Ok ()
 
@@ -43,6 +53,11 @@ end
 
 module List : sig
   include module type of List
+  type 'a t = 'a List.t =
+    | []
+    | (::) of 'a * 'a list
+  [@@deriving show, eq]
+
   val take: int -> 'a list -> 'a list
   val unsnoc: 'a list -> 'a list * 'a
 
@@ -54,6 +69,10 @@ module List : sig
     -> ('acc, 'e) Result.t
 end = struct
   include List
+  type 'a t = 'a List.t =
+    | []
+    | (::) of 'a * 'a list
+  [@@deriving show, eq]
 
   let take n l =
     let[@tail_mod_cons] rec aux n l =
