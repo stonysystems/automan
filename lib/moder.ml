@@ -62,14 +62,16 @@ module Definitions = struct
   [@@deriving show, eq]
 
   (** The output variable mentioned in a quantification *)
-  type quantification_functionalize_var_domain_t =
-    | QFVarBounded | QFVarCollection
+  type quantification_functionalize_var_range_sort_t =
+    | QFVarRangeBounds             (* 0 <= qv_id < |outvar|, outvar.fieldlike = Some Cardinality *)
+    | QFVarRangeColl               (* qv_id in outvar, outvar.fieldlike = None *)
+  [@@deriving show, eq]
 
-
-  (* type quantification_functionalize_var_domain_t = *)
-  (*   | QFVarDomRange of ParserPass.Prog.subseq_t *)
-  (*   | QFVarDomColl  of ParserPass.Prog.expr_t *)
-  (* [@@deriving show, eq] *)
+  type quantification_functionalize_var_range_t =
+    { id: id_t
+    ; tp: AnnotationPass.Type.t option
+    ; domain: quantification_functionalize_var_range_sort_t * outvar_lhs_t }
+  [@@deriving show, eq]
 
   (* type quantification_functionalize_var_t = *)
   (*   QFVar of *)
@@ -80,7 +82,14 @@ module Definitions = struct
 
   (*     } *)
 
-  type quantification_functionalize_t = outvar_lhs_t
+  type quantification_functionalize_var_t =
+    | QFVarRange of quantification_functionalize_var_range_t
+    | QFVarDom of outvar_lhs_t
+  [@@deriving show, eq]
+
+  type quantification_functionalize_t =
+    { qvar: quantification_functionalize_var_t
+    ; body_outvars: outvar_lhs_t list }
   [@@deriving show, eq]
 
   (** - outvar_is_left: true iff the (member-qualified) outvar is the left
@@ -892,6 +901,11 @@ type error_mode_expr_illegal_quantifier_domain_sources_t =
   ; antecedent: bool }
 [@@deriving show, eq]
 
+type error_mode_expr_unsupported_quantifier_domain_sources_t =
+  | QDomCollection
+  | QDomRange
+[@@deriving show, eq]
+
 type error_mode_expr_t =
   | UnsupportedTypeArgs of Definitions.outvar_lhs_t
   | UnsupportedNamedArgs of id_t * AnnotationPass.Prog.expr_t
@@ -915,6 +929,13 @@ type error_mode_expr_t =
       { domain: ParserPass.Prog.expr_t
       ; src: error_mode_expr_illegal_quantifier_domain_sources_t
       ; quantification: ParserPass.Prog.expr_t }
+  | UnsupportedQuantifierDomainSourceForFunctionalization of
+      { domain: ParserPass.Prog.expr_t
+      ; src: error_mode_expr_unsupported_quantifier_domain_sources_t
+      ; quantification: ParserPass.Prog.expr_t }
+  | IllegalQuantifierEquivalenceForFunctionalization of
+      ParserPass.Prog.expr_t
+  | UnsupportedUniversalQuantification of ParserPass.Prog.expr_t
 [@@deriving show]
 
 let mode_expr_ensure_input
@@ -1240,82 +1261,214 @@ and mode_expr_conjunct_match
         ~some:(fun a -> NonEmptyList.(as_list (head a))) )
 
 (* BEGIN WIP *)
-(* and mode_expr_conjunct_forall *)
-(*     (vars_out: AnnotationPass.TopDecl.formal_t list) *)
-(*     (qdom: AnnotationPass.Prog.qdom_t) *)
-(*     (qbody: AnnotationPass.Prog.expr_t) *)
-(*   : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list *)
-(*     , error_mode_expr_t ) m = *)
-(*   let here = "Moder: mode_expr_conjunct_forall:" in *)
-(*   let orig = *)
-(*     AnnotationPass.Prog.Quantifier *)
-(*       ( () *)
-(*       , { qt = Syntax.Common.Forall *)
-(*         ; qdom = qdom *)
-(*         ; qbody = qbody }) *)
-(*   in *)
-(*   let erase_orig() = Erase.Annotations.expr orig in *)
+and mode_expr_conjunct_forall
+    (vars_out: AnnotationPass.TopDecl.formal_t list)
+    (qdom: AnnotationPass.Prog.qdom_t)
+    (qbody: AnnotationPass.Prog.expr_t)
+  : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+    , error_mode_expr_t ) m =
+  let here = "Moder: mode_expr_conjunct_forall:" in
+  let orig =
+    AnnotationPass.Prog.Quantifier
+      ( ()
+      , { qt = Syntax.Common.Forall
+        ; qdom = qdom
+        ; qbody = qbody })
+  in
+  let erase_orig() = Erase.Annotations.expr orig in
 
-(*   let QDom {qvars = qvars; qrange = qrange} = qdom in *)
+  let QDom {qvars = qvars; qrange = qrange} = qdom in
 
-(*   (\* BEGIN utilities *\) *)
-(*   (\* NOTE: We only support a single output variable *\) *)
-(*   let ensure_single_fresh_qvar *)
-(*       (qvars: AnnotationPass.Prog.qvar_decl_t list) = *)
-(*     match qvars with *)
-(*     | (QVar (qv_id, _, _, _) as qvar) :: [] -> *)
-(*       let* () = *)
-(*         Result.error_when (Util.id_in_formals qv_id vars_out) *)
-(*           { callstack = [here] *)
-(*           ; sort = OutVarShadowing qv_id } *)
-(*       in *)
-(*       Result.Ok qvar *)
-(*     | _ -> *)
-(*       Result.Error *)
-(*         { callstack = [here] *)
-(*         ; sort = *)
-(*             UnsupportedMultipleUniversalQuantifications (erase_orig()) } *)
-(*   in *)
-(*   let is_generated_from_out_var (\* analyze *\) *)
-(*       (qv_dom_coll: AnnotationPass.Prog.expr_t option) *)
-(*       (qrange: AnnotationPass.Prog.expr_t option) *)
-(*       (qbody: AnnotationPass.Prog.expr_t) = *)
-(*     (\* NOTE/TODO: we do not handle the case where the quantified variable is *)
-(*        an alias for an outvar lhs (e.g., qv <- seq_outvar, qv <- set_outvar); *)
-(*        we assume that the quantified variable is to be treated as *)
-(*        "field-like" *\) *)
-(*     match (qv_dom_coll, qrange, qbody) with *)
-(*     | (Some coll, None, qb) -> *)
-(*       let err_illegal_domain() = *)
-(*         IllegalQuantifierDomainForFunctionalization *)
-(*           { domain = Erase.Annotations.expr coll *)
-(*           ; src = {collection = true; range = false; antecedent = false} *)
-(*           ; quantification = erase_orig() } *)
-(*       in *)
-(*       let* ov = *)
-(*         mode_expr_ensure_output vars_out coll *)
-(*           (fun _ -> err_illegal_domain()) in *)
-(*       let* () = *)
-(*         Result.error_when (Option.is_some ov.fieldlike) *)
-(*           { callstack = [here] *)
-(*           ; sort = err_illegal_domain() } *)
-(*       in *)
-(*       Result.Ok foo *)
-(*     | (_, _, _) -> _ *)
-(*   in *)
-(*   (\* END utilities *\) *)
+  (* BEGIN utilities *)
+  (* NOTE: We only support a single output variable *)
+  let ensure_single_fresh_qvar
+      (qvars: AnnotationPass.Prog.qvar_decl_t list) =
+    match qvars with
+    | (QVar (qv_id, _, _, _) as qvar) :: []
+      when not (Util.id_in_formals qv_id vars_out) ->
+      Result.Ok qvar
+    | (QVar (qv_id, _, _, _)) :: [] ->
+      Result.Error
+        { callstack = [here]
+        ; sort = OutVarShadowing qv_id }
+    | _ ->
+      Result.Error
+        { callstack = [here]
+        ; sort =
+            UnsupportedMultipleUniversalQuantifications (erase_orig()) }
 
-(*   Result.try_catch begin *)
-(*     mode_expr_ensure_input vars_out orig *)
-(*     |> Result.map (fun e -> (e, [])) *)
-(*   end begin fun _ -> *)
-(*     (\* There's an outvar *somewhere* *\) *)
+  in
+  let determine_outvar_for_qvar
+      (qv_id: Syntax.id_t)
+      (qv_tp: AnnotationPass.Type.t option)
+      (qv_dom_coll: AnnotationPass.Prog.expr_t option)
+      (qrange: AnnotationPass.Prog.expr_t option)
+      (qbody: AnnotationPass.Prog.expr_t)
+    : ( ModePass.Prog.expr_t * Definitions.outvar_lhs_t list
+      , error_mode_expr_t ) m =
+    (* TODO: When we support collection domains and domain restrictions
+       ("ranges"), switch to error IllegalQuantifierDomainForFunctionalization
+       if we ever have more than one (or no) sources *)
+    let err_unsupported_qdom dom src =
+      UnsupportedQuantifierDomainSourceForFunctionalization
+        { domain = Erase.Annotations.expr dom
+        ; src = src
+        ; quantification = erase_orig() }
+    in
+    let err_illegal_qdom dom src =
+      IllegalQuantifierDomainForFunctionalization
+        { domain = Erase.Annotations.expr dom
+        ; src = src
+        ; quantification = erase_orig() }
+    in
 
-(*     let* QVar (qv_id, qv_tp, qv_dom_coll, _attrs) = *)
-(*       ensure_single_fresh_qvar qvars in *)
+    let try_numeric_range_antecedent = function
+      (* TODO: Would be nice to have a less hacky analysis *)
+      | AnnotationPass.Prog.Binary (_, And, r1, r2) -> begin
+          match (r1, r2) with
+          (* 0 <= qv_id < |outvar| *)
+          | ( Binary (_, Lte, Lit (Nat 0), NameSeg (q1, []))
+            , Binary (_, Lt, NameSeg (q2, []), (Cardinality _ as ub)))
+            when q1 = q2 && q2 = qv_id ->
+            mode_expr_outvar_lhs vars_out ub
+            |> Result.fold ~error:(Fun.const Option.None)
+              ~ok:begin fun ov ->
+                assert Definitions.(ov.fieldlike = Some Cardinality);
+                Option.Some Definitions.(
+                    { id = qv_id; tp = qv_tp
+                    ; domain = (QFVarRangeBounds, ov) })
+              end
+          | _ ->
+            Option.None
+      end
+      | _ ->
+        Option.None
+    in
+    let try_collection_membership_antecedent = function
+      | AnnotationPass.Prog.Binary
+          (_, In, NameSeg (q1, []), coll) when q1 = qv_id -> begin
+          mode_expr_outvar_lhs vars_out coll
+          |> Result.fold ~error:(Fun.const Option.None)
+            ~ok:begin fun ov ->
+              if Option.is_some Definitions.(ov.fieldlike) then
+                Option.None
+              else
+                Option.Some Definitions.(
+                    { id = qv_id; tp = qv_tp
+                    ; domain = (QFVarRangeColl, ov) })
+            end
+        end
+      | _ -> Option.None
+    in
+    let try_antecedent e =
+      begin                     (* to avoid both attempts being evaluated (OCaml is call-by-value) *)
+        try_numeric_range_antecedent e
+        |> Option.fold
+          ~some:(fun x -> Fun.const (Some x))
+          ~none:(fun () -> try_collection_membership_antecedent e)
+      end ()
+    in
 
-(*     _ *)
-(*   end *)
+    match (qv_dom_coll, qrange, qbody) with
+    | (Some coll, _, _) ->
+      Result.Error
+        { callstack = [here]
+        ; sort = err_unsupported_qdom coll QDomCollection }
+    | (None, Some range, _) ->
+      Result.Error
+        { callstack = [here]
+        ; sort = err_unsupported_qdom range QDomRange }
+    | (None, None, Binary (_, Syntax.Common.Implies, ante, consq)) -> begin
+        match try_antecedent ante with
+        | None ->
+          Result.Error
+            { callstack = [here]
+            ; sort =
+                err_illegal_qdom ante
+                  { collection = false
+                  ; range = false
+                  ; antecedent = true }}
+        | Some qrange' ->
+          (* TODO Hacky *)
+          let* (consq', ovs) = mode_expr vars_out consq in
+          let ann = Definitions.({qvar = QFVarRange qrange'; body_outvars = ovs}) in
+          let ante' = Convert.expr ante in
+          let qdom' = begin
+            match (fst qrange'.domain) with
+            | QFVarRangeBounds ->
+              let qvar' =
+                ModePass.Prog.QVar
+                  (qv_id, Option.map Convert.typ qv_tp, None, []) in
+              ModePass.Prog.QDom {qvars = [qvar']; qrange = Some ante'}
+            | QFVarRangeColl ->
+              let qvar' =
+                ModePass.Prog.QVar
+                  ( qv_id, Option.map Convert.typ qv_tp
+                  , Some Util.(outvar_lhs_to_modepass_expr (snd qrange'.domain)), [])
+              in
+              ModePass.Prog.QDom {qvars = [qvar']; qrange = None}
+          end in
+          Result.Ok
+            ( ModePass.Prog.(
+                  Quantifier
+                    ( Some ann
+                    , {qt = Forall; qdom = qdom'; qbody = consq'} ))
+            , (snd qrange'.domain) :: ovs )
+      end
+    (* TODO: equivalences are symmetric... *)
+    | ( None, None
+      , (Binary
+           (_, Equiv, Binary (_, In, NameSeg (q', []), coll), e2)
+         as body))
+      when q' = qv_id ->
+      begin
+        let* _ = mode_expr_ensure_input vars_out e2 in
+        let* ov =
+          mode_expr_ensure_output vars_out coll
+            (fun _ ->  (* dummy *)
+               IllegalQuantifierEquivalenceForFunctionalization
+                (Lit True))
+        in
+        let qvar' =
+          ModePass.Prog.QVar
+            (qv_id, Option.map Convert.typ qv_tp, None, [])
+        in
+        let qdom' =
+          ModePass.Prog.(
+            QDom {qvars = [qvar']; qrange = None})
+        in
+        Result.Ok ModePass.Prog.(
+            ( Quantifier
+                ( Some Definitions.({qvar = QFVarDom ov; body_outvars = []})
+                , {qt = Forall; qdom = qdom'; qbody = Convert.expr body })
+            , [ov] ))
+      end |> Result.map_error begin fun _ ->
+        { callstack = [here]    (* override *)
+        ; sort =
+            IllegalQuantifierEquivalenceForFunctionalization
+              (Erase.Annotations.expr qbody) }
+      end
+    | (None, None, e) ->
+      Result.Error
+        { callstack = [here]
+        ; sort =
+            UnsupportedUniversalQuantification
+              (Erase.Annotations.expr e) }
+
+  in
+  (* END utilities *)
+
+  Result.try_catch begin
+    mode_expr_ensure_input vars_out orig
+    |> Result.map (fun e -> (e, []))
+  end begin fun _ ->
+    (* There's an outvar *somewhere* *)
+
+    let* QVar (qv_id, qv_tp, qv_dom_coll, _attrs) =
+      ensure_single_fresh_qvar qvars in
+
+    determine_outvar_for_qvar qv_id qv_tp qv_dom_coll qrange qbody
+  end
 (* END WIP *)
 
   (* Questions to answer:
@@ -1461,8 +1614,7 @@ and mode_expr_conjunct
           |> Result.map (fun x -> (x, []))
         | Forall ->
           (* TODO *)
-          Result.Ok (Convert.expr conj, [])
-          (* mode_expr_conjunct_forall vars_out quantification.qdom quantification.qbody *)
+          mode_expr_conjunct_forall vars_out quantification.qdom quantification.qbody
       end
     | SetComp _ ->
       failwith (here ^ " [fatal] unexpected set comprehension")
