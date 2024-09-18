@@ -9,7 +9,6 @@ module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
 
 
 let main dafny_fn automan_fn () =
-  (* Dafny *)
   let dafny = begin
     let inx = In_channel.create dafny_fn in
     let lexbuf = Lexing.from_channel inx in
@@ -30,9 +29,12 @@ let main dafny_fn automan_fn () =
   | Result.Error msg ->
     printf "Error: %s\n" msg
   | Result.Ok    dfy ->
+    let (dfy_moded, log) = Moder.run dfy in
+    let _ = log in (* Not printing the log at this moment *)
+    let _ = dfy_moded in
     let dfy' = Translator.translate dfy in
     let str  = Printer.print dfy' in
-    printf "%s\n" str
+    printf "%s\n" str 
 
 let () =
   Command.basic_spec
