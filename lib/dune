@@ -1,6 +1,6 @@
 (library
  (name automan)
- (libraries core str)
+ (libraries core str core_unix async_unix)
  (preprocess (pps ppx_deriving.show ppx_deriving.eq)))
 
 (ocamllex lexer)
