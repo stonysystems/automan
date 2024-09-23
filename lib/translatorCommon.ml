@@ -43,8 +43,8 @@ open Internal
   *)
 
 
-module AST = Syntax.AST(Annotator.AnnotationMetaData)
-module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+module AST = Syntax.AST(TranslatorMetadata.TranslationMetaData)
+module Printer = Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
 
 
 module TranslatorCommon = struct 
@@ -211,7 +211,7 @@ module TranslatorCommon = struct
         let r = aux rest in
         match is_expr_blank r with
         | true -> l 
-        | false -> Binary ((), Syntax.Common.And, l, r)
+        | false -> Binary (None, Syntax.Common.And, l, r)
       end in aux exprs
 
   module Expr = struct 

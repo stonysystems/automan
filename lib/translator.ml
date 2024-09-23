@@ -2,10 +2,10 @@ open Syntax
 open Internal
 
 
-module AST = AST(Annotator.AnnotationMetaData)
+module AST = AST(TranslatorMetadata.TranslationMetaData)
 module Refinement = Refinement.Refinement
 module TCommon = TranslatorCommon.TranslatorCommon
-module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+module Printer = Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
 
 
 module Translator = struct 
@@ -26,13 +26,13 @@ module Translator = struct
 
     and translate (x : AST.Type.t) = 
       match x with
-      | TpName (m, name_seg_lst) -> TpName (
+      | TpName (m, name_seg_lst) -> AST.Type.TpName (
           m, 
           NonEmptyList.coerce (
             List.map t_name_seg (NonEmptyList.as_list name_seg_lst)
           )
         )
-      | TpTup t_lst -> TpTup (List.map translate t_lst)
+      | TpTup t_lst -> AST.Type.TpTup (List.map translate t_lst)
 
   end
 
@@ -455,7 +455,7 @@ module Translator = struct
           let l_call = 
             get_self_call_from_func_id_and_args id args_for_l_call in
           let check = AST.Prog.Binary (
-            (), (* Changed for MetaData *)
+            None, (* Changed for MetaData *)
             Syntax.Common.Eq, c_call, l_call
           ) in
           [AST.TopDecl.Ensures check]
@@ -483,11 +483,26 @@ module Translator = struct
         )
       )
       in
+      let predicate_decl_t_metadata_roll_back 
+        (m : TranslatorMetadata.TranslationMetaData.predicate_decl_t) :
+        Annotator.AnnotationMetaData.predicate_decl_t =  
+        match m with 
+        | Moder.Definitions.Predicate -> None
+        | Moder.Definitions.Function _ -> 
+          (* To be changed later *)
+          Some ([
+            Annotation.Input  ;
+            Annotation.Output ;
+            Annotation.Input  ;
+           ])
+      in
       match x with 
       | Predicate (metadata, _, _, id, _, origin_fmls, specs, e) -> begin
         let _ = metadata, e in
+        let metadata = (predicate_decl_t_metadata_roll_back metadata) in
         let fmls_input, fmls_rtn = 
-          get_fmls_input_and_rtn origin_fmls metadata in
+          get_fmls_input_and_rtn origin_fmls 
+           metadata in
         let rtn = get_rtn_from_fmls fmls_rtn in
         let t_e = TCommon.expr_of_str "HOLDER" in
         let t_id = remapper#id_remap id in

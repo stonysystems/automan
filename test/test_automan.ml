@@ -5,10 +5,12 @@ open TestCommon
 
 
 module Translator = Translator.Translator
-module Printer = Printer.PrettyPrinter(Annotator.AnnotationMetaData)
+module Printer = Printer.PrettyPrinter(Moder.ModingMetaData)
 
 
 let main dafny_fn automan_fn () =
+  let symbol_table = new SymbolTable.SymbolTable.symbol_table in 
+  symbol_table#build dafny_fn;
   let dafny = begin
     let inx = In_channel.create dafny_fn in
     let lexbuf = Lexing.from_channel inx in
@@ -31,9 +33,8 @@ let main dafny_fn automan_fn () =
   | Result.Ok    dfy ->
     let (dfy_moded, log) = Moder.run dfy in
     let _ = log in (* Not printing the log at this moment *)
-    let _ = dfy_moded in
-    let dfy' = Translator.translate dfy in
-    let str  = Printer.print dfy' in
+    (* let dfy' = Translator.translate dfy in *)
+    let str  = Printer.print dfy_moded in
     printf "%s\n" str 
 
 let () =

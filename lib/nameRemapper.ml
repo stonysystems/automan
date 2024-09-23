@@ -1,4 +1,4 @@
-module AST = Syntax.AST(Annotator.AnnotationMetaData)
+module AST = Syntax.AST(TranslatorMetadata.TranslationMetaData)
 module TCommon = TranslatorCommon.TranslatorCommon
 
 

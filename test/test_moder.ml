@@ -26,11 +26,12 @@ let main dafny_fn automan_fn () =
     printf "Error: %s\n" msg
   | Result.Ok    dfy ->
     let (dfy_moded, log) = Moder.run dfy in
-    printf
+    let _ = log in 
+    (* printf
       ">>>> BEGIN ERROR LOG >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n%s\n<<<< END ERROR LOG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n"
       (Internal.List.show
          Moder.(pp_error_t pp_error_mode_expr_t)
-         log);
+         log); *)
     printf "%s\n" Moder.ModePass.(show dfy_moded);
     ()
 

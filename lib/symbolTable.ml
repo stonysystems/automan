@@ -18,26 +18,87 @@ We can improve A' step by step until T' = T.
 
 type symbol_object_t = 
   | DataTypeDeclSgl of Syntax.datatype_t
-  | DataTypeDeclMul of Syntax.datatype_t 
+  | DataTypeDeclMul of Syntax.datatype_t -> unknown
   | Alias           of Synatx.synonym_type_t
 
 For input file F:
   
-  Global Table T1:
+  ** Symbol Table T  **
+    
+    Data Member:
+      T.DefTable : symbol_object_t list ;
+        Contains definitions that can be directly accessed, come from:
+          1. Definitions imported from "include" 
+            /* The definitions outside of any modules (ignore) */
+          2. Import module with keyword "opened"
+            /* Import opened M; The definitions in M can be accessed */
+            /* The definitions in M.M2 cannot be accessed (assume it cannot) */
+          3. The definitions from the current file.
+            /* Added during translation */
 
-  Create a table T1 with 
-    For each files included in F, apply:
-      For each module:
-        Create the key K = Module Name (String)
-        Filter a list of symbol_object_t L from this module 
-        Add (K, L) to T1; Abort if T1 already has a key = K
+      T.ModTable : A key-value table with KEY = module name : string and
+                    VALUE = T : Symbol Table for this module name
 
-  T1 should only be initialized once and doesn't need to support for COPY.
+      T.OpenedTable : 
+        A list of string indicates imported modules inside T.ModTable
 
-  Syntax.TopDecl.t list ->
-    t -> t' -> [ Import | ModuleDef | DataTypeDecl | Alias ]
-    ModuleDef -> t list
-  A layer is a t list
+      T.AliasTable :
+        Used to handle alias for modules such as 
+          1. import A = B
+          2. import A : B
+          3. import A`E
+          4. import X = A.B`{E,F}
+        We don't implement this at this moment (not used anyway).
+
+    API:
+      T.Build (F : string) -> None
+
+      T.AddModule (key = name : String, value = table : T) -> None
+
+      T.AddDef (def : TopDecl.t) -> None 
+
+      T.Exist (string list) -> 
+        bool, indicates whether this module exists in this table
+        /* Example for input : M1.M2.D | D */ 
+
+      T.Query (x : string list) -> symbol_object_t
+      /* assert T.Exist (x); */
+
+      T.Copy () -> T; Return a copy of its self
+
+  ** Algorithms **
+    Helpers:
+      ** Path Checker ** :
+        INPUT : A string get from "Include"
+        OUTPUT : 
+          A string indicates the dafny file to parse in.
+          Empty if not found.
+        
+        Check whether there's a file in the same directory.
+        Other directory such as "../x" or "x/.." will lead to empty.
+
+      T.Build (F : string) : 
+        For each file IncludedF included in F, apply:
+          ```
+          Note that here for T
+            1. We ignore the modifiers for module, such as ABSTRACT.
+
+          These issues will lead T' to be a sub-set of T, 
+            but we can ** easily ** improve it later, as the arch allows it.
+          ```
+
+          IncludedT = new T and T.build IncludedF;
+          For each module (name, table) in IncludedT.ModTable:
+            self.AddMod (name, table)
+          /* We don't add IncludedT.DefTable */
+
+          For each defnitions d, self.AddDef (d);
+
+-------------------------------------------------------------------------------
+
+  The syntax indicates that 
+    [ Import | ModuleDef | DataTypeDecl | Alias ] shares a same layer.
+  ModuleDef can lead to a deeper layer.
 
   For ** import ** :
     ``` 
@@ -53,16 +114,26 @@ For input file F:
       `import opened B` and 
       `import A.B`
     are supported at this version
-    
-  Create a empty list of symbol_object_t, T2 with 
-    For each layer in the AST of F:
-      T2' = T2.copy()
-
-      for each module imported: T2' = T2' + F[module]
-      for each symbol_object_t introduced:
-        T2' = T2' + [symbol_object_t]
-
-      Apply translation to this layer with T2'
-      Enter next layer
 
 *)
+
+module SymbolTable = struct
+  
+  class symbol_table = 
+  object 
+    method build (file_path : string) : unit = 
+      let _ = file_path in
+      ()
+    
+    method query (name : string) : string list = 
+      assert (name = "LAcceptor");
+      [
+        "constants" ; 
+        "max_bal"   ;
+        "votes"     ;
+        "last_checkpointed_operation" ;
+        "log_truncation_point" ;
+      ]
+  end
+
+end

@@ -1,7 +1,7 @@
 open Internal
 
 
-module AST = Syntax.AST(Annotator.AnnotationMetaData)
+module AST = Syntax.AST(TranslatorMetadata.TranslationMetaData)
 module TCommon = TranslatorCommon.TranslatorCommon
 
 module Refinement  = struct
@@ -69,18 +69,18 @@ module Refinement  = struct
             match TCommon.is_primitive param_tp_id with 
             | true -> []
             | false -> [
-              Quantifier ((), {
+              Quantifier (None, {
                 qt = Syntax.Common.Forall;
                 qdom = QDom {
                   qvars = [QVar (i_id, None, None, [])];
                   qrange = None
                 };
                 qbody = Binary (
-                  (), 
+                  None, 
                   Syntax.Common.Implies,
                   (
                     AST.Prog.Binary (
-                      (),
+                      None,
                       Syntax.Common.In, 
                       i, 
                       generate_args wrapped_as_member_access fml_id
@@ -130,7 +130,7 @@ module Refinement  = struct
     let expr = generate_checker_4_ctors 
       (NonEmptyList.as_list ctors) token in
     AST.TopDecl.Predicate (
-      None (* Changed for MetaData *), 
+      Moder.Definitions.Predicate (* Changed for MetaData *), 
       false, 
       [], TCommon.expr_to_id (generate_token t_id token), 
       [], [AST.TopDecl.Formal (s_id, TCommon.tp_of_id t_id)], 
@@ -264,7 +264,7 @@ module Refinement  = struct
           fun x -> match x with AST.TopDecl.DataCtor (_, id, _) -> id
         ) t_ctors in
         let zipped = List.combine t_ctors_ids abs_4_ctors in
-        AST.Prog.Match ((), s, aux zipped)
+        AST.Prog.Match (None, s, aux zipped)
       )
     in
     AST.TopDecl.Function(
