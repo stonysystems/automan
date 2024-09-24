@@ -35,6 +35,9 @@ module Definitions = struct
 
   type arglist_functionalize_t = Moder.Definitions.arglist_functionalize_t
   [@@deriving show, eq]
+
+  type dataupdate_functionalize_t = Moder.Definitions.dataupdate_functionalize_t
+  [@@deriving show, eq]
 end
 
 module TranslationMetaData : MetaData
@@ -51,6 +54,7 @@ module TranslationMetaData : MetaData
   with type binary_op_t = Definitions.binary_op_functionalize_t option
 
   with type arglist_t = Definitions.arglist_functionalize_t option
+  with type dataupdate_t = Definitions.dataupdate_functionalize_t option
 = struct
   type predicate_decl_t = Moder.ModingMetaData.predicate_decl_t
   [@@deriving show, eq]
@@ -78,6 +82,9 @@ module TranslationMetaData : MetaData
   [@@deriving show, eq]
 
   type arglist_t = Definitions.arglist_functionalize_t option
+  [@@deriving show, eq]
+
+  type dataupdate_t = Definitions.dataupdate_functionalize_t option
   [@@deriving show, eq]
 end
 

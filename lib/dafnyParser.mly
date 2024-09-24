@@ -357,7 +357,7 @@ suffix:
     ; upds = separated_nonempty_list(COMMA, member_binding_upd)
     ; RPAREN
     { Syntax.ParserPass.Prog.(
-        DataUpd (Internal.NonEmptyList.coerce upds))
+        DataUpd ((), Internal.NonEmptyList.coerce upds))
     }
   | LSQBRAC; lb = option(expr(yeslem)); SLICE; ub = option(expr(yeslem)); RSQBRAC
     { Syntax.ParserPass.Prog.Subseq { lb = lb; ub = ub }}
