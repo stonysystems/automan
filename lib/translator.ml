@@ -161,7 +161,8 @@ module Translator = struct
           defs = NonEmptyList.map t_expr defs;
           body = t_expr body
         }
-      | MapComp {qdom = qdom; key = key; valu = valu} -> AST.Prog.MapComp {
+      | MapComp {imap = imap; qdom = qdom; key = key; valu = valu} -> AST.Prog.MapComp {
+        imap = imap;
         qdom = t_qdom qdom;
         key = t_expr_option key;
         valu = t_expr valu

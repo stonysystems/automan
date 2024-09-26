@@ -233,12 +233,12 @@ let rec annotate_expr
             ; pats = pats'
             ; defs = NonEmptyList.coerce defs'
             ; body = body'})
-  | MapComp {qdom = qdom; key = k; valu = v} ->
+  | MapComp {imap = imap; qdom = qdom; key = k; valu = v} ->
     let<* qdom' = annotate_quantifier_domain qdom anns in
     let<* k' = StateError.mapM_option (fun e -> annotate_expr e anns) k in
     let<* v' = annotate_expr v anns in
     StateError.return AnnotationPass.Prog.(
-        MapComp {qdom = qdom'; key = k'; valu = v'})
+        MapComp {imap; qdom = qdom'; key = k'; valu = v'})
   | Lit l ->
     StateError.return AnnotationPass.Prog.(Lit l)
   | This ->

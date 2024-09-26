@@ -166,6 +166,7 @@ module AST (M : MetaData) = struct
     let seq (elem: t) = simple_generic "seq" [elem]
     let set (elem: t) = simple_generic "set" [elem]
     let map (k: t) (v: t) = simple_generic "map" [k;v]
+    let imap (k: t) (v: t) = simple_generic "imap" [k;v]
 
     (* formal parameters at the type level
        NOTE: no variance annotations *)
@@ -390,7 +391,8 @@ module AST (M : MetaData) = struct
       ; qbody: expr_t }
 
     and map_comp_t =
-      { qdom: qdom_t
+      { imap: bool
+      ; qdom: qdom_t
       ; key: expr_t option
       ; valu: expr_t }
 
@@ -831,7 +833,7 @@ module Erase (M: MetaData) = struct
         , Option.map expr mcomp.key
         , expr mcomp.valu )
       in
-      MapComp {qdom = qdom'; key = key'; valu = valu'}
+      MapComp {imap = mcomp.imap; qdom = qdom'; key = key'; valu = valu'}
     | Lit l ->
       Lit l
     | This ->

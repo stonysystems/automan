@@ -274,9 +274,10 @@ module Convert = struct
         ; pats = NonEmptyList.map pattern p
         ; defs = NonEmptyList.map expr d
         ; body = expr b}
-    | MapComp {qdom = qdom; key = key; valu = valu} ->
+    | MapComp {imap = imap; qdom = qdom; key = key; valu = valu} ->
       MapComp
-        { qdom = aux_qdom qdom
+        { imap = imap
+        ; qdom = aux_qdom qdom
         ; key = Option.map expr key
         ; valu = expr valu }
     | Lit l -> Lit l
@@ -982,7 +983,8 @@ let rec mode_expr_no_out_vars
     let* (mapc_valu', _) = mode_expr_no_out_vars vars_out ~except:None mapc.valu in
     Result.Ok
       ( ModePass.Prog.MapComp
-          { qdom = mapc_qdom'
+          { imap = mapc.imap
+          ; qdom = mapc_qdom'
           ; key = mapc_key'
           ; valu = mapc_valu' }
       , no_unassigneds )

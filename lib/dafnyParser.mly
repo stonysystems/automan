@@ -249,16 +249,16 @@ endless_expr(LEM):
   /* let
      NOTE: no ghost, let-fail, assign-such-that */
   | e = let_expr(LEM) { e }
-  |   MAP
+  |   imap = midrule(MAP { false } | IMAP { true } );
     ; qd = qvar_dom(LEM)
     ; QUANTIFY_SEP
     ; e1 = expr(LEM)
     ; e2 = option(ASSIGN; e = expr(LEM) { e })
     { Syntax.ParserPass.Prog.(
         match e2 with
-        | None -> MapComp { qdom = qd; key = None; valu = e1}
+        | None -> MapComp { imap = imap; qdom = qd; key = None; valu = e1}
         | Some e2 ->
-           MapComp { qdom = qd; key = Some e1; valu = e2 }
+           MapComp { imap = imap; qdom = qd; key = Some e1; valu = e2 }
         )
     }
 
@@ -403,6 +403,8 @@ tp_prim:
     { Syntax.ParserPass.Type.seq t () }
   | MAP; LANGLE; t1 = tp; COMMA; t2 = tp; RANGLE
     { Syntax.ParserPass.Type.map t1 t2 () }
+  | IMAP; LANGLE; t1 = tp; COMMA; t2 = tp; RANGLE
+    { Syntax.ParserPass.Type.imap t1 t2 () }
   | INT
     { Syntax.ParserPass.Type.int () }
   | BOOL
