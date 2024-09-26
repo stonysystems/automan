@@ -433,8 +433,17 @@ gen_inst:
   | /* empty */
     { [] }
 
+gen_param_characteristic:
+  | EQ {()}
+
+gen_param_with_characteristics:
+  | id = ID;
+    option(delimited(LPAREN, separated_nonempty_list(COMMA, gen_param_characteristic), RPAREN))
+    /* TODO: preserve type characteristics */
+    { id }
+
 gen_params:
-  | tps = delimited(LANGLE, separated_nonempty_list(COMMA, ID), RANGLE)
+  | tps = delimited(LANGLE, separated_nonempty_list(COMMA, gen_param_with_characteristics), RANGLE)
     { tps }
   |                             /* empty */
     { [] }
