@@ -114,7 +114,7 @@ module TranslatorCommon = struct
 
   let suffix_to_data_update (x : AST.Prog.suffix_t) = 
     match x with 
-    | DataUpd member_binding_upd_lst -> begin
+    | DataUpd (_, member_binding_upd_lst) -> begin
       NonEmptyList.as_list member_binding_upd_lst
     end
     | _ -> assert false

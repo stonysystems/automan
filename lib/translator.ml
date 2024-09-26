@@ -212,8 +212,8 @@ module Translator = struct
         let t_tp_lst = List.map Type.translate tp_lst in
         AST.Prog.AugDot (t_dotsuffix, t_tp_lst)
       )
-      | DataUpd x -> AST.Prog.DataUpd (
-        NonEmptyList.map t_member_binding_upd x
+      | DataUpd ((), x) -> AST.Prog.DataUpd (
+        (), NonEmptyList.map t_member_binding_upd x
       )
       | Subseq {lb = lb; ub = ub} -> AST.Prog.Subseq {
         lb = t_expr_option lb;

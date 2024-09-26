@@ -15,6 +15,7 @@ module AnnotationMetaData : MetaData
 
   with type arglist_t =
          (Syntax.Common.module_qualified_name_t * Annotation.mode_t list) option
+  with type dataupdate_t = unit
 = struct
   (** - When this is Option.None, the user did not provide an annotation for
         this predicate. For now, a sensible default is to assume all arguments are
@@ -58,6 +59,8 @@ module AnnotationMetaData : MetaData
   type arglist_t =
     (Syntax.Common.module_qualified_name_t * Annotation.mode_t list) option
   [@@deriving show, eq]
+
+  type dataupdate_t = unit [@@deriving show, eq]
 end
 
 module AnnotationPass = AST (AnnotationMetaData)
@@ -120,7 +123,7 @@ let rec annotate_expr
         let<* tp_inst' = StateError.mapM annotate_type tp_inst in
         StateError.return AnnotationPass.Prog.(
           Suffixed (e', AugDot (dotsuf, tp_inst')))
-      | DataUpd upds ->
+      | DataUpd ((), upds) ->
         let<* e' = annotate_expr e anns in
         let<* upds' =
           StateError.mapM (function | (mem_id, e_new) ->
@@ -128,7 +131,7 @@ let rec annotate_expr
               StateError.return (mem_id, e_new'))
             (NonEmptyList.as_list upds) in
         StateError.return AnnotationPass.Prog.(
-          Suffixed (e', DataUpd (NonEmptyList.coerce upds')))
+          Suffixed (e', DataUpd ((), NonEmptyList.coerce upds')))
       | Subseq {lb = lb; ub = ub} ->
         let<* e' = annotate_expr e anns in
         (* TODO: another missing monadic combinator... *)

@@ -20,6 +20,7 @@ module type MetaData = sig
 
   (* Expression suffixes *)
   type arglist_t [@@deriving show, eq]
+  type dataupdate_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
@@ -35,6 +36,7 @@ module TrivMetaData : MetaData
   with type binary_op_t      = unit
 
   with type arglist_t = unit
+  with type dataupdate_t = unit
 = struct
   type predicate_decl_t    = unit [@@deriving show, eq]
   type datatype_decl_t     = unit [@@deriving show, eq]
@@ -48,6 +50,7 @@ module TrivMetaData : MetaData
   type binary_op_t      = unit [@@deriving show, eq]
 
   type arglist_t = unit [@@deriving show, eq]
+  type dataupdate_t = unit [@@deriving show, eq]
 end
 
 type id_t   = string
@@ -342,7 +345,7 @@ module AST (M : MetaData) = struct
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-augmented-dot-suffix *)
       | AugDot   of augmented_dotsuffix_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-datatype-update-suffix *)
-      | DataUpd  of member_binding_upd_t NonEmptyList.t
+      | DataUpd  of M.dataupdate_t * member_binding_upd_t NonEmptyList.t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-subsequence-suffix *)
       | Subseq   of subseq_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-subsequence-slices-suffix *)
@@ -914,7 +917,7 @@ module Erase (M: MetaData) = struct
     | AugDot (dotsuff, tp_args) ->
       let tp_args' = List.map typ tp_args in
       AugDot (dotsuff, tp_args')
-    | DataUpd upd ->
+    | DataUpd (_, upd) ->
       let upd' =
         NonEmptyList.map
           (function (mem, vlu) ->
@@ -922,7 +925,7 @@ module Erase (M: MetaData) = struct
              (mem, vlu'))
           upd
       in
-      DataUpd upd'
+      DataUpd ((), upd')
     | Subseq {lb = lb; ub = ub} ->
       let lb' = Option.map expr lb in
       let ub' = Option.map expr ub in

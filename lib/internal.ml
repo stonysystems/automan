@@ -15,7 +15,8 @@ module Result : sig
       -> ('a2, 'e2) result
   val map_option: ('a -> ('b, 'e) result) -> 'a option -> ('b option, 'e) result
   val error_when: bool -> 'e Lazy.t -> (unit, 'e) result
-  val try_catch: ('a, 'e) result -> ('e -> ('a, 'e) result) -> ('a, 'e) result
+  val try_catch: ('a, 'e1) result -> ('e1 -> ('a, 'e2) result) -> ('a, 'e2) result
+  val catch: ('e1 -> ('a, 'e2) result) -> ('a, 'e1) result -> ('a, 'e2) result
 end = struct
   include Result
   type ('a, 'e) t = ('a, 'e) Result.t =
@@ -47,8 +48,10 @@ end = struct
 
   let try_catch r h =
     match r with
-    | Ok _ -> r
+    | Ok x -> Ok x
     | Error e -> h e
+
+  let catch h r = try_catch r h
 end
 
 module List : sig
@@ -263,6 +266,31 @@ end = struct
     | None -> return None
     | Some x ->
       bind (f x) (fun y -> return (Some y))
+end
+
+module Option : sig
+  include module type of Option
+  type 'a t = 'a Option.t =
+    | None
+    | Some of 'a
+  [@@deriving show, eq]
+
+  val app: ('a -> 'b) t -> 'a t -> 'b t
+  val liftA2: ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
+end = struct
+  include Option
+  type 'a t = 'a Option.t =
+    | None
+    | Some of 'a
+  [@@deriving show, eq]
+
+  let app f x =
+    match f with
+    | None -> None
+    | Some f -> Option.map f x
+
+  let liftA2 f x y =
+    app (app (Some f) x) y
 end
 
 ;;

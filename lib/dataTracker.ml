@@ -162,7 +162,7 @@ object (self)
       let member_binding_upd_lst' = aux member_binding_upd_lst in
       let member_binding_upd_lst' = 
         NonEmptyList.coerce member_binding_upd_lst' in
-      AST.Prog.Suffixed(x, DataUpd(member_binding_upd_lst'))
+      AST.Prog.Suffixed(x, DataUpd ((), member_binding_upd_lst'))
     else
       e
   in
@@ -222,7 +222,7 @@ object (self)
             let bindings = ExprMap.bindings table in
             let kv_list = aux bindings in 
             let kv_list = NonEmptyList.coerce kv_list in
-            AST.Prog.Suffixed(this, DataUpd(kv_list))
+            AST.Prog.Suffixed(this, DataUpd ((), kv_list))
           end
           | true -> begin 
             (*  *)

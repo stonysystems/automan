@@ -169,7 +169,7 @@ module PrettyPrinter (M : MetaData) = struct
     and print_suffx (x : AST.Prog.suffix_t) = 
       match x with
       | AugDot x -> "." ^ (print_augmented_dotsuffix x)
-      | DataUpd x -> (
+      | DataUpd (_, x) -> (
         let x = Internal.NonEmptyList.as_list x in
         let x' = List.map print_member_binding_upd x in
         Printf.sprintf ".(%s)" (String.concat ", " x')
