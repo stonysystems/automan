@@ -367,6 +367,21 @@ and annotate_stmt
     let<* block' = StateError.mapM (fun s -> annotate_stmt s anns) block in
     StateError.return AnnotationPass.Prog.(
         SBlock block')
+  | SForall {qdom = qd; ensures = ensures; proof = proof} ->
+    let<* qd' = annotate_quantifier_domain qd anns in
+    let<* ensures' =
+      ensures
+      |> StateError.mapM begin function (attrs, ensure) ->
+        let<* ensure' = annotate_expr ensure anns in
+        StateError.return (attribute_handler attrs, ensure')
+      end in
+    let<* proof' =
+      proof
+      |> StateError.mapM begin fun s ->
+        annotate_stmt s anns
+      end in
+    StateError.return
+      (AnnotationPass.Prog.SForall {qdom = qd'; ensures = ensures'; proof = proof'})
   | SIf if_ ->
     let<* if_' = annotate_stmt_if if_ anns in
     StateError.return AnnotationPass.Prog.(
@@ -462,10 +477,10 @@ and annotate_stmt_case
 (* BEGIN TopDecls (utilities) *)
 let annotate_formal_parameter (p: ParserPass.TopDecl.formal_t)
   : AnnotationPass.TopDecl.formal_t Resolver.m =
-  let Formal (p_id, p_tp) = p in
+  let Formal (ghost, p_id, p_tp) = p in
   let<* p_tp' = annotate_type p_tp in
   StateError.return
-    AnnotationPass.TopDecl.(Formal (p_id, p_tp'))
+    AnnotationPass.TopDecl.(Formal (ghost, p_id, p_tp'))
 
 let annotate_type_id_for_alias
     (t_id: id_t) (t_tp_ps: ParserPass.Type.generic_params_t)

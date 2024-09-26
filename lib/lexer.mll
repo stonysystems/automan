@@ -45,6 +45,7 @@ rule lexeme = parse
   | "function"      { Tokens.FUNCTION                       }
   | "lemma"         { Tokens.LEMMA                          }
   | "method"        { Tokens.METHOD                         }
+  | "ghost"         { Tokens.GHOST                          }
 
   | "type"          { Tokens.TYPE                           }
   | "true"          { Tokens.TRUE                           }

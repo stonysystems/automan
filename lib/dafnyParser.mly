@@ -446,6 +446,7 @@ stmt:
   | s = stmt_assert { s }
   | s = stmt_assume { s }
   | s = stmt_block  { Syntax.ParserPass.Prog.SBlock s }
+  | s = stmt_forall { s }
   | s = stmt_if     { Syntax.ParserPass.Prog.SIf s }
   /* NOTE: I don't see how we can parse a case branch without curly braces around
   the tree... */
@@ -474,6 +475,18 @@ stmt_assume:
 
 stmt_block:
   | xs = delimited(LBRACE, list(stmt), RBRACE) { xs }
+
+stmt_forall:
+  | FORALL; qd = delimited(LPAREN, qvar_dom(NOLEM), RPAREN);
+    ensures = list(clause_ensures);
+    proof = stmt_block
+    {
+      Syntax.ParserPass.Prog.(
+        SForall
+          { qdom = qd
+          ; ensures = List.map (fun e -> ([], e)) ensures
+          ; proof = proof })
+    }
 
 stmt_if:
   | IF; g = expr(yeslem); t = stmt_block; e = option(stmt_if_footer)
@@ -575,8 +588,8 @@ import:
     }
 
 formal:
-  | x = ID; COLON; t = tp
-    { Syntax.ParserPass.TopDecl.Formal (x, t) }
+  | ghost = option(GHOST); x = ID; COLON; t = tp
+    { Syntax.ParserPass.TopDecl.Formal (Option.is_some ghost, x, t) }
 
 formals:
   | ps = delimited(LPAREN, separated_list(COMMA, formal), RPAREN);
@@ -593,12 +606,15 @@ datatype_ctor:
 datatype_ctors:
   | cs = separated_list(PIPE, datatype_ctor) { cs }
 
+clause_ensures: ENSURES; e = expr(NOLEM)
+  { e }
+
 function_spec:
   | REQUIRES; e = expr(NOLEM)
     { Syntax.ParserPass.TopDecl.Requires e }
   /* | READS; e = expr */
   /*   { Syntax.ParserPass.ModuleItem.Reads e } */
-  | ENSURES; e = expr(NOLEM)
+  | e = clause_ensures;
     { Syntax.ParserPass.TopDecl.Ensures e }
   | DECREASES; e = expr(NOLEM)
     { Syntax.ParserPass.TopDecl.Decreases e }

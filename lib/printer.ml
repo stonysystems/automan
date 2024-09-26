@@ -410,8 +410,10 @@ module PrettyPrinter (M : MetaData) = struct
 
   module TopDecl = struct
     let print_formal (x : AST.TopDecl.formal_t) =
-      match x with Formal (id, tp) ->
-      Printf.sprintf "%s: %s" id (Type.print tp)
+      match x with Formal (ghost, id, tp) ->
+      Printf.sprintf "%s%s: %s"
+        (if ghost then "ghost " else "")
+        id (Type.print tp)
 
     let print_formals (x : AST.TopDecl.formal_t list) =
       let x' = List.map print_formal x in 

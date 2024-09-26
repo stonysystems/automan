@@ -39,7 +39,8 @@ module Refinement  = struct
     match fmls with 
     | [] -> []
     | h :: rest -> begin
-      match h with AST.TopDecl.Formal (fml_id, fml_tp) ->
+        (* TODO: check for any changes introduced with ghost formals *)
+      match h with AST.TopDecl.Formal (_fml_ghost, fml_id, fml_tp) ->
       match fml_tp with 
       | TpTup _ -> assert false
       | TpName (_, name_seg_lst) -> begin
@@ -133,7 +134,7 @@ module Refinement  = struct
       None (* Changed for MetaData *), 
       false, 
       [], TCommon.expr_to_id (generate_token t_id token), 
-      [], [AST.TopDecl.Formal (s_id, TCommon.tp_of_id t_id)], 
+      [], [AST.TopDecl.Formal (false (* FIXME *), s_id, TCommon.tp_of_id t_id)], 
       [], 
       expr
     )
@@ -155,8 +156,9 @@ module Refinement  = struct
       | [] -> []
       | h :: rest -> (
         let fml, t_fml = h in
-        match fml   with AST.TopDecl.Formal (fml_id,     tp) ->
-        match t_fml with AST.TopDecl.Formal (t_fml_id, t_tp) ->
+        (* TODO: check for any changes introduced with ghost formals *)
+        match fml   with AST.TopDecl.Formal (_fml_ghost, fml_id,     tp) ->
+        match t_fml with AST.TopDecl.Formal (_t_fml_ghost, t_fml_id, t_tp) ->
         let _ = t_fml_id in
         let tp_id,    tp_gen_inst   = TCommon.id_and_gen_inst_of_tp tp    in
         let t_tp_id,  t_tp_gen_inst = TCommon.id_and_gen_inst_of_tp t_tp  in
@@ -272,7 +274,7 @@ module Refinement  = struct
       [], 
       TCommon.expr_to_id (generate_abstractify_token t_id id), 
       [], 
-      [AST.TopDecl.Formal (s_id, TCommon.tp_of_id t_id)], 
+      [AST.TopDecl.Formal (false (* FIXME *), s_id, TCommon.tp_of_id t_id)], 
       TCommon.tp_of_id id, 
       [AST.TopDecl.Requires (
         AST.Prog.Suffixed (

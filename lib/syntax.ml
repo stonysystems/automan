@@ -301,6 +301,7 @@ module AST (M : MetaData) = struct
       | SBlock  of stmt_block_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-if-statement
          NOTE: no alternative blocks*)
+      | SForall of stmt_forall_t
       | SIf of stmt_if_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-match-statement *)
       | SMatch of expr_t * stmt_case_t list
@@ -328,6 +329,12 @@ module AST (M : MetaData) = struct
     and stmt_assert_t = attribute_t list * (* label_name * *) expr_t * stmt_block_t
     and stmt_assume_t = attribute_t list * expr_t
     and stmt_block_t  = stmt_t list
+
+    and stmt_forall_t =
+      { qdom: qdom_t
+      ; ensures: (attribute_t list * expr_t) list
+      ; proof: stmt_block_t
+      }
 
     (* NOTE: no alternative block, binding guard *)
     and stmt_if_t = { guard: expr_t; then_br: stmt_block_t; footer: stmt_if_footer_t option }
@@ -541,7 +548,7 @@ module AST (M : MetaData) = struct
   module TopDecl = struct
 
     (* Formal parameters to constructors/functions/methods *)
-    type formal_t = Formal of id_t * Type.t
+    type formal_t = Formal of bool * id_t * Type.t
     [@@deriving show, eq]
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-datatype
@@ -857,6 +864,11 @@ module Erase (M: MetaData) = struct
     | SBlock sblock ->
       let sblock' = List.map stmt sblock in
       SBlock sblock'
+    | SForall {qdom = qd; ensures = ensures; proof = proof} ->
+      let qd' = qdom qd in
+      let ensures' = List.map (function (_, ensure) -> ([], expr ensure)) ensures in
+      let proof' = List.map stmt proof in
+      SForall {qdom = qd'; ensures = ensures'; proof = proof'}
     | SIf sif ->
       let rec stmt_if (s: Src.Prog.stmt_if_t): ParserPass.Prog.stmt_if_t =
         let Src.Prog.({guard = g; then_br = t; footer = e}) = s in

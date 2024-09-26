@@ -289,9 +289,9 @@ module Translator = struct
   module TopDecl = struct 
 
     let t_formal (x : AST.TopDecl.formal_t) = 
-      match x with Formal (id, tp) ->
+      match x with Formal (ghost, id, tp) ->
         let t_tp = Type.translate tp in
-        AST.TopDecl.Formal (id, t_tp)
+        AST.TopDecl.Formal (ghost, id, t_tp)
 
     let t_datatype_ctor (x : AST.TopDecl.datatype_ctor_t) = 
       match x with DataCtor (attr_lst, id, formals) ->
@@ -338,7 +338,8 @@ module Translator = struct
           match lst with 
           | [] -> []
           | h :: rest -> (
-            match h with AST.TopDecl.Formal (id, _) ->
+              (* TODO: check for any changes introduced with ghost formals *)
+            match h with AST.TopDecl.Formal (_ghost, id, _) ->
             (TCommon.expr_of_str id) :: (aux rest)
           ) in
         aux fmls
@@ -369,7 +370,7 @@ module Translator = struct
       let get_fmls_input_and_rtn origin_fmls metadata = 
         match metadata with 
         | None -> 
-          origin_fmls, [AST.TopDecl.Formal ("", TCommon.tp_of_id "bool")]
+          origin_fmls, [AST.TopDecl.Formal (false, "", TCommon.tp_of_id "bool")]
         | Some metadata -> (
           let rec aux lst = 
             match lst with 
@@ -390,15 +391,17 @@ module Translator = struct
       let get_rtn_from_fmls fmls_rtn =
         match List.length fmls_rtn with
         | 1 -> (
-          let _, h = List.unsnoc fmls_rtn in 
-          match h with AST.TopDecl.Formal (_, tp) -> tp
+          let _, h = List.unsnoc fmls_rtn in
+          (* TODO: check for changes introduced by ghost formals *)
+          match h with AST.TopDecl.Formal (_ghost, _, tp) -> tp
         )
         | _ -> (
           let rec aux lst = 
             match lst with 
             | [] -> []
             | h :: rest -> (
-              match h with AST.TopDecl.Formal (_, tp) -> 
+                (* TODO: check for changes introduced by ghost formals *)
+              match h with AST.TopDecl.Formal (_ghost, _, tp) -> 
                 tp :: (aux rest)
             )
           in
@@ -531,7 +534,7 @@ module Translator = struct
       ) ->
         let rtn_to_fmls rtn base_name = 
           match rtn with 
-          | AST.Type.TpName _ -> [AST.TopDecl.Formal (base_name, rtn)]
+          | AST.Type.TpName _ -> [AST.TopDecl.Formal (false, base_name, rtn)] (* TODO: check for changes introduced by ghost formals *)
           | AST.Type.TpTup tps -> (
             let rec aux lst cnt = 
               match lst with
@@ -539,6 +542,7 @@ module Translator = struct
               | h :: rest -> (
                 (
                   AST.TopDecl.Formal (
+                    false, (* TODO: check for changes introduced by ghost formals *)
                     base_name ^ (string_of_int cnt), 
                     h
                   ) :: (aux rest (cnt + 1))

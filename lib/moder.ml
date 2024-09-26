@@ -360,7 +360,7 @@ module Util = struct
   let id_in_formals
       (id: id_t) (ps: AnnotationPass.TopDecl.formal_t list)
     : bool =
-    List.exists (function AnnotationPass.TopDecl.Formal (p_id, _) -> id = p_id) ps
+    List.exists (function AnnotationPass.TopDecl.Formal (_, p_id, _) -> id = p_id) ps
 
   (* NOTE: change this when other "members" are allowed (digits, sequence/key
      selections) *)
@@ -1924,8 +1924,8 @@ let mode_topdecl_formals
   let ps' =
     List.map
       (function
-        | AnnotationPass.TopDecl.Formal (id, tp) ->
-          ModePass.TopDecl.Formal (id, Convert.typ tp))
+        | AnnotationPass.TopDecl.Formal (ghost, id, tp) ->
+          ModePass.TopDecl.Formal (ghost, id, Convert.typ tp))
       ps
   in
   let ps_ann' =
