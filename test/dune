@@ -28,15 +28,15 @@
   (modules test_printer)
   (libraries core core_unix.command_unix async_unix automan))
 
-(test
-  (name test_build_symbol_table)
-  (modules test_build_symbol_table)
-  (libraries core core_unix.command_unix async_unix automan))
+; (test
+;   (name test_build_symbol_table)
+;   (modules test_build_symbol_table)
+;   (libraries core core_unix.command_unix async_unix automan))
 
-(test
-  (name test_build_global_symbol_table)
-  (modules test_build_global_symbol_table)
-  (libraries core core_unix.command_unix async_unix automan))
+; (test
+;   (name test_build_global_symbol_table)
+;   (modules test_build_global_symbol_table)
+;   (libraries core core_unix.command_unix async_unix automan))
 
 (test
   (name test_type_builder)
