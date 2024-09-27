@@ -4,6 +4,9 @@ open Lexing
 open TestCommon
 
 let main dafny_fn automan_fn () =
+  let dafny_basename = Filename.basename dafny_fn in
+  let annotator_filename = dafny_basename ^ ".annotator" in
+
   (* Dafny *)
   let dafny = begin
     let inx = In_channel.create dafny_fn in
@@ -25,7 +28,10 @@ let main dafny_fn automan_fn () =
   | Result.Error msg ->
     printf "Error: %s\n" msg
   | Result.Ok    dfy ->
-    printf "%s\n" Annotator.AnnotationPass.(show dfy)
+    Out_channel.with_file annotator_filename ~f:(fun out ->
+      Out_channel.output_string out (Annotator.AnnotationPass.show dfy)
+    );
+    printf "Annotator pass output has been written to %s\n" annotator_filename
 
 let () =
   Command.basic_spec
