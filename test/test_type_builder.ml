@@ -79,12 +79,14 @@ let main dafny_fn () =
   ; *)
 
 
-
+  (* find all visible types of a module *)
   let _ = TypeTableBuilder.find_visible_decls builder_instance "test.A" in
 
   let type_name = "Ballot" in
   if TypeTableBuilder.is_exists type_name then (
     printf "\nQuerying type\n";
+
+    (* query a type decl in visible types *)
     match TypeTableBuilder.find_type_decl type_name with
     | Some (module_name, (modifiers, decl_body)) ->
         printf "Found in module %s: %s\n" module_name (Syntax.ParserPass.TopDecl.show (modifiers, decl_body))

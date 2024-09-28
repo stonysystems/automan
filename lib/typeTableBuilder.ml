@@ -300,7 +300,7 @@
     ;;
 
 
-
+    (* Call this function to find all visible datatype/type decls for a module from the global type table *)
     let find_visible_decls builder_instance module_name =
       match Hashtbl.find builder_instance.decls_table module_name with
       | Some module_table ->
@@ -366,6 +366,7 @@
           None
     ;;
 
+    (* Find decls of a datatype/type from the visible type table of a current module *)
     let find_type_decl type_name =
       match get_cached_visible_decls () with
       | Some visible_decls -> 
@@ -377,6 +378,7 @@
           None
     ;;
 
+    (* Check if a type decl exists in the visible type table of a current module *)
     let is_exists type_name =
       match get_cached_visible_decls () with
       | Some _ -> (
