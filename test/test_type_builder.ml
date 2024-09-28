@@ -26,10 +26,18 @@ let print_type_table builder_instance =
 
 let main dafny_fn () =
   let builder_instance = TypeTableBuilder.create () in
-  let _ = TypeTableBuilder.build_type_table dafny_fn builder_instance in
-  
+  begin
+    printf ">>>> BEGIN build_type_table >>>>>>>>>>>>>>>>>>>>>>\n";
+    let _ = TypeTableBuilder.build_type_table dafny_fn builder_instance in
+    printf "<<<< END   build_type_table <<<<<<<<<<<<<<<<<<<<<<\n"
+  end;
+
   (* Print the entire type table *)
-  print_type_table builder_instance;
+  begin
+    printf ">>>> BEGIN print_type_table >>>>>>>>>>>>>>>>>>>>>>\n";
+    print_type_table builder_instance;
+    printf "<<<< END   print_type_table <<<<<<<<<<<<<<<<<<<<<<\n"
+  end;
 
   (* printf "\n--- Testing find visible decls ---\n";
   let visible_decls = TypeTableBuilder.find_visible_decls builder_instance "test.A" in
