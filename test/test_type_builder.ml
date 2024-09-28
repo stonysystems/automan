@@ -2,6 +2,7 @@ open Automan
 open Core
 open TypeTableBuilder
 
+
 let print_type_table builder_instance =
   printf "Type Table Contents:\n";
 
@@ -12,8 +13,15 @@ let print_type_table builder_instance =
     );
     Hashtbl.iteri module_table.decls ~f:(fun ~key:id ~data:decl ->
       printf "ID: %s\n" id;
-      printf "Declaration: %s\n\n" (Syntax.ParserPass.TopDecl.show decl)
-    )
+      printf "Declaration: %s\n" (Syntax.ParserPass.TopDecl.show decl)
+    );
+
+    printf "Nested Modules:\n";
+    List.iter !(module_table.nested) ~f:(fun nested_module_name ->
+      printf "%s\n" nested_module_name
+    );
+
+    printf("\n")
   )
 
 let main dafny_fn () =
@@ -23,42 +31,73 @@ let main dafny_fn () =
   (* Print the entire type table *)
   print_type_table builder_instance;
 
-  printf "\n--- Testing find imports of a module ---\n";
-  let imports = TypeTableBuilder.find_module_imports builder_instance "LiveRSL__Configuration_i" in
-  List.iter imports ~f:(fun import_decl ->
-    printf "Found ModuleImport: %s\n" (Syntax.ParserPass.TopDecl.show import_decl)
-  );
-
-
-  printf "\n--- Testing find all by type name ---\n";
-  let decls = TypeTableBuilder.find_all_type_decls_by_type_name builder_instance "Ballot" in
-  if List.is_empty decls then
-    printf "No declarations found by type name\n"
-  else
-    List.iter decls ~f:(fun (module_name, decl) ->
-      printf "Found in module %s: %s\n" module_name (Syntax.ParserPass.TopDecl.show decl)
+  (* printf "\n--- Testing find visible decls ---\n";
+  let visible_decls = TypeTableBuilder.find_visible_decls builder_instance "test.A" in
+  match visible_decls with
+  | Some decls ->
+    printf "Self Declarations:\n";
+    List.iter decls.self_decls ~f:(fun decl ->
+      printf "  %s\n" (Syntax.ParserPass.TopDecl.show decl)
     );
 
-  printf "\n--- Testing when multiple type with same name, use import lists to identify correct one ---\n";
-  let results = TypeTableBuilder.find_type_decl_by_type_name_with_imports builder_instance "Ballot" "LiveRSL__Configuration_i" in
-  if List.is_empty results then
-    printf "No open declarations found for Ballot\n"
-  else
-    List.iter results ~f:(fun (module_name, decl) ->
-      printf "Found in module %s: %s\n" module_name (Syntax.ParserPass.TopDecl.show decl)
+    printf "\nOpened Imports (Modules):\n";
+    Hashtbl.iteri decls.opened_imports ~f:(fun ~key:module_name ~data:module_table ->
+      printf "Opened Module: %s\n" module_name;
+      printf "  Declarations:\n";
+      Hashtbl.iteri module_table.TypeTableBuilder.decls ~f:(fun ~key:id ~data:decl ->
+        printf "    ID: %s\n" id;
+        printf "    Declaration: %s\n" (Syntax.ParserPass.TopDecl.show decl)
+      );
+      printf "  Imports:\n";
+      List.iter !(module_table.TypeTableBuilder.imports) ~f:(fun import_decl ->
+        printf "    %s\n" (Syntax.ParserPass.TopDecl.show import_decl)
+      );
+      printf "  Nested Modules:\n";
+      List.iter !(module_table.TypeTableBuilder.nested) ~f:(fun nested_module ->
+        printf "    Nested Module: %s\n" nested_module
+      )
     );
 
-  printf "\n--- Testing find_type_decl_by_module_and_type_name_with_imports ---\n";
-  match TypeTableBuilder.find_type_decl_by_module_and_type_name_with_imports builder_instance "Ballot" "E" "LiveRSL__Configuration_i" with
-  | Some (module_name, decl) -> 
-      printf "Found by module and type with imports in module %s: %s\n" module_name (Syntax.ParserPass.TopDecl.show decl)
-  | None -> printf "Declaration not found by module and type with imports\n";
+    printf "\nNon-opened Imports or Nested Modules:\n";
+    Hashtbl.iteri decls.non_opened_imports_or_nested ~f:(fun ~key:module_name ~data:module_table ->
+      printf "Non-opened or Nested Module: %s\n" module_name;
+      printf "  Declarations:\n";
+      Hashtbl.iteri module_table.TypeTableBuilder.decls ~f:(fun ~key:id ~data:decl ->
+        printf "    ID: %s\n" id;
+        printf "    Declaration: %s\n" (Syntax.ParserPass.TopDecl.show decl)
+      );
+      printf "  Imports:\n";
+      List.iter !(module_table.TypeTableBuilder.imports) ~f:(fun import_decl ->
+        printf "    %s\n" (Syntax.ParserPass.TopDecl.show import_decl)
+      );
+      printf "  Nested Modules:\n";
+      List.iter !(module_table.TypeTableBuilder.nested) ~f:(fun nested_module ->
+        printf "    Nested Module: %s\n" nested_module
+      )
+    );
+  | None -> printf "Module not found.\n"
+  ; *)
 
-  printf "\n--- Testing find by module and type name ---\n";
-  match TypeTableBuilder.find_type_decl_by_module_and_type_name builder_instance "LiveRSL__Acceptor_i" "LAcceptor" with
-  | Some (module_name, decl) -> printf "Found in module %s: %s\n" module_name (Syntax.ParserPass.TopDecl.show decl)
-  | None -> printf "Declaration not found\n"
 
+  (* find all visible types of a module *)
+  let _ = TypeTableBuilder.find_visible_decls builder_instance "test.A" in
+
+  let type_name = "Ballot" in
+  if TypeTableBuilder.is_exists type_name then (
+    printf "\nQuerying type\n";
+
+    (* query a type decl in visible types *)
+    match TypeTableBuilder.find_type_decl type_name with
+    | Some (module_name, (modifiers, decl_body)) ->
+        printf "Found in module %s: %s\n" module_name (Syntax.ParserPass.TopDecl.show (modifiers, decl_body))
+    | None ->
+        printf "Type '%s' not found in visible declarations.\n" type_name
+  ) else
+    printf "Type '%s' does not exist in visible declarations.\n" type_name
+
+
+
+      
 let () =
   Command.basic_spec
     ~summary:"Build type table for a Dafny file."

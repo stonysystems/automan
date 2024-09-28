@@ -4,6 +4,10 @@ open Lexing
 open TestCommon
 
 let main dafny_fn automan_fn () =
+  let dafny_basename = Filename.basename dafny_fn in
+  let log_filename = dafny_basename ^ ".log" in
+  let modepass_filename = dafny_basename ^ ".moder" in
+
   (* Dafny *)
   let dafny = begin
     let inx = In_channel.create dafny_fn in
@@ -26,13 +30,30 @@ let main dafny_fn automan_fn () =
     printf "Error: %s\n" msg
   | Result.Ok    dfy ->
     let (dfy_moded, log) = Moder.run dfy in
-    printf
+    Out_channel.with_file log_filename ~f:(fun out ->
+      Out_channel.output_string out
+        (Printf.sprintf
+           ">>>> BEGIN ERROR LOG >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n%s\n<<<< END ERROR LOG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n"
+           (Internal.List.show
+              Moder.(pp_error_t pp_error_mode_expr_t)
+              log))
+    );
+    
+    Out_channel.with_file modepass_filename ~f:(fun out ->
+      Out_channel.output_string out (Moder.ModePass.show dfy_moded)
+    );
+
+    printf "Error log has been written to %s\n" log_filename;
+    printf "Modepass has been written to %s\n" modepass_filename;
+    ()
+
+    (* printf
       ">>>> BEGIN ERROR LOG >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n%s\n<<<< END ERROR LOG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n"
       (Internal.List.show
          Moder.(pp_error_t pp_error_mode_expr_t)
          log);
     printf "%s\n" Moder.ModePass.(show dfy_moded);
-    ()
+    () *)
 
 let () =
   Command.basic_spec
