@@ -24,7 +24,7 @@ let print_type_table builder_instance =
     printf("\n")
   )
 
-let main dafny_fn () =
+let main dafny_fn module_name type_name () =
   let builder_instance = TypeTableBuilder.create () in
   let _ = TypeTableBuilder.build_type_table dafny_fn builder_instance in
   
@@ -32,7 +32,7 @@ let main dafny_fn () =
   print_type_table builder_instance;
 
   (* printf "\n--- Testing find visible decls ---\n";
-  let visible_decls = TypeTableBuilder.find_visible_decls builder_instance "test.A" in
+  let visible_decls = TypeTableBuilder.find_visible_decls builder_instance "LiveRSL__Acceptor_i" in
   match visible_decls with
   | Some decls ->
     printf "Self Declarations:\n";
@@ -41,9 +41,9 @@ let main dafny_fn () =
     );
 
     printf "\nOpened Imports (Modules):\n";
-    Hashtbl.iteri decls.opened_imports ~f:(fun ~key:module_name ~data:module_table ->
+    Hashtbl.iteri decls.opened_imports ~f:(fun ~key:module_name ~data:_ ->
       printf "Opened Module: %s\n" module_name;
-      printf "  Declarations:\n";
+      (* printf "  Declarations:\n";
       Hashtbl.iteri module_table.TypeTableBuilder.decls ~f:(fun ~key:id ~data:decl ->
         printf "    ID: %s\n" id;
         printf "    Declaration: %s\n" (Syntax.ParserPass.TopDecl.show decl)
@@ -55,7 +55,7 @@ let main dafny_fn () =
       printf "  Nested Modules:\n";
       List.iter !(module_table.TypeTableBuilder.nested) ~f:(fun nested_module ->
         printf "    Nested Module: %s\n" nested_module
-      )
+      ) *)
     );
 
     printf "\nNon-opened Imports or Nested Modules:\n";
@@ -80,9 +80,8 @@ let main dafny_fn () =
 
 
   (* find all visible types of a module *)
-  let _ = TypeTableBuilder.find_visible_decls builder_instance "test.A" in
+  let _ = TypeTableBuilder.find_visible_decls builder_instance module_name in
 
-  let type_name = "Ballot" in
   if TypeTableBuilder.is_exists type_name then (
     printf "\nQuerying type\n";
 
@@ -104,6 +103,8 @@ let () =
     Command.Spec.(
       empty
       +> anon ("dafnyFilename" %: string)
+      +> anon ("moduleName" %: string)
+      +> anon ("typeName" %: string)
     )
     main
   |> Command_unix.run
