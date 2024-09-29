@@ -24,6 +24,7 @@ rule lexeme = parse
   | "set"           { Tokens.SET                            }
   | "seq"           { Tokens.SEQ                            }
   | "map"           { Tokens.MAP                            }
+  | "imap"          { Tokens.IMAP                           }
   | "int"           { Tokens.INT                            }
   | "bool"          { Tokens.BOOL                           }
   | "nat"           { Tokens.NAT                            }
@@ -45,6 +46,7 @@ rule lexeme = parse
   | "function"      { Tokens.FUNCTION                       }
   | "lemma"         { Tokens.LEMMA                          }
   | "method"        { Tokens.METHOD                         }
+  | "ghost"         { Tokens.GHOST                          }
 
   | "type"          { Tokens.TYPE                           }
   | "true"          { Tokens.TRUE                           }

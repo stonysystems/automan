@@ -1,5 +1,7 @@
 # Parser/Lexer
 
+- [ ] Arrow types (`S --> T`) are not supported.
+
 - [ ] The lexer currently does not track character position for line comments,
       which means the line numbers in the reported locations of syntax errors
       are off by the number of lines beginning with // (ignoring whitespace).
@@ -30,8 +32,6 @@
 
 - [X] Language support for named parameters in argument lists
 
-- [ ] Consider state relationship (for partial specifications)
-
 # Annotator
 
 ## Nice-to-haves
@@ -43,3 +43,7 @@
       fields are).
 
 - [ ] users may want to introduce some indirection to certain types
+
+- [ ] Some kind of state relationship would be useful for giving default
+      implementations for partial specifications.
+

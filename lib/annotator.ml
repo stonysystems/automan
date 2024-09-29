@@ -15,6 +15,7 @@ module AnnotationMetaData : MetaData
 
   with type arglist_t =
          (Syntax.Common.module_qualified_name_t * Annotation.mode_t list) option
+  with type dataupdate_t = unit
 = struct
   (** - When this is Option.None, the user did not provide an annotation for
         this predicate. For now, a sensible default is to assume all arguments are
@@ -58,6 +59,8 @@ module AnnotationMetaData : MetaData
   type arglist_t =
     (Syntax.Common.module_qualified_name_t * Annotation.mode_t list) option
   [@@deriving show, eq]
+
+  type dataupdate_t = unit [@@deriving show, eq]
 end
 
 module AnnotationPass = AST (AnnotationMetaData)
@@ -120,7 +123,7 @@ let rec annotate_expr
         let<* tp_inst' = StateError.mapM annotate_type tp_inst in
         StateError.return AnnotationPass.Prog.(
           Suffixed (e', AugDot (dotsuf, tp_inst')))
-      | DataUpd upds ->
+      | DataUpd ((), upds) ->
         let<* e' = annotate_expr e anns in
         let<* upds' =
           StateError.mapM (function | (mem_id, e_new) ->
@@ -128,7 +131,7 @@ let rec annotate_expr
               StateError.return (mem_id, e_new'))
             (NonEmptyList.as_list upds) in
         StateError.return AnnotationPass.Prog.(
-          Suffixed (e', DataUpd (NonEmptyList.coerce upds')))
+          Suffixed (e', DataUpd ((), NonEmptyList.coerce upds')))
       | Subseq {lb = lb; ub = ub} ->
         let<* e' = annotate_expr e anns in
         (* TODO: another missing monadic combinator... *)
@@ -230,12 +233,12 @@ let rec annotate_expr
             ; pats = pats'
             ; defs = NonEmptyList.coerce defs'
             ; body = body'})
-  | MapComp {qdom = qdom; key = k; valu = v} ->
+  | MapComp {imap = imap; qdom = qdom; key = k; valu = v} ->
     let<* qdom' = annotate_quantifier_domain qdom anns in
     let<* k' = StateError.mapM_option (fun e -> annotate_expr e anns) k in
     let<* v' = annotate_expr v anns in
     StateError.return AnnotationPass.Prog.(
-        MapComp {qdom = qdom'; key = k'; valu = v'})
+        MapComp {imap; qdom = qdom'; key = k'; valu = v'})
   | Lit l ->
     StateError.return AnnotationPass.Prog.(Lit l)
   | This ->
@@ -364,6 +367,21 @@ and annotate_stmt
     let<* block' = StateError.mapM (fun s -> annotate_stmt s anns) block in
     StateError.return AnnotationPass.Prog.(
         SBlock block')
+  | SForall {qdom = qd; ensures = ensures; proof = proof} ->
+    let<* qd' = annotate_quantifier_domain qd anns in
+    let<* ensures' =
+      ensures
+      |> StateError.mapM begin function (attrs, ensure) ->
+        let<* ensure' = annotate_expr ensure anns in
+        StateError.return (attribute_handler attrs, ensure')
+      end in
+    let<* proof' =
+      proof
+      |> StateError.mapM begin fun s ->
+        annotate_stmt s anns
+      end in
+    StateError.return
+      (AnnotationPass.Prog.SForall {qdom = qd'; ensures = ensures'; proof = proof'})
   | SIf if_ ->
     let<* if_' = annotate_stmt_if if_ anns in
     StateError.return AnnotationPass.Prog.(
@@ -459,10 +477,10 @@ and annotate_stmt_case
 (* BEGIN TopDecls (utilities) *)
 let annotate_formal_parameter (p: ParserPass.TopDecl.formal_t)
   : AnnotationPass.TopDecl.formal_t Resolver.m =
-  let Formal (p_id, p_tp) = p in
+  let Formal (ghost, p_id, p_tp) = p in
   let<* p_tp' = annotate_type p_tp in
   StateError.return
-    AnnotationPass.TopDecl.(Formal (p_id, p_tp'))
+    AnnotationPass.TopDecl.(Formal (ghost, p_id, p_tp'))
 
 let annotate_type_id_for_alias
     (t_id: id_t) (t_tp_ps: ParserPass.Type.generic_params_t)

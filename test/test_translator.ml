@@ -7,7 +7,7 @@ open Internal
 module AST = Syntax.AST (TranslatorMetadata.TranslationMetaData)
 
 (* NOTE: the prefix "_" was added to suppress warnings for unused variables *)
-let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
+let _rsl_acceptor_lacceptorproccess1a_body: AST.Prog.expr_t =
   (* Local name for a long (qualified) expression  *)
   let s_constants_all_config_replica_ids: AST.Prog.expr_t =
     AST.Prog.Suffixed
@@ -152,7 +152,8 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
             { outvar_is_left = true
             ; outvar =
                 { mq_outvar = NonEmptyList.singleton "sent_packets"
-                ; fieldlike = None }})
+                ; fieldlike = None }
+            ; unassigned_members = None })
       in
       (AST.Prog.Binary
          ( Some if_then_eq_sent_packets_ann
@@ -168,7 +169,8 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
             { outvar_is_left = true
             ; outvar =
                 { mq_outvar = NonEmptyList.singleton "s'"
-                ; fieldlike = None }})
+                ; fieldlike = None }
+            ; unassigned_members = Some [] })
       in
       AST.Prog.Binary
         ( Some if_then_eq_s'_ann
@@ -177,13 +179,14 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
         , (AST.Prog.Suffixed
              ( (AST.Prog.NameSeg ("s", []))
              , (AST.Prog.DataUpd
-                  (NonEmptyList.(::)
-                     ( ( Either.left "max_bal"
-                       , AST.Prog.Suffixed
-                           ( AST.Prog.NameSeg ("m", [])
-                           , AST.Prog.AugDot
-                               ((Syntax.Common.DSId "bal_1a"), [])))
-                     , []))))))
+                  ( Some (DataUpdUnassigned [])
+                  , NonEmptyList.(::)
+                      ( ( Either.left "max_bal"
+                        , AST.Prog.Suffixed
+                            ( AST.Prog.NameSeg ("m", [])
+                            , AST.Prog.AugDot
+                                ((Syntax.Common.DSId "bal_1a"), [])))
+                      , []))))))
     in
     let if_then_conj_ann: Moder.Definitions.binary_op_functionalize_and_t =
       (* NOTE: You will probably not need to use these for translation, except
@@ -225,7 +228,8 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
                   { outvar_is_left = true
                   ; outvar =
                       { mq_outvar = NonEmptyList.singleton "s'"
-                      ; fieldlike = None }})
+                      ; fieldlike = None }
+                  ; unassigned_members = None })
           , Syntax.Common.Eq
           , (AST.Prog.NameSeg ("s'", []))
           , (AST.Prog.NameSeg ("s", [])))
@@ -235,7 +239,8 @@ let _rsl_acceptor_lacceptorproccess2a_body: AST.Prog.expr_t =
                   { outvar_is_left = true
                   ; outvar =
                       { mq_outvar = NonEmptyList.singleton "sent_packets"
-                      ; fieldlike = None }})
+                      ; fieldlike = None }
+                  ; unassigned_members = None })
           , Syntax.Common.Eq
           , (AST.Prog.NameSeg ("sent_packets", []))
           , (AST.Prog.SeqDisplay(AST.Prog.SeqEnumerate []))))

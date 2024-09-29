@@ -249,16 +249,16 @@ endless_expr(LEM):
   /* let
      NOTE: no ghost, let-fail, assign-such-that */
   | e = let_expr(LEM) { e }
-  |   MAP
+  |   imap = midrule(MAP { false } | IMAP { true } );
     ; qd = qvar_dom(LEM)
     ; QUANTIFY_SEP
     ; e1 = expr(LEM)
     ; e2 = option(ASSIGN; e = expr(LEM) { e })
     { Syntax.ParserPass.Prog.(
         match e2 with
-        | None -> MapComp { qdom = qd; key = None; valu = e1}
+        | None -> MapComp { imap = imap; qdom = qd; key = None; valu = e1}
         | Some e2 ->
-           MapComp { qdom = qd; key = Some e1; valu = e2 }
+           MapComp { imap = imap; qdom = qd; key = Some e1; valu = e2 }
         )
     }
 
@@ -357,7 +357,7 @@ suffix:
     ; upds = separated_nonempty_list(COMMA, member_binding_upd)
     ; RPAREN
     { Syntax.ParserPass.Prog.(
-        DataUpd (Internal.NonEmptyList.coerce upds))
+        DataUpd ((), Internal.NonEmptyList.coerce upds))
     }
   | LSQBRAC; lb = option(expr(yeslem)); SLICE; ub = option(expr(yeslem)); RSQBRAC
     { Syntax.ParserPass.Prog.Subseq { lb = lb; ub = ub }}
@@ -403,6 +403,8 @@ tp_prim:
     { Syntax.ParserPass.Type.seq t () }
   | MAP; LANGLE; t1 = tp; COMMA; t2 = tp; RANGLE
     { Syntax.ParserPass.Type.map t1 t2 () }
+  | IMAP; LANGLE; t1 = tp; COMMA; t2 = tp; RANGLE
+    { Syntax.ParserPass.Type.imap t1 t2 () }
   | INT
     { Syntax.ParserPass.Type.int () }
   | BOOL
@@ -431,8 +433,17 @@ gen_inst:
   | /* empty */
     { [] }
 
+gen_param_characteristic:
+  | EQ {()}
+
+gen_param_with_characteristics:
+  | id = ID;
+    option(delimited(LPAREN, separated_nonempty_list(COMMA, gen_param_characteristic), RPAREN))
+    /* TODO: preserve type characteristics */
+    { id }
+
 gen_params:
-  | tps = delimited(LANGLE, separated_nonempty_list(COMMA, ID), RANGLE)
+  | tps = delimited(LANGLE, separated_nonempty_list(COMMA, gen_param_with_characteristics), RANGLE)
     { tps }
   |                             /* empty */
     { [] }
@@ -446,6 +457,7 @@ stmt:
   | s = stmt_assert { s }
   | s = stmt_assume { s }
   | s = stmt_block  { Syntax.ParserPass.Prog.SBlock s }
+  | s = stmt_forall { s }
   | s = stmt_if     { Syntax.ParserPass.Prog.SIf s }
   /* NOTE: I don't see how we can parse a case branch without curly braces around
   the tree... */
@@ -474,6 +486,18 @@ stmt_assume:
 
 stmt_block:
   | xs = delimited(LBRACE, list(stmt), RBRACE) { xs }
+
+stmt_forall:
+  | FORALL; qd = delimited(LPAREN, qvar_dom(NOLEM), RPAREN);
+    ensures = list(clause_ensures);
+    proof = stmt_block
+    {
+      Syntax.ParserPass.Prog.(
+        SForall
+          { qdom = qd
+          ; ensures = List.map (fun e -> ([], e)) ensures
+          ; proof = proof })
+    }
 
 stmt_if:
   | IF; g = expr(yeslem); t = stmt_block; e = option(stmt_if_footer)
@@ -575,8 +599,8 @@ import:
     }
 
 formal:
-  | x = ID; COLON; t = tp
-    { Syntax.ParserPass.TopDecl.Formal (x, t) }
+  | ghost = option(GHOST); x = ID; COLON; t = tp
+    { Syntax.ParserPass.TopDecl.Formal (Option.is_some ghost, x, t) }
 
 formals:
   | ps = delimited(LPAREN, separated_list(COMMA, formal), RPAREN);
@@ -593,12 +617,15 @@ datatype_ctor:
 datatype_ctors:
   | cs = separated_list(PIPE, datatype_ctor) { cs }
 
+clause_ensures: ENSURES; e = expr(NOLEM)
+  { e }
+
 function_spec:
   | REQUIRES; e = expr(NOLEM)
     { Syntax.ParserPass.TopDecl.Requires e }
   /* | READS; e = expr */
   /*   { Syntax.ParserPass.ModuleItem.Reads e } */
-  | ENSURES; e = expr(NOLEM)
+  | e = clause_ensures;
     { Syntax.ParserPass.TopDecl.Ensures e }
   | DECREASES; e = expr(NOLEM)
     { Syntax.ParserPass.TopDecl.Decreases e }

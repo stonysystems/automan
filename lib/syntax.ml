@@ -20,6 +20,7 @@ module type MetaData = sig
 
   (* Expression suffixes *)
   type arglist_t [@@deriving show, eq]
+  type dataupdate_t [@@deriving show, eq]
 end
 
 module TrivMetaData : MetaData
@@ -35,6 +36,7 @@ module TrivMetaData : MetaData
   with type binary_op_t      = unit
 
   with type arglist_t = unit
+  with type dataupdate_t = unit
 = struct
   type predicate_decl_t    = unit [@@deriving show, eq]
   type datatype_decl_t     = unit [@@deriving show, eq]
@@ -48,6 +50,7 @@ module TrivMetaData : MetaData
   type binary_op_t      = unit [@@deriving show, eq]
 
   type arglist_t = unit [@@deriving show, eq]
+  type dataupdate_t = unit [@@deriving show, eq]
 end
 
 type id_t   = string
@@ -163,6 +166,7 @@ module AST (M : MetaData) = struct
     let seq (elem: t) = simple_generic "seq" [elem]
     let set (elem: t) = simple_generic "set" [elem]
     let map (k: t) (v: t) = simple_generic "map" [k;v]
+    let imap (k: t) (v: t) = simple_generic "imap" [k;v]
 
     (* formal parameters at the type level
        NOTE: no variance annotations *)
@@ -298,6 +302,7 @@ module AST (M : MetaData) = struct
       | SBlock  of stmt_block_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-if-statement
          NOTE: no alternative blocks*)
+      | SForall of stmt_forall_t
       | SIf of stmt_if_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-match-statement *)
       | SMatch of expr_t * stmt_case_t list
@@ -326,6 +331,12 @@ module AST (M : MetaData) = struct
     and stmt_assume_t = attribute_t list * expr_t
     and stmt_block_t  = stmt_t list
 
+    and stmt_forall_t =
+      { qdom: qdom_t
+      ; ensures: (attribute_t list * expr_t) list
+      ; proof: stmt_block_t
+      }
+
     (* NOTE: no alternative block, binding guard *)
     and stmt_if_t = { guard: expr_t; then_br: stmt_block_t; footer: stmt_if_footer_t option }
     and stmt_if_footer_t =
@@ -342,7 +353,7 @@ module AST (M : MetaData) = struct
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-augmented-dot-suffix *)
       | AugDot   of augmented_dotsuffix_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-datatype-update-suffix *)
-      | DataUpd  of member_binding_upd_t NonEmptyList.t
+      | DataUpd  of M.dataupdate_t * member_binding_upd_t NonEmptyList.t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#g-subsequence-suffix *)
       | Subseq   of subseq_t
       (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-subsequence-slices-suffix *)
@@ -380,7 +391,8 @@ module AST (M : MetaData) = struct
       ; qbody: expr_t }
 
     and map_comp_t =
-      { qdom: qdom_t
+      { imap: bool
+      ; qdom: qdom_t
       ; key: expr_t option
       ; valu: expr_t }
 
@@ -538,7 +550,7 @@ module AST (M : MetaData) = struct
   module TopDecl = struct
 
     (* Formal parameters to constructors/functions/methods *)
-    type formal_t = Formal of id_t * Type.t
+    type formal_t = Formal of bool * id_t * Type.t
     [@@deriving show, eq]
 
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-datatype
@@ -821,7 +833,7 @@ module Erase (M: MetaData) = struct
         , Option.map expr mcomp.key
         , expr mcomp.valu )
       in
-      MapComp {qdom = qdom'; key = key'; valu = valu'}
+      MapComp {imap = mcomp.imap; qdom = qdom'; key = key'; valu = valu'}
     | Lit l ->
       Lit l
     | This ->
@@ -854,6 +866,11 @@ module Erase (M: MetaData) = struct
     | SBlock sblock ->
       let sblock' = List.map stmt sblock in
       SBlock sblock'
+    | SForall {qdom = qd; ensures = ensures; proof = proof} ->
+      let qd' = qdom qd in
+      let ensures' = List.map (function (_, ensure) -> ([], expr ensure)) ensures in
+      let proof' = List.map stmt proof in
+      SForall {qdom = qd'; ensures = ensures'; proof = proof'}
     | SIf sif ->
       let rec stmt_if (s: Src.Prog.stmt_if_t): ParserPass.Prog.stmt_if_t =
         let Src.Prog.({guard = g; then_br = t; footer = e}) = s in
@@ -914,7 +931,7 @@ module Erase (M: MetaData) = struct
     | AugDot (dotsuff, tp_args) ->
       let tp_args' = List.map typ tp_args in
       AugDot (dotsuff, tp_args')
-    | DataUpd upd ->
+    | DataUpd (_, upd) ->
       let upd' =
         NonEmptyList.map
           (function (mem, vlu) ->
@@ -922,7 +939,7 @@ module Erase (M: MetaData) = struct
              (mem, vlu'))
           upd
       in
-      DataUpd upd'
+      DataUpd ((), upd')
     | Subseq {lb = lb; ub = ub} ->
       let lb' = Option.map expr lb in
       let ub' = Option.map expr ub in
