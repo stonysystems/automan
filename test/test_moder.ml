@@ -38,7 +38,7 @@ let main dafny_fn automan_fn () =
               Moder.(pp_error_t pp_error_mode_expr_t)
               log))
     );
-    
+
     Out_channel.with_file modepass_filename ~f:(fun out ->
       Out_channel.output_string out (Moder.ModePass.show dfy_moded)
     );

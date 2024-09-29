@@ -1985,8 +1985,8 @@ let mode_topdecl_synonym_type
     ; rhs = sd_rhs })
 
 open struct
-  type ('a, 'e) error_logger = 'a * (error_mode_expr_t error_t) list
-  (* [@@deriving show] *)
+  type ('a, 'e) error_logger = 'a * ('e error_t) list
+  [@@deriving show]
 
   let return (x: 'a): ('a, 'e) error_logger =
     (x, [])
@@ -2002,12 +2002,20 @@ open struct
     ((), [err])
 end
 
+type error_mode_topdecl_t =
+  | ErrorModeExpr of error_mode_expr_t
+  | ErrorOtherTopDecl of string
+[@@deriving show]
+
+let error_mode_expr err = ErrorModeExpr err
+
 let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
-  : (ModePass.TopDecl.t', error_mode_expr_t) error_logger =
+  : (ModePass.TopDecl.t' option, error_mode_topdecl_t) error_logger =
   let here = "Moder.mode_topdecl:" in
   let report_offending_predicate p_id err =
     let msg = here ^ " in predicate " ^ p_id in
-    { err with callstack = msg :: err.callstack }
+    { callstack = msg :: err.callstack
+    ; sort = ErrorModeExpr err.sort }
   in
 
   let aux_spec (spec: AnnotationPass.TopDecl.function_spec_t)
@@ -2021,17 +2029,17 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
 
   match d with
   | ModuleImport imp ->
-    return (ModePass.TopDecl.ModuleImport imp)
+    return (Some (ModePass.TopDecl.ModuleImport imp))
   | ModuleDef (_attrs, m_id, m_decls) ->
     let< m_decls' = mode_topdecls m_decls in
     (* NOTE: We drop attributes *)
-    return (ModePass.TopDecl.ModuleDef ([], m_id, m_decls'))
+    return (Some (ModePass.TopDecl.ModuleDef ([], m_id, m_decls')))
   | DatatypeDecl dd ->
     let dd' = mode_topdecl_datatype dd in
-    return (ModePass.TopDecl.DatatypeDecl dd')
+    return (Some (ModePass.TopDecl.DatatypeDecl dd'))
   | SynonymTypeDecl syn ->
     let syn' = mode_topdecl_synonym_type syn in
-    return (ModePass.TopDecl.SynonymTypeDecl syn')
+    return (Some (ModePass.TopDecl.SynonymTypeDecl syn'))
   | PredFunDecl
       (Function (m_pres, _attrs, f_id, tp_ps, ps, tp, specs, body)) ->
 
@@ -2040,8 +2048,8 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
     let specs' = List.map aux_spec specs in
     let body' = Convert.expr body in
 
-    return (ModePass.TopDecl.(
-      PredFunDecl (Function (m_pres, [], f_id, tp_ps, ps', tp', specs', body'))))
+    return (Some (ModePass.TopDecl.(
+        PredFunDecl (Function (m_pres, [], f_id, tp_ps, ps', tp', specs', body')))))
 
   | PredFunDecl
       (Predicate
@@ -2070,7 +2078,7 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
       match p_ann' with
       | None
       | Some Definitions.Predicate ->
-        return (fallback_result ())
+        return (Some (fallback_result ()))
       | Some
           (Definitions.Function
              { make_stub = _      (* TODO: This field has no semantic meaning when
@@ -2090,25 +2098,44 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
                    ; vars_out = vars_out })
                body')
         end |> Result.fold
-          ~ok:return
+          ~ok:(fun res -> return (Some res))
           ~error:begin fun err ->
             let< () = log_error (report_offending_predicate p_id err) in
-            return (fallback_result ())
+            return (Some (fallback_result ()))
           end
     end
-  | MethLemDecl _ ->
-    failwith (here ^ " TODO method/lemma unimplemented")
+  | MethLemDecl methlem -> begin
+      match methlem.sort with
+      | Syntax.Common.Method ->
+        failwith (here ^ " TODO methods not yet supported")
+      | Syntax.Common.Lemma ->
+        let< () =
+          log_error
+            { callstack = [here]
+            ; sort =
+                ErrorOtherTopDecl (here ^ " [WARN] lemma dropped: " ^ methlem.id) }
+        in
+        return None
+    end
+
+    (* failwith (here ^ " TODO method/lemma unimplemented") *)
 
 and mode_topdecls (d: AnnotationPass.TopDecl.t list)
-  : (ModePass.TopDecl.t list, error_mode_expr_t) error_logger =
+  : (ModePass.TopDecl.t list, error_mode_topdecl_t) error_logger =
   match d with
   | [] -> return []
   | (mods, decl) :: decls ->
     let< decl' = mode_topdecl decl in
     let< decls' = mode_topdecls decls in
-    return ((mods, decl') :: decls')
 
-let run (m: AnnotationPass.t): (ModePass.t, error_mode_expr_t) error_logger =
+    begin
+      match decl' with
+      | None -> []
+      | Some decl' -> [(mods, decl')]
+    end @ decls'
+    |> return
+
+let run (m: AnnotationPass.t): (ModePass.t, error_mode_topdecl_t) error_logger =
   let Dafny {includes = includes; decls = decls} = m in
   let< decls' = mode_topdecls decls in
   return (ModePass.Dafny {includes = includes; decls = decls'})
