@@ -2,15 +2,20 @@ open Automan
 open Core
 open Lexing
 open TestCommon
+open Checker
+open TypeTableBuilder
 
 
 module Translator = Translator.Translator
-module Printer = Printer.PrettyPrinter(Moder.ModingMetaData)
+module Printer = 
+  Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
 
 
 let main dafny_fn automan_fn () =
-  let symbol_table = new SymbolTable.SymbolTable.symbol_table in 
-  symbol_table#build dafny_fn;
+
+  let type_table = TypeTableBuilder.create () in
+  let _ = TypeTableBuilder.build_type_table dafny_fn type_table in
+
   let dafny = begin
     let inx = In_channel.create dafny_fn in
     let lexbuf = Lexing.from_channel inx in
@@ -32,9 +37,10 @@ let main dafny_fn automan_fn () =
     printf "Error: %s\n" msg
   | Result.Ok    dfy ->
     let (dfy_moded, log) = Moder.run dfy in
-    let _ = log in (* Not printing the log at this moment *)
-    (* let dfy' = Translator.translate dfy in *)
-    let str  = Printer.print dfy_moded in
+    let _ = log in 
+    let dfy_checked = Checker.check dfy_moded type_table in
+    let generated_code = Translator.translate dfy_checked type_table in
+    let str = Printer.print generated_code in
     printf "%s\n" str 
 
 let () =

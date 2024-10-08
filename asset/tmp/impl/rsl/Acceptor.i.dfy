@@ -1,3 +1,17 @@
+Parsing include file: ./asset/tmp/spec/rsl/Environment.i.dfy
+Parsing include file: ./asset/tmp/spec/rsl/Types.i.dfy
+Warning: Include file not found: ./asset/tmp/spec/rsl/../../Services/RSL/AppStateMachine.i.dfy
+Warning: Include file not found: ./asset/tmp/spec/rsl/../Common/NodeIdentity.i.dfy
+Parsing include file: ./asset/tmp/spec/rsl/Message.i.dfy
+Warning: Include file not found: ./asset/tmp/spec/rsl/../../Common/Framework/Environment.s.dfy
+Parsing include file: ./asset/tmp/spec/rsl/Configuration.i.dfy
+Warning: Include file not found: ./asset/tmp/spec/rsl/../../Common/Collections/Sets.i.dfy
+Warning: Include file not found: ./asset/tmp/spec/rsl/../../Common/Collections/Seqs.i.dfy
+Parsing include file: ./asset/tmp/spec/rsl/Constants.i.dfy
+Parsing include file: ./asset/tmp/spec/rsl/Parameters.i.dfy
+Warning: Include file not found: ./asset/tmp/spec/rsl/../Common/UpperBound.s.dfy
+Parsing include file: ./asset/tmp/spec/rsl/Broadcast.i.dfy
+Warning: Include file not found: ./asset/tmp/spec/rsl/../../Common/Collections/CountMatches.i.dfy
 include ""
 
 
@@ -47,68 +61,14 @@ module Impl_LiveRSL__Acceptor_i
 		LAcceptor(AbstractifyCReplicaConstantsToLReplicaConstants(s.constants), AbstractifyCBallotToBallot(s.max_bal), AbstractifyCVotesToVotes(s.votes), AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber), AbstractifyCOperationNumberToOperationNumber(s.log_truncation_point))
 	}
 
-	function method CIsLogTruncationPointValid(log_truncation_point: COperationNumber, last_checkpointed_operation: seq<COperationNumber>, config: CConfiguration) : bool 
-		requires COperationNumberIsValid(log_truncation_point)
-		requires (forall i :: i in last_checkpointed_operation ==> COperationNumberIsValid(i))
-		requires CConfigurationIsValid(config)
-		ensures CIsLogTruncationPointValid(log_truncation_point, last_checkpointed_operation, config) == IsLogTruncationPointValid(AbstractifyCOperationNumberToOperationNumber(log_truncation_point), AbstractifySeq(last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber), AbstractifyCConfigurationToLConfiguration(config))
-	{
-		HOLDER
-	}
-
-	function method CRemoveVotesBeforeLogTruncationPoint(votes: CVotes, log_truncation_point: COperationNumber) : CVotes 
-		requires CVotesIsValid(votes)
-		requires COperationNumberIsValid(log_truncation_point)
-		ensures var votes' := CRemoveVotesBeforeLogTruncationPoint(votes, log_truncation_point); CVotesIsValid(votes') && RemoveVotesBeforeLogTruncationPoint(AbstractifyCVotesToVotes(votes), AbstractifyCVotesToVotes(votes'), AbstractifyCOperationNumberToOperationNumber(log_truncation_point))
-	{
-		HOLDER
-	}
-
-	function method CAddVoteAndRemoveOldOnes(votes: CVotes, new_opn: COperationNumber, new_vote: CVote, log_truncation_point: COperationNumber) : CVotes 
-		requires CVotesIsValid(votes)
-		requires COperationNumberIsValid(new_opn)
-		requires CVoteIsValid(new_vote)
-		requires COperationNumberIsValid(log_truncation_point)
-		ensures var votes' := CAddVoteAndRemoveOldOnes(votes, new_opn, new_vote, log_truncation_point); CVotesIsValid(votes') && LAddVoteAndRemoveOldOnes(AbstractifyCVotesToVotes(votes), AbstractifyCVotesToVotes(votes'), AbstractifyCOperationNumberToOperationNumber(new_opn), AbstractifyCVoteToVote(new_vote), AbstractifyCOperationNumberToOperationNumber(log_truncation_point))
-	{
-		HOLDER
-	}
-
-	function method CAcceptorInit(c: CReplicaConstants) : CAcceptor 
-		requires CReplicaConstantsIsValid(c)
-		ensures var a := CAcceptorInit(c); CAcceptorIsValid(a) && LAcceptorInit(AbstractifyCAcceptorToLAcceptor(a), AbstractifyCReplicaConstantsToLReplicaConstants(c))
-	{
-		HOLDER
-	}
-
-	function method CAcceptorProcess1a(s: CAcceptor, inp: CPacket) : (CAcceptor, CBroadcast) 
-		requires CAcceptorIsValid(s)
-		requires CPacketIsValid(inp)
-		requires inp.msg.CMessage_1a?
-		ensures var (s', broadcast_sent_packets) := CAcceptorProcess1a(s, inp); CAcceptorIsValid(s') && CBroadcastIsValid(broadcast_sent_packets) && LAcceptorProcess1a(AbstractifyCAcceptorToLAcceptor(s), AbstractifyCAcceptorToLAcceptor(s'), AbstractifyCPacketToRslPacket(inp), AbstractifyCBroadcastToRlsPacketSeq(broadcast_sent_packets))
-	{
-		HOLDER
-	}
-
-	function method CAcceptorProcess2a(s: CAcceptor, inp: CPacket) : (CAcceptor, CBroadcast) 
-		requires CAcceptorIsValid(s)
-		requires CPacketIsValid(inp)
-		requires inp.msg.CMessage_2a?
-		requires inp.src in s.constants.all.config.replica_ids
-		requires CBalLeq(s.max_bal, inp.msg.bal_2a)
-		requires CLeqUpperBound(inp.msg.opn_2a, s.constants.all.params.max_integer_val)
-		ensures var (s', broadcast_sent_packets) := CAcceptorProcess2a(s, inp); CAcceptorIsValid(s') && CBroadcastIsValid(broadcast_sent_packets) && LAcceptorProcess2a(AbstractifyCAcceptorToLAcceptor(s), AbstractifyCAcceptorToLAcceptor(s'), AbstractifyCPacketToRslPacket(inp), AbstractifyCBroadcastToRlsPacketSeq(broadcast_sent_packets))
-	{
-		HOLDER
-	}
-
 	function method CAcceptorProcessHeartbeat(s: CAcceptor, inp: CPacket) : CAcceptor 
 		requires CAcceptorIsValid(s)
 		requires CPacketIsValid(inp)
 		requires inp.msg.CMessage_Heartbeat?
 		ensures var s' := CAcceptorProcessHeartbeat(s, inp); CAcceptorIsValid(s') && LAcceptorProcessHeartbeat(AbstractifyCAcceptorToLAcceptor(s), AbstractifyCAcceptorToLAcceptor(s'), AbstractifyCPacketToRslPacket(inp))
 	{
-		HOLDER
+		var t1 := if inp.src in s.constants.all.config.replica_ids then var t1 := var sender_index := GetReplicaIndex(inp.src, s.constants.all.config); var t1 := if 0 <= sender_index && sender_index < |s.last_checkpointed_operation| && inp.msg.opn_ckpt < s.last_checkpointed_operation[sender_index] then var t1 := s.last_checkpointed_operation[sender_index := inp.msg.opn_ckpt]; var t2 := s.constants; var t3 := s.max_bal; var t4 := s.votes; var t5 := s.log_truncation_point; LAcceptor(t2, t3, t4, t1, t5) else var t1 := s; t1; t1; t1 else var t1 := s; t1; 		
+		t1
 	}
 
 	function method CAcceptorTruncateLog(s: CAcceptor, opn: COperationNumber) : CAcceptor 
@@ -116,6 +76,7 @@ module Impl_LiveRSL__Acceptor_i
 		requires COperationNumberIsValid(opn)
 		ensures var s' := CAcceptorTruncateLog(s, opn); CAcceptorIsValid(s') && LAcceptorTruncateLog(AbstractifyCAcceptorToLAcceptor(s), AbstractifyCAcceptorToLAcceptor(s'), AbstractifyCOperationNumberToOperationNumber(opn))
 	{
-		HOLDER
+		var t1 := if opn <= s.log_truncation_point then var t1 := s; t1 else var t1 := RemoveVotesBeforeLogTruncationPoint(s.votes, opn); var t2 := s.(log_truncation_point := opn, votes := t1); t2; 		
+		t1
 	}
 }

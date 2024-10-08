@@ -17,7 +17,7 @@ module Definitions = struct
     ; permutations:  Moder.Definitions.match_functionalize_t
     }
   [@@deriving show, eq]
-
+  
   type quantification_forall_functionalize_collection_t =
     | QFSeq of ParserPass.Prog.seq_display_t
     | QFMap of ParserPass.Prog.map_comp_t

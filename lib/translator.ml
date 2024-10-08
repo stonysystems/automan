@@ -1,6 +1,8 @@
 open Syntax
 open Internal
+open TypeTableBuilder
 
+module Tracker = DataTracker.DataTracker
 
 module AST = AST(TranslatorMetadata.TranslationMetaData)
 module Refinement = Refinement.Refinement
@@ -9,6 +11,7 @@ module Printer = Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
 
 
 module Translator = struct 
+  (* remapper : should be replaced by meta data later *)
   let remapper = new NameRemapper.name_remapper
 
   module Type = struct 
@@ -333,7 +336,7 @@ module Translator = struct
       | Decreases expr -> AST.TopDecl.Decreases (Prog.t_expr expr)
 
     let t_function 
-      (x : AST.TopDecl.function_t) = 
+      (x : AST.TopDecl.function_t) =
       let get_args_from_fmls fmls = 
         let rec aux lst = 
           match lst with 
@@ -487,28 +490,68 @@ module Translator = struct
         )
       )
       in
+      (* Note by Ti
+       * Note that, for each input or output formal, we need to know its 
+       * original position in the predicate list to construct the refinement
+       * check. Moder MetaData is not enough, we need the original 
+       * Annotator MetaData.
+       **)
       let predicate_decl_t_metadata_roll_back 
-        (m : TranslatorMetadata.TranslationMetaData.predicate_decl_t) :
+        (m : TranslatorMetadata.TranslationMetaData.predicate_decl_t)
+        (origin_fmls : AST.TopDecl.formal_t list) :
         Annotator.AnnotationMetaData.predicate_decl_t =  
         match m with 
         | Moder.Definitions.Predicate -> None
-        | Moder.Definitions.Function _ -> 
+        | Moder.Definitions.Function m -> 
           (* To be changed later *)
-          Some ([
-            Annotation.Input  ;
-            Annotation.Output ;
-            Annotation.Input  ;
-           ])
+          let rec is_fml_in_lst 
+            (lst : Annotator.AnnotationPass.TopDecl.formal_t list)
+            (fml : AST.TopDecl.formal_t) : bool = 
+            match lst with 
+            | [] -> false
+            | h :: rest -> (
+              match h   with Formal (_, id , _) ->
+              match fml with Formal (_, id', _) ->
+                (id = id') || (is_fml_in_lst rest fml)
+            )
+          in
+          let vars_in = m.vars_in in
+          let rec aux 
+            (lst : AST.TopDecl.formal_t list) :
+            (Annotation.mode_t list) = 
+            match lst with 
+            | [] -> []
+            | h :: rest -> (
+              match is_fml_in_lst vars_in h with 
+              | true -> Annotation.Input
+              | false -> Annotation.Output
+            ) :: (aux rest)
+          in
+          Some (aux origin_fmls)
       in
       match x with 
       | Predicate (metadata, _, _, id, _, origin_fmls, specs, e) -> begin
         let _ = metadata, e in
-        let metadata = (predicate_decl_t_metadata_roll_back metadata) in
+        let metadata = 
+          predicate_decl_t_metadata_roll_back metadata origin_fmls in
+
         let fmls_input, fmls_rtn = 
-          get_fmls_input_and_rtn origin_fmls 
-           metadata in
+          get_fmls_input_and_rtn origin_fmls metadata in
+        
         let rtn = get_rtn_from_fmls fmls_rtn in
-        let t_e = TCommon.expr_of_str "HOLDER" in
+
+        (* let t_e = TCommon.expr_of_str "HOLDER" in *)
+        let tracker = Tracker.API.build fmls_rtn in
+        let members_to_output = 
+          List.map (
+            fun x ->
+              match x with AST.TopDecl.Formal (_, id, _) ->
+                TCommon.expr_of_str id 
+          ) fmls_rtn in
+        let t_e = 
+          Functionalization.Functionalization.entry
+            e tracker members_to_output
+        in
         let t_id = remapper#id_remap id in
         let t_original_fmls = List.map t_formal origin_fmls in
         let t_fmls_input = List.map t_formal fmls_input in
@@ -595,34 +638,40 @@ module Translator = struct
         [AST.TopDecl.PredFunDecl t_function]
 
     let rec translate 
-      (x : Syntax.Common.topdecl_modifier_t list * AST.TopDecl.t') = 
+      (x : Syntax.Common.topdecl_modifier_t list * AST.TopDecl.t')
+      (type_table : TypeTableBuilder.t) = 
       let modifier_lst, t' = x in
       let _ = modifier_lst in (* IGNORE: modifier *)
-      List.map (fun x -> ([], x)) (translate' t')
+      List.map (fun x -> ([], x)) (translate' t' type_table)
 
-    and translate' (x : AST.TopDecl.t') = 
+    and translate' (x : AST.TopDecl.t') (type_table : TypeTableBuilder.t) = 
       match x with 
       | ModuleImport _ 
       | SynonymTypeDecl _ 
       | MethLemDecl _ -> []
-      | ModuleDef x -> t_module_def x
+      | ModuleDef x -> t_module_def x type_table
       | DatatypeDecl x -> t_data_type_decl x
       | PredFunDecl x -> t_function x
 
-    and t_module_def (x : AST.TopDecl.module_def_t) = 
+    and t_module_def 
+      (x : AST.TopDecl.module_def_t) (type_table : TypeTableBuilder.t) = 
       let attribute_lst, id, t_lst = x in
       let _ = attribute_lst in (* IGNORE: attribute_lst *)
+      let _ = TypeTableBuilder.find_visible_decls type_table id in
       [AST.TopDecl.ModuleDef begin
         [], 
         (remapper#module_id_remap id), 
-        List.concat (List.map translate t_lst)
+        List.concat (List.map 
+          (fun x -> translate x type_table) t_lst)
       end]
   end
 
-  let translate (x : AST.t) = 
+  let translate (x : AST.t) (type_table : TypeTableBuilder.t) = 
+    let _ = type_table in
     let Dafny { includes = _; decls = decls } = x in
     AST.Dafny { includes = [""]; decls = begin 
-      List.concat (List.map TopDecl.translate decls)
+      List.concat (List.map 
+        (fun x -> TopDecl.translate x type_table) decls)
     end }
-      
+
 end

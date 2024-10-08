@@ -1,234 +1,427 @@
 open Syntax
+open TypeTableBuilder
 open Internal
-open TranslatorCommon
 
 
-module AST = Syntax.AST(TranslatorMetadata.TranslationMetaData)
-module TranslatorCommon = TranslatorCommon
+module AST = AST(TranslatorMetadata.TranslationMetaData)
+module TCommon = TranslatorCommon.TranslatorCommon
+module Printer = Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
+module Convert = 
+  Convert (TrivMetaData) (TranslatorMetadata.TranslationMetaData)
 
-module DataTracker = struct
+(**
+  * DataTracker is used for:
+  * 1. Harmony Check: Each member cannot be assigned twice.
+  * 2. Saturation Check: Each member must be assigned.
+  * 3. Assisting in translating Moder MetaData to Translator MetaData,
+  *    specifically determining the members created by an expression.
+  *
+  * DataUpdate case:
+  *   An expression like s' == s.(x := s'.x) involves assigning a sub-member
+  *   with the member value of the output state, which can be assigned in any
+  *   other location of the logical expression.
+  *  
+  *)
 
-module ExprMap = Map.Make(TranslatorCommon.Expr)
+module DataTracker = struct 
 
-class data_tracker 
-  (s : AST.Prog.expr_t) (init_dtp : AST.Prog.expr_t) = 
-object (self)
+  (*
+   * APIs for callers:
 
-  val mutable table         = ExprMap.empty
-  val mutable end_point     = TranslatorCommon.expr_blank
-  val mutable data_update   = TranslatorCommon.expr_blank
-  val mutable this          = s
-  val mutable init_dtp      = init_dtp
+      let assign_top_lvl_lst 
+        (top_lvl : t)
+        (kv_lst : 
+          (AST.Prog.expr_t * 
+           AST.Prog.expr_t *
+           AST.Prog.expr_t list) list) : t
 
-  method set_table t        = table <- t
-  method set_end_point e    = end_point <- e
-  method set_data_update e  = data_update <- e
-  method set_this e         = 
-    if TranslatorCommon.is_expr_blank this then this <- e else ()
+      let build_top_lvl (fs : AST.TopDecl.formal_t list) : t
+   *)
 
-  method get_this = this
+  type tracker_k = AST.TopDecl.formal_t
 
-  method copy = 
-    let new_tracker = new data_tracker this init_dtp in 
-    let new_table = begin
-      ExprMap.fold (
-        fun k v acc -> ExprMap.add k (v#copy) acc
-       ) table ExprMap.empty
-    end in
-    new_tracker#set_table new_table;
-    new_tracker#set_end_point end_point;
-    new_tracker#set_data_update data_update;
-    new_tracker#set_this this;
-    new_tracker
+  and tracker_v = 
+    {
+      (* Assigned value; initially null *)
+      assigned_v : AST.Prog.expr_t ;
 
-  method add_helper 
-    (k : AST.Prog.expr_t) (v : data_tracker) : unit = 
-    match (ExprMap.mem k table) with
-    | true -> assert false (* checking *)
-    | false -> table <- ExprMap.add k v table
+      (* Tracker for this datatype *)
+      t : t ;
+      
+      (**
+        * Skipped member assignments when the data update has self-assignments.
+        * For example, s' == s.(a := s'.a). 
+        * Then `a` will be recorded here for node `s'`.
+        * Info about the skipped self-assignments is provided by the Moder.
+        *)
+      skipped_members : AST.Prog.expr_t list ;
 
-  method is_end_point_filled : bool = 
-    TranslatorCommon.is_expr_n_blank end_point
+      (**
+        * Assigned sub-members for this node.
+        * For example, s'.x could contain s'.x.a and s'.x.b.
+        *)
+      assigned_members : AST.Prog.expr_t list ;
+    }
 
-  method is_data_update_filled : bool = 
-    TranslatorCommon.is_expr_n_blank data_update
+  (**
+    * formal (d : D)
+    * datatype D = D (x : X, y : Y)
+    * t ->
+    *   Tracker (k = (d : D), list = [v0, v1])
+    *   v0 ->
+    *     t ->
+    *       Tracker (k = (x : X), list = []) 
+    *     i.e. the key for v0 is determined by v0.t.k
+    *)
+  and t = | Tracker of (tracker_k * tracker_v list) 
 
-  method is_init_dtp_filled : bool = TranslatorCommon.is_expr_n_blank init_dtp
+  let assert_helper = TranslatorCommon.assert_helper
 
-  method query_member 
-    (prefix_list : AST.Prog.expr_t list)
-    (suffix_list : AST.Prog.expr_t list) : AST.Prog.expr_t = 
-    let prefix_list, suffix_list = 
-      TranslatorCommon.move_one_expr_from_suffix_to_prefix 
-        prefix_list suffix_list in
-    match suffix_list with
-    | [] -> begin
-        (* checking *)
-        assert (TranslatorCommon.is_expr_n_blank end_point);
-        end_point
-      end
-    | h :: _ -> begin
-        let prefix_expr = 
-          TranslatorCommon.expr_lst_to_dot_expr prefix_list in
-        (* TranslatorCommon.debug_print_expr prefix_expr; *)
-        (* checking *)
-        assert (
-          (TranslatorCommon.is_expr_blank this) ||
-          (TranslatorCommon.is_expr_eq this prefix_expr)
-        );
-        self#set_this prefix_expr;
-        match ExprMap.find_opt h table with
-        | Some entry -> entry#query_member prefix_list suffix_list
-        | None -> assert false
-      end
-
-  method query_member_wrapper suffix_list = 
-    self#query_member [] suffix_list
-
-  method add 
-    (prefix_list : AST.Prog.expr_t list)
-    (suffix_list : AST.Prog.expr_t list)
-    (value : AST.Prog.expr_t) : unit =
-    let prefix_list, suffix_list = 
-      TranslatorCommon.move_one_expr_from_suffix_to_prefix 
-        prefix_list suffix_list in 
-    let prefix_expr = 
-      TranslatorCommon.expr_lst_to_dot_expr prefix_list in
-    match suffix_list with
-    | [] -> begin
-        (* checking *)
-        assert (TranslatorCommon.is_expr_blank end_point);
-        (* assert (TranslatorCommon.is_expr_blank this); *)
-        self#set_this prefix_expr;
-        end_point <- value;
-      end
-    | h :: _ -> begin
-        (* checking *)
-        (* assert (
-          (TranslatorCommon.is_expr_blank this) ||
-          (TranslatorCommon.is_expr_eq this prefix_expr)
-        ); *)
-        self#set_this prefix_expr;
-        match ExprMap.find_opt h table with
-        | Some entry -> entry#add prefix_list suffix_list value
-        | None -> begin
-          let new_entry = 
-            new data_tracker 
-              TranslatorCommon.expr_blank TranslatorCommon.expr_blank in
-          new_entry#add prefix_list suffix_list value;
-          self#add_helper h new_entry
-        end
-    end
-
-  method add_wrapper suffix_list value = 
-    self#add [] suffix_list value
-
-  method add_data_update 
-  (prefix_list  : AST.Prog.expr_t list)
-  (suffix_list  : AST.Prog.expr_t list)
-  (value        : AST.Prog.expr_t)
-  (root_entry   : data_tracker)
-  (s            : AST.Prog.expr_t)
-  (s'           : AST.Prog.expr_t) : unit = 
-  let prefix_list, suffix_list = 
-  TranslatorCommon.move_one_expr_from_suffix_to_prefix 
-    prefix_list suffix_list in 
-  let prefix_expr = 
-    TranslatorCommon.expr_lst_to_dot_expr prefix_list in
-  let rec replace_dot_expr_starts_with_s' 
-    (e : AST.Prog.expr_t) : AST.Prog.expr_t = 
-    (* TranslatorCommon.debug_print_expr e; *)
-    if (TranslatorCommon.is_expr_tp_aug_dot e) then
-      let e_lst = TranslatorCommon.dot_expr_to_expr_lst e in
-      let e_lst = NonEmptyList.coerce e_lst in 
-      let h, rest = NonEmptyList.uncons e_lst in
-      match (TranslatorCommon.is_expr_eq h s') with
-      | true -> root_entry#query_member_wrapper (s :: rest)
-      | false -> e
-    else if (TranslatorCommon.is_expr_tp_data_update e) then
-      let x, suffix = TranslatorCommon.expr_to_suffix e in
-      let member_binding_upd_lst = 
-        TranslatorCommon.suffix_to_data_update suffix in
-      let rec aux lst = 
-        match lst with
-        | [] -> []
-        | h :: rest -> begin 
-            [
-              let assignee, v = h in
-              (assignee, replace_dot_expr_starts_with_s' v)
-            ] @ aux rest
-        end
+  let fml_from_passerpass_to_translator 
+    (fml : ParserPass.TopDecl.formal_t) : AST.TopDecl.formal_t = 
+    match fml with ParserPass.TopDecl.Formal (is_ghost, id, tp) ->
+    (
+      let tp_handler_t (m : TrivMetaData.type_t) : 
+        TranslatorMetadata.TranslationMetaData.type_t = 
+        let _ = m in None 
       in
-      let member_binding_upd_lst' = aux member_binding_upd_lst in
-      let member_binding_upd_lst' = 
-        NonEmptyList.coerce member_binding_upd_lst' in
-      AST.Prog.Suffixed(x, DataUpd(member_binding_upd_lst'))
-    else
-      e
-  in
-  match suffix_list with
-  | [] -> begin
-    assert (TranslatorCommon.is_expr_blank data_update);
-    self#set_this prefix_expr;
-    data_update <- replace_dot_expr_starts_with_s' value;
-  end
-  | h :: _ -> begin 
-    (* checking *)
-    assert (
-      (TranslatorCommon.is_expr_blank this) ||
-      (TranslatorCommon.is_expr_eq this prefix_expr)
-    );
-    self#set_this prefix_expr;
-    match ExprMap.find_opt h table with
-    | Some entry -> entry#add prefix_list suffix_list value
-    | None -> begin
-      let new_entry = 
-        new data_tracker 
-          TranslatorCommon.expr_blank TranslatorCommon.expr_blank in
-      new_entry#add_data_update prefix_list suffix_list value root_entry s s';
-      self#add_helper h new_entry
-    end
-  end    
+      let tp' = Convert.typ tp_handler_t tp
+      in
+      AST.TopDecl.Formal (is_ghost, id, tp')
+    )
 
-  method add_data_update_wrapper
-  (suffix_list  : AST.Prog.expr_t list)
-  (value        : AST.Prog.expr_t)
-  (root_entry   : data_tracker)
-  (s            : AST.Prog.expr_t)
-  (s'           : AST.Prog.expr_t) : unit = 
-    (* TranslatorCommon.debug_print_expr value; *)
-    self#add_data_update [] suffix_list value root_entry s s'
+  let rec build 
+    (k : tracker_k) : t = 
+    match k with Formal (is_ghost, id, tp) ->
+      let _ = is_ghost in
+      let empty_t = Tracker (k, []) in
+      match TCommon.is_tp_id tp with
+      | true -> (
+        match TypeTableBuilder.find_type_decl id with 
+        | Some (module_name, (modifiers, decl_body)) ->
+          let _ = module_name, modifiers in (
+            match decl_body with 
+            | DatatypeDecl datatype -> 
+              let (meta, attrs, id', params, ctors) = datatype in
+              let _ = meta, attrs, params in
+              assert_helper (id = id') "data tracker: id of data type mismatch";
+              let ctors_len = List.length (NonEmptyList.as_list ctors) in (
+                match ctors_len with 
+                | 0 ->
+                  assert_helper 
+                  false
+                  "data tracker: no constructor; grammar error";
+                assert false
+                | 1 -> (
+                    let (ctor, _) = NonEmptyList.uncons ctors in
+                    match ctor with DataCtor (attrs, ctor_id, fmls) ->
+                      let _ = attrs, ctor_id in
+                      let vs = List.map (
+                        fun (x : tracker_k) : tracker_v -> 
+                          {
+                            assigned_v = TCommon.expr_blank ;
+                            t = build x ;
+                            skipped_members = [] ; 
+                            assigned_members = [] ; 
+                          }
+                      ) (
+                        List.map fml_from_passerpass_to_translator fmls
+                      ) in
+                      Tracker (k, vs)
+                  )
+                | _ -> 
+                  assert_helper 
+                    false
+                    "data tracker: cannot handle multi-constructors";
+                  assert false
+              )
+            | SynonymTypeDecl synonym_type -> 
+              let k' = AST.TopDecl.Formal (
+                is_ghost, id, TCommon.tp_of_id synonym_type.id) in
+              build k'
+            | _ -> assert false
+          )
+        | None -> empty_t
+      )
+      | false -> empty_t
 
-  method construct = 
-    let x = begin
-      match self#is_data_update_filled with 
-      | true -> data_update
-      | false -> begin
-        match self#is_end_point_filled with 
-        | true -> end_point
-        | false -> begin
-          match self#is_init_dtp_filled with 
-          | false -> begin
-            let rec aux lst = 
-              match lst with 
-              | [] -> []
-              | (k, v) :: lst -> begin
-                let k_id = TranslatorCommon.expr_to_id k in
-                let k_id_either : (id_t, int) Either.t = Left k_id in
-                let member_binding_upd = (k_id_either, v#construct) in
-                [member_binding_upd] @ (aux lst)
-              end
-            in
-            let bindings = ExprMap.bindings table in
-            let kv_list = aux bindings in 
-            let kv_list = NonEmptyList.coerce kv_list in
-            AST.Prog.Suffixed(this, DataUpd(kv_list))
-          end
-          | true -> begin 
-            (*  *)
-            assert false
-          end end end end in x
+  let is_tracker_k_equals_to_id 
+    (k : tracker_k) (id : string) : bool = 
+    match k with AST.TopDecl.Formal (_, id', _) -> id = id'
+    
+  let is_t_for_this_id 
+    (t : t) (id : string) : bool = 
+    match t with Tracker (k, _) -> is_tracker_k_equals_to_id k id
+  
+  (**
+    * Find the wanted tracker_v from t.tracker_v list
+    *)
+  let query_sub_v (tracker : t) (id : string) : tracker_v =   
+    match tracker with Tracker (_, vs) ->
+      let rec aux (lst : tracker_v NonEmptyList.t) = 
+        let (h, rest) = NonEmptyList.uncons lst in
+        let t = h.t in
+        match is_t_for_this_id t id  with 
+        | true -> h
+        | false -> aux (NonEmptyList.coerce rest)
+      in
+      aux (NonEmptyList.coerce vs)
 
-end ;;
+  let is_sub_member_in_skipped_members 
+    (sub_member : AST.Prog.expr_t)
+    (skipped_members : AST.Prog.expr_t list) : bool = 
+    let rec aux lst = 
+      match lst with 
+      | [] -> false 
+      | h :: rest -> (
+        (TCommon.str_of_expr sub_member) = 
+        (TCommon.str_of_expr h)
+      ) || (aux rest)
+    in
+    aux skipped_members
+
+  (**
+    * Find a tracker from a v_lst that has a t with key = id 
+    * Assing the value e' to it  
+    *)
+  let update_v_lst_with_assign_to_a_v
+    (v_lst : tracker_v list)
+    (id : string)
+    (e' : AST.Prog.expr_t) 
+    (skipped_members : AST.Prog.expr_t list): tracker_v list = 
+    let rec aux lst : tracker_v list = 
+      match lst with 
+      | [] -> 
+          assert_helper 
+            false
+            "data tracker: update failed; cannot find the member";
+          assert false
+      | h :: rest -> 
+        match is_t_for_this_id h.t id with
+        | true -> 
+          
+          (* Whether this node has been assigned before. *)
+          assert_helper 
+            (TCommon.is_expr_n_blank h.assigned_v)
+            "data tracker: harmony check failed";
+
+          (** 
+            * Whether any sub-member of this node has been assigned before. 
+            * If they do, they must be a skipped member for this assign.
+            *)
+          let harmony_check = 
+            match h.assigned_members with 
+            | [] -> true
+            | _ -> (
+              List.for_all (
+                fun assigned_member -> 
+                  is_sub_member_in_skipped_members
+                    assigned_member
+                    skipped_members
+              ) h.assigned_members
+            ) 
+          in
+          assert_helper
+            harmony_check
+            "data tracker: harmony check failed"
+          ;
+
+          {
+            assigned_v = e' ;
+            t = h.t ;
+            skipped_members = skipped_members ;
+            assigned_members = h.assigned_members ;
+          } :: (aux rest)
+        | false ->
+          h :: (aux rest)
+    in
+    aux v_lst
+
+  (**
+    * For tracker t, find the node with key = k
+    * Assign value v with skipped members (only for data update)
+    *)
+  let assign 
+    (t : t)
+    (k : AST.Prog.expr_t) 
+    (v : AST.Prog.expr_t) 
+    (skipped_members : AST.Prog.expr_t list) : t = 
+    let rec aux 
+      (exprs : AST.Prog.expr_t NonEmptyList.t) 
+      (t : t) : t = 
+      let (h, rest) = NonEmptyList.uncons exprs in
+      let id = TCommon.str_of_expr h in
+      match rest with 
+      | [] -> ( 
+        match t with Tracker (tracker_k, tracker_vs) ->
+          (**
+            * Replace the target tracker_v in tracker_vs with
+            * a new one with updated v and skipped_members
+            *)
+          Tracker 
+            (tracker_k, 
+              update_v_lst_with_assign_to_a_v
+                tracker_vs id v skipped_members)
+        )
+      | _ -> (
+        let sub_tracker = query_sub_v t id in
+        
+        assert_helper 
+          (
+            (* Unassigned before *)
+            (TCommon.is_expr_blank sub_tracker.assigned_v) || 
+            (
+              let sub_member = TCommon.expr_lst_to_dot_expr rest in
+              (**
+                * Assigned as Data Update before
+                * Check whether we are trying to 
+                * assign a member skipped before
+                *)
+              is_sub_member_in_skipped_members 
+                sub_member sub_tracker.skipped_members 
+            )
+          )
+          "data tracker: harmony check failed";
+          
+        aux (NonEmptyList.coerce rest) sub_tracker.t
+      )
+    in
+    let exprs = TCommon.dot_expr_to_expr_lst k in
+    aux (NonEmptyList.coerce exprs) t
+
+  let assign_top_lvl 
+    (top_lvl : t)
+    (k : AST.Prog.expr_t) 
+    (v : AST.Prog.expr_t)
+    (skipped_members : AST.Prog.expr_t list) : t = 
+    assign top_lvl k v skipped_members
+
+  let assign_top_lvl_lst 
+    (top_lvl : t)
+    (kv_lst : 
+      (AST.Prog.expr_t * AST.Prog.expr_t * AST.Prog.expr_t list) list) : t = 
+    let rec aux lst t = 
+      match lst with 
+      | [] -> t
+      | h :: rest -> (
+        let (k, v, s_lst) = h in
+        let t = aux rest t in
+        assign_top_lvl t k v s_lst
+      )
+    in
+    aux kv_lst top_lvl
+
+  let build_top_lvl (fs : AST.TopDecl.formal_t list) : t =
+    let empty_tracker_k = 
+      AST.TopDecl.Formal 
+        (false, "", TCommon.tp_of_id "") in
+    let tracker_vs : tracker_v list = 
+      List.map (
+        fun (f : tracker_k) : tracker_v -> 
+        {
+          assigned_v = TCommon.expr_blank ;
+          t = build f ;
+          skipped_members = [] ; 
+          assigned_members = [] ;
+        }
+      ) fs in
+    Tracker (empty_tracker_k, tracker_vs)
+
+  let query_sub_t 
+    (tracker : t)
+    (member : AST.Prog.expr_t) : t = 
+    let rec aux (t : t) (member_id_lst : string list) : t = 
+      match member_id_lst with 
+      | [] -> t
+      | h :: rest -> 
+        let sub_v = query_sub_v t h in
+        let sub_t = sub_v.t in
+        aux sub_t rest
+    in
+    let member_lst = TCommon.dot_expr_to_expr_lst member in
+    let member_id_lst = List.map (
+      fun x -> TCommon.str_of_expr x
+    ) member_lst in
+    aux tracker member_id_lst
+
+  let rec saturation_check (t : t) : bool = 
+    match t with Tracker (_, vs) -> 
+      let rec aux lst = 
+      match lst with
+      | [] -> true
+      | h :: rest -> (
+        match TCommon.is_expr_n_blank h.assigned_v with 
+        | true -> (
+          List.for_all 
+            (fun sub_member -> 
+              let sub_t = query_sub_t t sub_member in
+              saturation_check sub_t) 
+            h.skipped_members
+        )
+        | false -> 
+          match h.t with Tracker (_, sub_vs) ->
+            List.for_all (
+              fun sub_v -> saturation_check sub_v.t
+            ) sub_vs
+      ) && (aux rest) in
+      aux vs
+  
+  let rec construct (t : t) : AST.Prog.expr_t list = 
+    match t with Tracker (tracker_k, tracker_vs) ->
+      let rec aux (lst : tracker_v list) : AST.Prog.expr_t list = 
+      match lst with 
+      | [] -> []
+      | h :: rest -> (
+        match TCommon.is_expr_blank h.assigned_v with
+        | false -> (
+          let assigned_v = (
+            match h.skipped_members with 
+            | [] -> h.assigned_v
+            | _ -> (
+              let e = h.assigned_v in
+              match e with 
+              | AST.Prog.Suffixed (e, suffix) ->
+                (
+                  match suffix with 
+                  | AST.Prog.DataUpd (_, member_bindings) ->
+                    let aux v = 
+                      assert_helper 
+                        (is_sub_member_in_skipped_members 
+                          v h.skipped_members) 
+                        "data tracker : saturation check failed";
+                      let sub_member = v in
+                      let sub_t = query_sub_t h.t sub_member in
+                      let c_lst = construct (sub_t) in
+                      match c_lst with 
+                      | [] -> assert false
+                      | h :: _ -> h
+                    in
+                    let member_bindings = NonEmptyList.map (
+                      fun x -> let (eit, v) = x in (eit, aux v) 
+                    ) member_bindings in
+                    AST.Prog.Suffixed 
+                      (e, AST.Prog.DataUpd (None, member_bindings))
+                  | _ -> assert false
+                )
+              | _ -> assert false
+            )
+          ) in
+          assigned_v :: (aux rest)
+        )
+        | true -> (construct t) @ (aux rest)
+      )
+    in
+    let args = aux tracker_vs in
+    match tracker_k with AST.TopDecl.Formal (_, _, tp) ->
+      let tp_id = TCommon.id_of_tp tp in
+      match tp_id with 
+      | "" -> args
+      | _ -> 
+        [AST.Prog.Suffixed 
+          (TCommon.expr_of_str tp_id, 
+            AST.Prog.ArgList 
+              ({positional = args; named = []}, 
+              None))]
 
 end
+

@@ -25,6 +25,7 @@ module LiveRSL__Acceptor_i {
     log_truncation_point:OperationNumber
   )
 
+  /*
   predicate IsLogTruncationPointValid(log_truncation_point:OperationNumber, last_checkpointed_operation:seq<OperationNumber>,
                                       config:LConfiguration)
   {
@@ -104,6 +105,7 @@ module LiveRSL__Acceptor_i {
     && s'.constants == s.constants
     && s'.last_checkpointed_operation == s.last_checkpointed_operation
   }
+  */
 
   predicate LAcceptorProcessHeartbeat(s:LAcceptor, s':LAcceptor, inp:RslPacket)
     requires inp.msg.RslMessage_Heartbeat?

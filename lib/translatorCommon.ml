@@ -31,6 +31,7 @@ open Internal
   * expr_to_id : expr -> id; The expr must be a id_t
   *
   * id_of_tp
+  * is_tp_id
   * tp_of_id
   * id_and_gen_inst_of_tp
   *
@@ -39,6 +40,9 @@ open Internal
   * expr_lst_to_dot_expr : [a, b, c, d] -> a.b.c.d
   * dot_expr_to_expr_lst : a.b.c.d -> [a, b, c, d]
   * expr_lst_to_and
+  *
+  * str_of_outvar_lhs
+  * expr_of_outvar_lhs
   * **************************************************************************
   *)
 
@@ -46,6 +50,9 @@ open Internal
 module AST = Syntax.AST(TranslatorMetadata.TranslationMetaData)
 module Printer = Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
 
+
+let assert_helper condition message =
+  if not condition then failwith message
 
 module TranslatorCommon = struct 
 
@@ -79,6 +86,21 @@ module TranslatorCommon = struct
       (id, gen_inst)
     end
     | TpTup _ -> assert false
+
+  let is_tp_id (x : AST.Type.t) = 
+    match x with 
+    | TpName (_, name_seg) -> begin 
+      let rest, h = NonEmptyList.unsnoc name_seg in
+      if ((List.length rest) != 0) then 
+        false 
+      else if 
+        let AST.Type.TpIdSeg {id = _; gen_inst = gen_inst} = h in
+        ((List.length gen_inst) != 0) then 
+        false 
+      else
+        true 
+    end
+    | TpTup _ -> false
 
   let id_of_tp (x : AST.Type.t) = 
     match x with 
@@ -163,6 +185,12 @@ module TranslatorCommon = struct
     end
     | _ -> assert false
 
+  let debug_print (e : string) = 
+    Printf.printf "[+] %s \n" (e)
+    
+  let debug_print_expr (e) = 
+    Printf.printf "[+] %s \n" (str_of_expr e)
+
   let move_one_expr_from_suffix_to_prefix prefix_list suffix_list =
     let suffix_list = NonEmptyList.coerce suffix_list in
     let h, suffix_list = NonEmptyList.uncons suffix_list in
@@ -184,7 +212,30 @@ module TranslatorCommon = struct
   
   (* The expr occured can only be id *)  
   let dot_expr_to_expr_lst (x : AST.Prog.expr_t) = 
-    let rec aux x = 
+    (**
+      * [BUG] : "s.votes'" is parsed as 
+      *   (Syntax.AST.Prog.NameSeg ("s'.votes", [])) 
+      *
+      * Thus here instead of using AST based split,
+      * we split it from text level
+      *)
+    
+    (* debug_print_expr x;
+    debug_print (string_of_bool (is_expr_tp_aug_dot x)) ;  
+    debug_print (AST.Prog.show_expr_t x); *)
+
+    let s = str_of_expr x in
+    match 
+      (
+        (String.contains s '[') ||
+        (String.contains s '(')
+      ) with
+      | true -> [x] | false ->
+        List.map
+          expr_of_str
+          (String.split_on_char '.' s)
+
+    (* let rec aux x = 
       match is_expr_tp_aug_dot x with
       | true -> begin
         let x, suffix = expr_to_suffix(x) in
@@ -195,13 +246,7 @@ module TranslatorCommon = struct
         [x]
       end
     in
-    aux x
-
-  let debug_print (e : string) = 
-    Printf.printf "[+] %s \n" (e)
-  
-  let debug_print_expr (e) = 
-    Printf.printf "[+] %s \n" (str_of_expr e)
+    aux x *)
 
   let expr_lst_to_and exprs = 
     let rec aux lst = 
@@ -223,5 +268,15 @@ module TranslatorCommon = struct
       else if e1_str < e2_str then -1 
       else 1
   end ;;
+
+  let str_of_outvar_lhs 
+  (x : Moder.Definitions.outvar_lhs_t) : string = 
+    let member_qualified_name = x.mq_outvar in 
+    let member_qualified_name = NonEmptyList.as_list member_qualified_name in
+    String.concat "." member_qualified_name
+
+  let expr_of_outvar_lhs
+  (x : Moder.Definitions.outvar_lhs_t) : AST.Prog.expr_t = 
+  expr_of_str (str_of_outvar_lhs x)
 
 end

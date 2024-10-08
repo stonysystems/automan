@@ -552,7 +552,7 @@ module AST (M : MetaData) = struct
     (* Formal parameters to constructors/functions/methods *)
     type formal_t = Formal of bool * id_t * Type.t
     [@@deriving show, eq]
-
+    
     (* https://dafny.org/dafny/DafnyRef/DafnyRef.html#sec-datatype
        NOTE: no codatatype, type members
        NOTE: constructor argument names required *)
