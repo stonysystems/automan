@@ -35,7 +35,7 @@ let main dafny_fn automan_fn () =
         (Printf.sprintf
            ">>>> BEGIN ERROR LOG >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n%s\n<<<< END ERROR LOG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n"
            (Internal.List.show
-              Moder.(pp_error_t pp_error_mode_expr_t)
+              Moder.(pp_error_t pp_error_mode_topdecl_t)
               log))
     );
 

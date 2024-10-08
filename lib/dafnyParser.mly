@@ -76,8 +76,8 @@ rel_op_lt_lte:
   | LANGLE { Syntax.Common.Lt }
 
 rel_op_gt_gte:
-  | GTE    { Syntax.Common.Lte }
-  | RANGLE { Syntax.Common.Lt }
+  | GTE    { Syntax.Common.Gte }
+  | RANGLE { Syntax.Common.Gt }
 
 /* NOTE: In Dafny, NEQ is allowed to appear inside a chain of equalities. We
    don't support this (yet?)
