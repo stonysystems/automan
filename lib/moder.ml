@@ -1986,7 +1986,7 @@ let mode_topdecl_synonym_type
 
 open struct
   type ('a, 'e) error_logger = 'a * ('e error_t) list
-  [@@deriving show]
+  (* [@@deriving show] *)
 
   let return (x: 'a): ('a, 'e) error_logger =
     (x, [])

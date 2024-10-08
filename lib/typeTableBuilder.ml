@@ -112,8 +112,8 @@
             | Syntax.ParserPass.Dafny { decls; includes } ->
               filter_datatype_synonym_and_imports decls None builder_instance;
                 (decls, includes))
-        | Result.Error msg -> 
-          printf "Error while parsing file: %s\n%s" filename msg;
+        | Result.Error _msg -> 
+          (* printf "Error while parsing file: %s\n%s" filename msg; *)
           ([], [])
       end
 
@@ -125,11 +125,11 @@
           []
         else begin
           if file_exists include_path then begin
-            printf "Parsing include file: %s\n" include_path;
+            (* printf "Parsing include file: %s\n" include_path; *)
             let (filtered_decls, inner_includes) = parse_and_filter include_path builder_instance in
             filtered_decls @ parse_includes include_path inner_includes builder_instance
           end else begin
-            printf "Warning: Include file not found: %s\n" include_path;
+            (* printf "Warning: Include file not found: %s\n" include_path; *)
             []
           end
         end
