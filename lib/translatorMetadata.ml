@@ -4,6 +4,8 @@ open Syntax
 open Internal
 
 
+module ModerAST = AST(Moder.ModingMetaData)
+
 module Definitions = struct
 
   type ite_functionalize_t =
@@ -19,13 +21,15 @@ module Definitions = struct
   [@@deriving show, eq]
   
   type quantification_forall_functionalize_collection_t =
-    | QFSeq of ParserPass.Prog.seq_display_t
-    | QFMap of ParserPass.Prog.map_comp_t
-    | QFSet of ParserPass.Prog.set_comp_t
+    | QFSeq of ModerAST.Prog.seq_display_t
+    | QFMap of ModerAST.Prog.expr_t
+    | QFSet of ModerAST.Prog.set_comp_t
   [@@deriving show, eq]
 
   type quantification_forall_functionalize_t =
-    { out_var: Moder.Definitions.quantification_functionalize_t
+    { 
+      (* out_var: Moder.Definitions.quantification_functionalize_t *)
+      out_var : ModerAST.Prog.expr_t
     ; collection: quantification_forall_functionalize_collection_t
     }
   [@@deriving show, eq]
@@ -50,7 +54,7 @@ module TranslationMetaData : MetaData
   with type ite_t     = Definitions.ite_functionalize_t option
   with type match_t   = Definitions.match_functionalize_t option
   with type quantification_t =
-         Definitions.quantification_forall_functionalize_collection_t option
+         Definitions.quantification_forall_functionalize_t option
   with type binary_op_t = Definitions.binary_op_functionalize_t option
 
   with type arglist_t = Definitions.arglist_functionalize_t option
@@ -75,7 +79,7 @@ module TranslationMetaData : MetaData
   [@@deriving show, eq]
 
   type quantification_t =
-    Definitions.quantification_forall_functionalize_collection_t option
+    Definitions.quantification_forall_functionalize_t option
   [@@deriving show, eq]
 
   type binary_op_t = Definitions.binary_op_functionalize_t option

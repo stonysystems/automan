@@ -501,7 +501,9 @@ module Translator = struct
         (origin_fmls : AST.TopDecl.formal_t list) :
         Annotator.AnnotationMetaData.predicate_decl_t =  
         match m with 
-        | Moder.Definitions.Predicate -> None
+        | Moder.Definitions.Predicate -> 
+          (* TCommon.debug_print ("here") ; *)
+          None
         | Moder.Definitions.Function m -> 
           (* To be changed later *)
           let rec is_fml_in_lst 
@@ -516,6 +518,7 @@ module Translator = struct
             )
           in
           let vars_in = m.vars_in in
+          (* TCommon.debug_print (string_of_int (List.length vars_in)) ; *)
           let rec aux 
             (lst : AST.TopDecl.formal_t list) :
             (Annotation.mode_t list) = 
@@ -531,26 +534,40 @@ module Translator = struct
       in
       match x with 
       | Predicate (metadata, _, _, id, _, origin_fmls, specs, e) -> begin
-        let _ = metadata, e in
-        let metadata = 
+        let in_ou_metadata = 
           predicate_decl_t_metadata_roll_back metadata origin_fmls in
 
         let fmls_input, fmls_rtn = 
-          get_fmls_input_and_rtn origin_fmls metadata in
+          get_fmls_input_and_rtn origin_fmls in_ou_metadata in
+        
+        (* TCommon.debug_print (string_of_int (List.length fmls_input)) ;
+        TCommon.debug_print (string_of_int (List.length fmls_rtn)) ; *)
         
         let rtn = get_rtn_from_fmls fmls_rtn in
-
-        (* let t_e = TCommon.expr_of_str "HOLDER" in *)
-        let tracker = Tracker.API.build fmls_rtn in
-        let members_to_output = 
-          List.map (
-            fun x ->
-              match x with AST.TopDecl.Formal (_, id, _) ->
-                TCommon.expr_of_str id 
-          ) fmls_rtn in
         let t_e = 
-          Functionalization.Functionalization.entry
-            e tracker members_to_output
+          (
+            match metadata with 
+            | Moder.Definitions.Predicate -> 
+              (Prog.t_expr e)
+            | Moder.Definitions.Function meta -> (
+              match meta.make_stub with 
+              | true -> TCommon.expr_blank
+              | false ->
+                let tracker = Tracker.API.build fmls_rtn in
+                let members_to_output = 
+                  List.map (
+                    fun x ->
+                      match x with AST.TopDecl.Formal (_, id, _) ->
+                        TCommon.expr_of_str id 
+                  ) fmls_rtn in
+                let t_e = 
+                  Functionalization.Functionalization.entry
+                    e tracker members_to_output
+                in 
+                let t_e = Prog.t_expr t_e in
+                t_e
+            )
+          )
         in
         let t_id = remapper#id_remap id in
         let t_original_fmls = List.map t_formal origin_fmls in
@@ -564,7 +581,7 @@ module Translator = struct
             id t_id
             specs 
             t_fmls_input
-            metadata
+            in_ou_metadata
         in
         let t_rtn = 
           match t_rtn with
@@ -669,9 +686,9 @@ module Translator = struct
   let translate (x : AST.t) (type_table : TypeTableBuilder.t) = 
     let _ = type_table in
     let Dafny { includes = _; decls = decls } = x in
-    AST.Dafny { includes = [""]; decls = begin 
+    AST.Dafny { includes = [""]; decls =  
       List.concat (List.map 
         (fun x -> TopDecl.translate x type_table) decls)
-    end }
+    }
 
 end

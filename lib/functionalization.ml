@@ -112,7 +112,7 @@ module Functionalization = struct
       match meta with 
       | None -> (
         (* TCommon.debug_print (TCommon.str_of_expr x) ; *)
-        assert false
+        ([], tracker, cnter)
       )
       | Some binary_op_functionalize ->
       match binary_op_functionalize with 
@@ -194,10 +194,9 @@ module Functionalization = struct
                 Tracker.API.assign t k v) 
             tracker
             (List.combine 
-                members_to_be_output access) in
+                members_to_be_output' access) in
         ([let_helper], tracker', cnter)
       )
-    
     | Let let_bind ->
       let solved_expr = 
         entry
@@ -225,7 +224,9 @@ module Functionalization = struct
         AST.Prog.Let {
           ghost = let_bind.ghost ;
           pats = let_bind.pats ;
-          defs = let_bind.defs ; 
+          defs = NonEmptyList.map 
+            (fun x -> Tracker.Obligation.Prog.solve_expr tracker x) 
+            let_bind.defs ;
           body = solved_expr ;
         }
       in
@@ -234,7 +235,43 @@ module Functionalization = struct
         defs = NonEmptyList.coerce [assigner] ;
       } in
       ([helper], tracker', cnter)
-    
+    | Quantifier (meta, _) ->
+      (
+        match meta with 
+        | None -> ([], tracker, cnter)
+        | Some meta -> 
+          let k = Checker.Converter.Prog.convert_expr meta.out_var in
+          match meta.collection with 
+          | QFSeq seq_display -> (
+            let v = 
+              AST.Prog.SeqDisplay
+                (Checker.Converter.Prog.convert_seq_display seq_display) in
+            let cnter = cnter + 1 in
+            let var_id = local_var cnter in
+            let let_helper = {
+              pats = NonEmptyList.coerce [AST.Prog.PatVar (var_id, None)] ;
+              defs = NonEmptyList.coerce 
+                [Tracker.Obligation.Prog.solve_expr tracker v] ;
+            } in
+            let tracker' = 
+              Tracker.API.assign tracker k (TCommon.expr_of_str var_id) in
+            ([let_helper], tracker', cnter)
+          )
+          | QFMap v -> (
+            let v = Checker.Converter.Prog.convert_expr v in
+            let cnter = cnter + 1 in
+            let var_id = local_var cnter in
+            let let_helper = {
+              pats = NonEmptyList.coerce [AST.Prog.PatVar (var_id, None)] ;
+              defs = NonEmptyList.coerce 
+                [Tracker.Obligation.Prog.solve_expr tracker v] ;
+            } in
+            let tracker' = 
+              Tracker.API.assign tracker k (TCommon.expr_of_str var_id) in
+            ([let_helper], tracker', cnter)
+          )
+          | _ -> assert false
+      )
     | _ -> ([], tracker, cnter)
 
   and entry 

@@ -25,7 +25,6 @@ module LiveRSL__Acceptor_i {
     log_truncation_point:OperationNumber
   )
 
-  /*
   predicate IsLogTruncationPointValid(log_truncation_point:OperationNumber, last_checkpointed_operation:seq<OperationNumber>,
                                       config:LConfiguration)
   {
@@ -33,7 +32,7 @@ module LiveRSL__Acceptor_i {
                                 last_checkpointed_operation,
                                 LMinQuorumSize(config))
   }
-
+  
   predicate RemoveVotesBeforeLogTruncationPoint(votes:Votes, votes':Votes, log_truncation_point:OperationNumber)
   {
     /*
@@ -42,10 +41,12 @@ module LiveRSL__Acceptor_i {
     && (forall opn :: opn >= log_truncation_point && opn in votes ==> opn in votes')
     */
 
-    && (forall opn :: opn in votes' ==> opn in votes && votes'[opn] == votes[opn])
-    && (forall opn :: opn < log_truncation_point ==> opn !in votes')
-    && (forall opn :: opn >= log_truncation_point && opn in votes ==> opn in votes')
-    && (forall opn :: opn in votes && opn >= log_truncation_point ==> opn in votes' && votes'[opn] == votes[opn])
+    // && (forall opn :: opn in votes' ==> opn in votes && votes'[opn] == votes[opn])
+    // && (forall opn :: opn < log_truncation_point ==> opn !in votes')
+    // && (forall opn :: opn >= log_truncation_point && opn in votes ==> opn in votes')
+
+    && (forall opn :: opn in votes' <==> opn in votes && opn >= log_truncation_point)
+    && (forall opn :: opn in votes' ==> votes'[opn] == votes[opn])
   }
 
   predicate LAddVoteAndRemoveOldOnes(votes:Votes, votes':Votes, new_opn:OperationNumber, new_vote:Vote, log_truncation_point:OperationNumber)
@@ -57,7 +58,6 @@ module LiveRSL__Acceptor_i {
 
     && (forall opn :: opn in votes' <==> opn >= log_truncation_point && (opn in votes || opn == new_opn))
     && (forall opn :: opn in votes' ==> votes'[opn] == (if opn == new_opn then new_vote else votes[opn]))
-    && (forall opn :: opn in (votes.Keys + {new_opn}) && opn >= log_truncation_point ==> opn in votes' && votes'[opn] == (if opn == new_opn then new_vote else votes[opn]))
   }
 
   predicate LAcceptorInit(a:LAcceptor, c:LReplicaConstants)
@@ -69,7 +69,7 @@ module LiveRSL__Acceptor_i {
     && (forall idx :: 0 <= idx < |a.last_checkpointed_operation| ==> a.last_checkpointed_operation[idx] == 0)
     && a.log_truncation_point == 0
   }
-
+      
   predicate LAcceptorProcess1a(s:LAcceptor, s':LAcceptor, inp:RslPacket, broadcast_sent_packets:seq<RslPacket>)
     requires inp.msg.RslMessage_1a?
   {
@@ -105,7 +105,6 @@ module LiveRSL__Acceptor_i {
     && s'.constants == s.constants
     && s'.last_checkpointed_operation == s.last_checkpointed_operation
   }
-  */
 
   predicate LAcceptorProcessHeartbeat(s:LAcceptor, s':LAcceptor, inp:RslPacket)
     requires inp.msg.RslMessage_Heartbeat?
@@ -128,11 +127,12 @@ module LiveRSL__Acceptor_i {
 
   predicate LAcceptorTruncateLog(s:LAcceptor, s':LAcceptor, opn:OperationNumber)
   {
+    var t := seq(10, idx => 1);
     if opn <= s.log_truncation_point then
       s' == s
     else
       && RemoveVotesBeforeLogTruncationPoint(s.votes, s'.votes, opn)
       && s' == s.(log_truncation_point := opn, votes := s'.votes)
   }
-
+  
 }

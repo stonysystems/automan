@@ -276,7 +276,7 @@ module DataTracker = struct
     * For tracker t, find the node with key = k
     * Assign value v with skipped members (only for data update)
     *)
-  let assign 
+  let assign
     (t : t)
     (k : AST.Prog.expr_t) 
     (v : AST.Prog.expr_t) 
@@ -807,6 +807,9 @@ module DataTracker = struct
       (v : AST.Prog.expr_t) : t = 
       let v' = Obligation.Prog.solve_expr t v in
       (* Note that here we might do not need a Obligation Solver at all *)
+      (* TCommon.debug_print 
+        ("[Tracker] assign " ^ 
+        (TCommon.str_of_expr k) ^ " <- " ^ (TCommon.str_of_expr v)) ; *)
       if print_log then 
         TCommon.debug_print 
           ("[Tracker] assign " ^ 
@@ -836,30 +839,33 @@ module DataTracker = struct
       tracker
 
     let rec saturation_check (t : t) : bool = 
-      match t with Tracker (_, vs) -> 
+      match t with Tracker (_k, vs) -> 
         let rec aux lst = 
         match lst with
         | [] -> true
-        | h :: rest -> (
+        | h :: rest -> ((
+          (* TCommon.debug_print_expr h.assigned_v ; *)
           match TCommon.is_expr_n_blank h.assigned_v with 
           | true -> true
           | false -> 
-            match h.t with Tracker (_, sub_vs) ->
-              List.for_all (
-                fun sub_v -> saturation_check sub_v.t
-              ) sub_vs
-        ) && (aux rest) in
+            (
+              match h.t with Tracker (_k, sub_vs) ->
+                (* TCommon.debug_print (Printer.TopDecl.print_formal _k) ; *)
+                ( (List.length sub_vs) > 0 ) &&
+                (
+                  List.for_all (
+                    fun sub_v -> saturation_check sub_v.t
+                  ) sub_vs
+                ) 
+            )
+        ) && (aux rest)) in
         aux vs
 
     let compare
-      (t1 : t)
-      (t2 : t) : bool = 
-      compare t1 t2
+      (t1 : t) (t2 : t) : bool = compare t1 t2
 
     let merge
-      (t1 : t)
-      (t2 : t) : t = 
-      merge t1 t2
+      (t1 : t) (t2 : t) : t = merge t1 t2
 
     let get_assigned_lst 
       (t : t) : AST.Prog.expr_t list = 

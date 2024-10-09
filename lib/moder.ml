@@ -2042,7 +2042,7 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
     return (Some (ModePass.TopDecl.SynonymTypeDecl syn'))
   | PredFunDecl
       (Function (m_pres, _attrs, f_id, tp_ps, ps, tp, specs, body)) ->
-
+    
     let (ps', _) = mode_topdecl_formals ps None in
     let tp' = Convert.typ tp in
     let specs' = List.map aux_spec specs in
@@ -2101,7 +2101,7 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
           ~ok:(fun res -> return (Some res))
           ~error:begin fun err ->
             let< () = log_error (report_offending_predicate p_id err) in
-            return (Some (fallback_result ()))
+            return (Some (fallback_result ())) (* HERE *)
           end
     end
   | MethLemDecl methlem -> begin

@@ -5,6 +5,7 @@ open TypeTableBuilder
 
 module TCommon = TranslatorCommon.TranslatorCommon
 module Tracker = DataTracker.DataTracker
+module QuantifierHelper = QuantifierHelper.QuantifierHelper
 
 module ModerAST = AST(Moder.ModingMetaData)
 module TranslatorAST = AST(TranslatorMetadata.TranslationMetaData)
@@ -20,10 +21,8 @@ module Converter = struct
       (x : ModerAST.Type.name_seg_t) : TranslatorAST.Type.name_seg_t = 
       match x with ModerAST.Type.TpIdSeg x ->
       TranslatorAST.Type.TpIdSeg
-      {
-        id = x.id;
-        gen_inst = List.map convert_t x.gen_inst
-      }
+      {id = x.id;
+        gen_inst = List.map convert_t x.gen_inst}
 
     and convert_t 
       (x : ModerAST.Type.t) : TranslatorAST.Type.t = 
@@ -544,17 +543,17 @@ module Checker = struct
     (* Ignore the eq_meta.unassigned_members at this moment: It's unassigned all the time *)
     let rec check_expr 
       (x : ModerAST.Prog.expr_t)
-      (tracker : DataTracker.DataTracker.t) :
+      (tracker : DataTracker.DataTracker.t)
+      (qtf_booker : QuantifierHelper.quantifier_booker) :
       (TranslatorAST.Prog.expr_t *
-       DataTracker.DataTracker.t) = 
-      let basic = (Converter.Prog.convert_expr x, tracker) in
+       DataTracker.DataTracker.t *
+       QuantifierHelper.quantifier_booker) = 
+      let basic = (Converter.Prog.convert_expr x, tracker, qtf_booker) in
 
       if print_checker_log then
         TCommon.debug_print 
           ("[Checker] " ^ 
-          (TCommon.str_of_expr (Converter.Prog.convert_expr x))) 
-      else 
-        () ;
+          (TCommon.str_of_expr (Converter.Prog.convert_expr x))) ;
 
       match x with 
       | Suffixed (expr, suffix) -> 
@@ -582,13 +581,13 @@ module Checker = struct
                   TranslatorAST.Prog.ArgList (
                     Converter.Prog.convert_arglist arglist, 
                     meta
-                )) in (expr', tracker')
+                )) in (expr', tracker', qtf_booker)
             )
           | _ -> basic
         ) 
       | Let x -> 
-        let (body_expr', tracker') = check_expr
-          x.body tracker 
+        let (body_expr', tracker', qtf_booker) = 
+          check_expr x.body tracker qtf_booker
         in
         let expr' = 
           TranslatorAST.Prog.Let {
@@ -599,7 +598,7 @@ module Checker = struct
                       Converter.Prog.convert_expr x.defs ;
             body = body_expr' ;
           } in
-        (expr', tracker')
+        (expr', tracker', qtf_booker)
       | Binary (meta, bop, e1, e2) ->        
         (
           match meta with 
@@ -611,23 +610,31 @@ module Checker = struct
                 * meta.outvar and meta.unassigned_members 
                 * are not necessary  
                 *)
-              let k, v = 
+              
+              let (updated, qtf_booker) = 
+                QuantifierHelper.try_add_seq_dom x qtf_booker in
+              
+              if updated then 
+                (* let _ = QuantifierHelper.print_seq_doms qtf_booker in *)
+                (Converter.Prog.convert_expr x, tracker, qtf_booker)
+              else
+                let k, v = 
                 (match eq_meta.outvar_is_left with
-                | true -> e1, e2
-                | false -> e2, e1) in
-              let k, v = 
-                Converter.Prog.convert_expr k, 
-                Converter.Prog.convert_expr v in
-              let tracker' = Tracker.API.assign tracker k v in
-              (TranslatorAST.Prog.Binary
-                (meta, bop,
-                  Converter.Prog.convert_expr e1,
-                  Converter.Prog.convert_expr e2 ), tracker')
+                | true -> e1, e2 | false -> e2, e1) in
+                let k, v = 
+                  Converter.Prog.convert_expr k, 
+                  Converter.Prog.convert_expr v in
+                let tracker' = Tracker.API.assign tracker k v in
+                (TranslatorAST.Prog.Binary
+                  (meta, bop,
+                    Converter.Prog.convert_expr e1,
+                    Converter.Prog.convert_expr e2), tracker', qtf_booker)
+            
             | Moder.Definitions.And _ ->
               (**
                 * meta is not useful at all; 
                 *)
-              let e1', tracker' = check_expr e1 tracker in
+              let e1', tracker', qtf_booker = check_expr e1 tracker qtf_booker in
               let lft_vars = 
                 List.map
                 (fun x : Moder.Definitions.outvar_lhs_t -> 
@@ -635,7 +642,7 @@ module Checker = struct
                   { mq_outvar = NonEmptyList.coerce [id] ; 
                     fieldlike = None ; } ) 
                 (Tracker.API.get_assigned_lst tracker') in
-              let e2', tracker' = check_expr e2 tracker' in
+              let e2', tracker', qtf_booker = check_expr e2 tracker' qtf_booker in
               let rht_vars = 
                 List.map
                 (fun x : Moder.Definitions.outvar_lhs_t -> 
@@ -650,7 +657,7 @@ module Checker = struct
                 }) in
               let x' = TranslatorAST.Prog.Binary 
                 (meta', bop, e1', e2') in
-              (x', tracker')
+              (x', tracker', qtf_booker)
         )
       | If (meta, e_cond, e_then, e_else) ->
         (
@@ -660,8 +667,10 @@ module Checker = struct
           let empty_tracker = Tracker.API.clear tracker in
           let e_cond' = Converter.Prog.convert_expr e_cond in
 
-          let e_then', tracker_then = check_expr e_then empty_tracker in
-          let e_else', tracker_else = check_expr e_else empty_tracker in
+          let e_then', tracker_then, _ = 
+            check_expr e_then empty_tracker qtf_booker in
+          let e_else', tracker_else, _ = 
+            check_expr e_else empty_tracker qtf_booker in
 
           (* TCommon.debug_print (TCommon.str_of_expr e_then') ; *)
 
@@ -669,6 +678,7 @@ module Checker = struct
             (Tracker.API.compare tracker_then tracker_else)
             "checker: then-branch and else-branch return different set of assignments"
           ;
+          
           let merged_tracker = 
             Tracker.API.merge tracker_then tracker_else in
           let vars = 
@@ -689,8 +699,56 @@ module Checker = struct
           let expr' = 
             TranslatorAST.Prog.If 
               (Some meta', e_cond', e_then', e_else') in
-          (expr', tracker')
+          (expr', tracker', qtf_booker)
         ) 
+      | Quantifier (_meta, quantification) -> 
+        let (_is_map_dom, qtf_booker) = 
+          QuantifierHelper.try_add_map_dom x qtf_booker in 
+        let (is_map_map, qtf_booker) = 
+          QuantifierHelper.try_add_map_map x qtf_booker in
+        let (is_seq_map, qtf_booker) = 
+          QuantifierHelper.try_add_seq_map x qtf_booker in
+        if is_seq_map then
+          (* let _ = QuantifierHelper.print_seq_maps booker_updated_seq_map in *)
+          (
+            match QuantifierHelper.construct_seq_display qtf_booker with
+            | None -> 
+              (Converter.Prog.convert_expr x, tracker, qtf_booker)
+            | Some (seq_display, k) ->
+              let expr' = 
+                TranslatorAST.Prog.Quantifier 
+                  (Some 
+                    {out_var = k;
+                      collection = 
+                      TranslatorMetadata.Definitions.QFSeq (seq_display);}, 
+                  (Converter.Prog.convert_quantification quantification))
+              in 
+              let k' = Converter.Prog.convert_expr k in
+              (* TCommon.debug_print_expr k' ; *)
+              let tracker' = Tracker.API.assign tracker k' v_holder in
+              (expr', tracker', qtf_booker)
+          )
+        else if is_map_map then
+          (
+            match QuantifierHelper.construct_map_qtf qtf_booker with
+            | None ->
+              (Converter.Prog.convert_expr x, tracker, qtf_booker)
+            | Some (qtfier, k) ->
+              let expr' = 
+                TranslatorAST.Prog.Quantifier
+                  (Some
+                    {
+                      out_var = k;
+                      collection = 
+                        TranslatorMetadata.Definitions.QFMap (qtfier);
+                    }, (Converter.Prog.convert_quantification quantification)) 
+              in
+              let k' = Converter.Prog.convert_expr k in
+              let tracker' = Tracker.API.assign tracker k' v_holder in
+              (expr', tracker', qtf_booker)
+          )
+        else
+          (Converter.Prog.convert_expr x, tracker, qtf_booker)
       | _ -> basic
 
   end
@@ -706,9 +764,7 @@ module Checker = struct
         let _ = is_ghost, attrs, id, params, fmls, specs, e in
         (
           if print_checker_log then
-            TCommon.debug_print ("[Checker] " ^ id) 
-          else 
-            () ;
+            TCommon.debug_print ("[Checker] " ^ id) ;
 
           match meta with 
           | Moder.Definitions.Predicate -> 
@@ -730,8 +786,16 @@ module Checker = struct
                       ))) vars_out in
               let tracker = 
                 DataTracker.DataTracker.API.build vars_out in
-              let (e', tracker') = Prog.check_expr e tracker in
-              assert (Tracker.API.saturation_check tracker') ;
+              (* init checker analysis here *)
+              let qtf_booker = QuantifierHelper.init in
+              let (e', tracker', _) = Prog.check_expr e tracker qtf_booker in
+              let _ = tracker' in
+
+              (* Printf.printf "%s\n" (Tracker.show tracker') ; *)
+              (* assert_helper
+                (Tracker.API.saturation_check tracker')
+                ("Saturation Check for " ^ id ^ " failed") ; *)
+              
               TranslatorAST.TopDecl.Predicate (
                 meta, 
                 is_ghost, 
@@ -785,7 +849,7 @@ module Checker = struct
   
   let check 
     (x : ModerAST.t)
-    (type_table : TypeTableBuilder.t) : (TranslatorAST.t) = 
+    (type_table : TypeTableBuilder.t) :(TranslatorAST.t) = 
     match x with ModerAST.Dafny x ->
       TranslatorAST.Dafny
       {
@@ -797,4 +861,3 @@ module Checker = struct
       }
 
 end
- 
