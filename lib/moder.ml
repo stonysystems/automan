@@ -601,24 +601,18 @@ let rec mode_expr_no_out_vars_pattern
     (vars_out: AnnotationPass.TopDecl.formal_t list)
     (pat: AnnotationPass.Prog.pattern_t)
   : (ModePass.Prog.pattern_t, error_outvar_occur_t) m =
-  (* let here = "Moder.mode_expr_no_out_vars_pattern" in *)
+  let here = "Moder.mode_expr_no_out_vars_pattern" in
 
   match pat with
   | PatVar (p_id, tp_opt) ->
-    let is_outvar = Util.id_in_formals p_id vars_out in
-    let _ = if is_outvar then
-        ()
-    in
-    let tp_opt' = Option.map Convert.typ tp_opt in
-    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt'))
-    (* let* () =
+    let* () =
       Result.error_when (Util.id_in_formals p_id vars_out)
         (lazy
           { callstack = [here]
           ; sort = {occurring_outvar = p_id; shadowed = true }})
     in
     let tp_opt' = Option.map Convert.typ tp_opt in
-    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt')) *)
+    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt'))
   | PatCtor (ctor_id, pats) ->
     let* pats' = List.mapMResult (mode_expr_no_out_vars_pattern vars_out) pats in
     Result.Ok (ModePass.Prog.PatCtor (ctor_id, pats'))
@@ -681,16 +675,6 @@ let rec mode_expr_no_out_vars
                     Result.Ok (new_upds @ [(m_id, new_val')], unassigneds')
                   | Some ov ->
                     let* () =
-                      if Either.fold m_id
-                        ~left:(fun id ->
-                          not (ov.mq_outvar = NonEmptyList.snoc except id
-                              && Option.is_none ov.fieldlike))
-                        ~right:(Fun.const true)
-                      then 
-                        Result.Ok ()
-                      else 
-                        Result.Ok ()
-                    (* let* () =
                       Result.error_when
                         (Either.fold m_id
                            ~left:(fun id ->
@@ -704,7 +688,7 @@ let rec mode_expr_no_out_vars
                               OutVarOccur
                                 { occurring_outvar = NonEmptyList.head except
                                 ; shadowed = false }}
-                        end *)
+                        end
                     in
                     Result.Ok
                       ( new_upds @ [(m_id, Util.outvar_lhs_to_modepass_expr ov)]
@@ -835,13 +819,7 @@ let rec mode_expr_no_out_vars
     in
     Result.Ok (ModePass.Prog.Suffixed (pref', suff'), unassigned)
   | NameSeg (seg_id, seg_tp_args) ->
-    let is_outvar = Util.id_in_formals seg_id vars_out in
-    let _ = if is_outvar then
-        ()
-    in
-    let seg_tp_args' = List.map Convert.typ seg_tp_args in
-    Result.Ok (ModePass.Prog.NameSeg (seg_id, seg_tp_args'), no_unassigneds)
-    (* let* () =
+    let* () =
       Result.error_when (Util.id_in_formals seg_id vars_out)
         (lazy
           { callstack = [here]
@@ -849,7 +827,7 @@ let rec mode_expr_no_out_vars
     in
     let seg_tp_args' = List.map Convert.typ seg_tp_args in
     Result.Ok
-      (ModePass.Prog.NameSeg (seg_id, seg_tp_args'), no_unassigneds) *)
+      (ModePass.Prog.NameSeg (seg_id, seg_tp_args'), no_unassigneds)
 
   | Lambda (lam_ps, lam_body) ->
     let* lam_ps' =

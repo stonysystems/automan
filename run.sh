@@ -1,4 +1,4 @@
-# eval $(opam env)
+eval $(opam env)
 
 rsl_files=(
   Acceptor.i.dfy 
@@ -9,21 +9,21 @@ rsl_files=(
   # Message.i.dfy
   # Election.i.dfy
   # Learner.i.dfy 
-  Proposer.i.dfy
+  # Proposer.i.dfy
   # StateMachine.i.dfy
   # Executor.i.dfy
   # Replica.i.dfy
 )
 
 kv_files=(
-  # Message.i.dfy
-  # SingleMessage.i.dfy
-  # Network.i.dfy
-  # Parameters.i.dfy
-  # Configuration.i.dfy
-  # Delegations.i.dfy
-  # SingleDelivery.i.dfy
-  # Host.i.dfy
+  Message.i.dfy
+  SingleMessage.i.dfy
+  Network.i.dfy
+  Parameters.i.dfy
+  Configuration.i.dfy
+  Delegations.i.dfy
+  SingleDelivery.i.dfy
+  Host.i.dfy
 )
 
 if [ $# -eq 0 ]; then
@@ -35,7 +35,7 @@ if [ "$1" == "rsl" ]; then
   for file in "${rsl_files[@]}"
   do
     echo "[+] rsl/spec -> rsl/impl | "$file
-    dune exe ./_build/default/test/test_automan.exe ./asset/tmp/spec/rsl/$file asset/tmp/annotations/RSL.automan  > \
+    dune exe test/test_automan.exe ./asset/tmp/spec/rsl/$file asset/tmp/annotations/RSL.automan  > \
       ./asset/tmp/impl/rsl/$file
   done
 elif [ "$1" == "kv" ]; then

@@ -189,6 +189,12 @@ module Refinement  = struct
                     "AbstractifyCBroadcastToRlsPacketSeq", 
                   let e = member_access in AST.Prog.ArgList (({positional=[e]; named=[]}, None))
                 )
+            | "OutboundPackets" -> (* Hard coded *)
+              AST.Prog.Suffixed (
+                  TCommon.expr_of_str 
+                    "AbstractifyOutboundCPacketsToSeqOfRslPackets", 
+                  let e = member_access in AST.Prog.ArgList (({positional=[e]; named=[]}, None))
+                )
             | _ ->
             (* AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber),  *)
             let _, param_tp   = List.unsnoc tp_gen_inst   in
