@@ -24,15 +24,6 @@ module LiveRSL__Constants_i {
 module LiveRSL__DistributedSystem_i {
 
 }
-module LiveRSL__Message_i {
-
-}
-module LiveRSL__Parameters_i {
-
-}
-module LiveRSL__Types_i {
-
-}
 module LiveRSL__Election_i {
   ElectionStateInit(-,+);
   ElectionStateProcessHeartbeat(+,-,+,+);
