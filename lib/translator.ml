@@ -332,6 +332,108 @@ module Translator = struct
         AST.TopDecl.PredFunDecl   abstractify     ;
       ]
 
+    let t_synonym_type (x : AST.TopDecl.synonym_type_t) = 
+      let t_id = remapper#id_remap x.id in
+      let m_id = "s" in
+      let t_rhs, fml, t_fml = (
+            match x.rhs with 
+            | AST.TopDecl.Synonym tp -> 
+              let t_tp = (Type.translate tp) in
+              AST.TopDecl.Synonym t_tp, 
+              (AST.TopDecl.Formal (false, m_id, tp)), 
+              (AST.TopDecl.Formal (false, m_id, t_tp))
+            | _ -> assert false
+          ) in
+      let _ = t_id, t_rhs, fml, t_fml in
+      let abstractable_body = 
+        (
+          let is_abstractables = 
+            Refinement.generate_checker_4_fmls  
+              [t_fml] Refinement.is_abstractable_token false
+          in
+          match is_abstractables with 
+          | [] -> TCommon.expr_of_str "true"
+          | h :: _ -> h
+        )
+      in
+      let is_abstractable = 
+        AST.Prog.Suffixed (
+          Refinement.generate_token 
+            t_id Refinement.is_abstractable_token, 
+          AST.Prog.ArgList 
+            ({positional=[TCommon.expr_of_str m_id]; named=[]}, None)
+        )
+      in
+      let valid_body = 
+        (
+          let is_valids = 
+            Refinement.generate_checker_4_fmls  
+              [t_fml] Refinement.is_valid_token false
+          in
+          TCommon.expr_lst_to_and (is_abstractable :: is_valids)
+        )
+      in
+      let abstractify_body = 
+        (
+          let abs = 
+          Refinement.generate_abstractify_4_formals 
+            [t_fml] [fml] false
+          in
+          match abs with 
+          | [] -> assert false
+          | h :: _ -> h
+        )
+      in
+      (* TCommon.debug_print_expr abstractable_body ;
+      TCommon.debug_print_expr valid_body ;
+      TCommon.debug_print_expr abstractify_body ; *)
+      let _ = valid_body, abstractable_body, abstractify_body in
+      [
+        AST.TopDecl.SynonymTypeDecl 
+          {x with id = t_id ; rhs = t_rhs ;} ;
+
+        AST.TopDecl.PredFunDecl (
+          AST.TopDecl.Predicate (
+            Moder.Definitions.Predicate , 
+            false, 
+            [], TCommon.expr_to_id 
+                (Refinement.generate_token t_id Refinement.is_abstractable_token), 
+            [], [AST.TopDecl.Formal (false, m_id, TCommon.tp_of_id t_id)], 
+            [], 
+            abstractable_body
+          )) ;
+
+        AST.TopDecl.PredFunDecl (
+          AST.TopDecl.Predicate (
+            Moder.Definitions.Predicate , 
+            false, 
+            [], TCommon.expr_to_id 
+                (Refinement.generate_token t_id Refinement.is_valid_token), 
+            [], [AST.TopDecl.Formal (false, m_id, TCommon.tp_of_id t_id)], 
+            [], 
+            valid_body
+          )) ;
+
+        AST.TopDecl.PredFunDecl (
+          AST.TopDecl.Function(
+            false, 
+            [], 
+            TCommon.expr_to_id 
+              (Refinement.generate_abstractify_token t_id x.id), 
+            [], 
+            [AST.TopDecl.Formal (false, m_id, TCommon.tp_of_id t_id)], 
+            TCommon.tp_of_id x.id, 
+            [AST.TopDecl.Requires (
+              AST.Prog.Suffixed (
+                is_abstractable, 
+                AST.Prog.ArgList 
+                  ({positional=[TCommon.expr_of_str m_id]; named=[]}, None)
+              )
+            )], 
+            abstractify_body
+          )) ;
+      ]
+
     let t_function_spec (x : AST.TopDecl.function_spec_t) = 
       match x with
       | Requires  expr -> AST.TopDecl.Requires  (Prog.t_expr expr)
@@ -745,19 +847,7 @@ module Translator = struct
       | ModuleImport _ 
       | MethLemDecl _ -> []
       | SynonymTypeDecl x ->
-        let x' : AST.TopDecl.synonym_type_t = 
-        {
-          ann = x.ann ;
-          attrs = [] ;
-          id = remapper#id_remap x.id ;
-          params = x.params ; 
-          rhs = (
-            match x.rhs with 
-            | AST.TopDecl.Synonym tp -> 
-              AST.TopDecl.Synonym (Type.translate tp)
-            | _ -> assert false
-          ) ;
-        } in [AST.TopDecl.SynonymTypeDecl x']
+        t_synonym_type x
       | ModuleDef x -> t_module_def x type_table
       | DatatypeDecl x -> (
         (* TCommon.debug_print (Printer.TopDecl.print' (DatatypeDecl x) 0) ; *)

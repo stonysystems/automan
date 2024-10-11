@@ -330,7 +330,12 @@ module PrettyPrinter (M : MetaData) = struct
           | false -> expr_str
         in
         Printf.sprintf "%s %s%s %s"
-        (aux expr_l print_expr_in_one_line)
+        (
+          let x = aux expr_l print_expr_in_one_line in
+          match bop with 
+          | Or -> "(" ^ x ^ ")"
+          | _ -> x
+        )
         ( 
           match bop with
           | And -> idnt_str
@@ -338,9 +343,14 @@ module PrettyPrinter (M : MetaData) = struct
         )
         (CommonPrinter.print_bop bop)
         (
+          let x = 
           match bop with 
           | And -> (aux expr_r (fun x -> print_expr x idnt_lvl))
           | _ -> print_expr_in_one_line expr_r
+          in
+          match bop with 
+          | Or -> "(" ^ x ^ ")"
+          | _ -> x
         )
       )
       | Tuple (exprs) -> begin
