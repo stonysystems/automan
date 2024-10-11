@@ -16,6 +16,8 @@ module Refinement  = struct
   let is_valid_token = "IsValid"
   let is_abstractable_token = "IsAbstractable"
   let abstractify_seq_token = TCommon.expr_of_str "AbstractifySeq"
+  let abstractify_map_token = TCommon.expr_of_str "AbstractifyMap"
+
 
   let generate_token t_id token = 
     TCommon.expr_of_str (Printf.sprintf "%s%s" t_id token)
@@ -95,7 +97,68 @@ module Refinement  = struct
               })
             ]
           end
-          | 2 -> assert false
+          | 2 -> ( (* id is map *)
+            let rest, param_tp_v = List.unsnoc gen_inst in
+            let _, param_tp_k = List.unsnoc rest in 
+            let param_tp_k_id = TCommon.id_of_tp param_tp_k in
+            let param_tp_v_id = TCommon.id_of_tp param_tp_v in
+            (* TCommon.debug_print (param_tp_k_id ^ "  " ^ param_tp_v_id) ; *)
+            let is_k_primitive = TCommon.is_primitive param_tp_k_id in
+            let is_v_primitive = TCommon.is_primitive param_tp_v_id in
+            match (is_k_primitive && is_v_primitive) with
+            | true -> [] | false -> 
+              [AST.Prog.Quantifier (None, {
+                qt = Syntax.Common.Forall;
+                qdom = QDom {
+                  qvars = [QVar (i_id, None, None, [])];
+                  qrange = None
+                };
+                qbody = (
+                  let coll = generate_args wrapped_as_member_access fml_id in
+                  let checker_for_k = 
+                    (
+                      match is_k_primitive with 
+                      | true -> []
+                      | false ->
+                        [AST.Prog.Suffixed (
+                          generate_token param_tp_k_id token, 
+                          AST.Prog.ArgList ({positional=[i]; named=[]}, None)
+                        )]
+                    )
+                  in
+                  let checker_for_v = 
+                    (
+                      match is_v_primitive with 
+                      | true -> []
+                      | false ->
+                        [AST.Prog.Suffixed (
+                          generate_token param_tp_v_id token, 
+                          AST.Prog.ArgList ({positional=[
+                            AST.Prog.Suffixed (i, 
+                              AST.Prog.ArgList 
+                                ({positional=[coll]; named=[]}, None ) )
+                          ]; named=[]}, None)
+                        )]
+                    )
+                  in
+                  let check = 
+                    TCommon.expr_lst_to_and (checker_for_k @ checker_for_v) in
+                  Binary (
+                    None, 
+                    Syntax.Common.Implies,
+                    (
+                      AST.Prog.Binary (
+                        None,
+                        Syntax.Common.In, 
+                        i, 
+                        generate_args wrapped_as_member_access fml_id
+                      )
+                    ), 
+                    check
+                  )
+                )
+              })]
+          )
           | _ -> assert false
         )) @ (generate_checker_4_fmls rest token wrapped_as_member_access)
       end
@@ -103,18 +166,19 @@ module Refinement  = struct
 
   let rec generate_checker_4_ctors
     (ctors : AST.TopDecl.datatype_ctor_t list)
-    (token : string) = 
+    (token : string)
+    (dtp_id : string) = 
     match List.length ctors with
     | 1 -> begin 
       let ctors = NonEmptyList.coerce ctors in
       let ctor, _ = NonEmptyList.uncons ctors in
-      match ctor with AST.TopDecl.DataCtor (_, t_id, fmls) ->
+      match ctor with AST.TopDecl.DataCtor (_, _t_id, fmls) ->
       let is_formals_valid_lst = generate_checker_4_fmls fmls token true in
       let extended_lst = 
         match token with 
         | "IsValid" -> begin 
           AST.Prog.Suffixed (
-            generate_token t_id is_abstractable_token, 
+            generate_token dtp_id is_abstractable_token, 
             AST.Prog.ArgList ({positional=[s]; named=[]}, None)
           ) :: is_formals_valid_lst
         end
@@ -124,7 +188,7 @@ module Refinement  = struct
     | _ -> 
       let get_case_expr (ctor : AST.TopDecl.datatype_ctor_t)
         : AST.Prog.case_expr_t = 
-        let expr = generate_checker_4_ctors [ctor] token in
+        let expr = generate_checker_4_ctors [ctor] token dtp_id in
         match ctor with AST.TopDecl.DataCtor (_, id, fmls) ->
         let ids = List.map 
           (fun x -> match x with AST.TopDecl.Formal (_, id, _) -> id)
@@ -153,8 +217,8 @@ module Refinement  = struct
     (token : string) = 
     let m, attrs, t_id, params, ctors = dtp in
     let _ = m, attrs, params in
-    let expr = generate_checker_4_ctors 
-      (NonEmptyList.as_list ctors) token in
+    let ctors = NonEmptyList.as_list ctors in
+    let expr = generate_checker_4_ctors ctors token t_id in
     AST.TopDecl.Predicate (
       Moder.Definitions.Predicate (* Changed for MetaData *), 
       false, 
@@ -231,7 +295,7 @@ module Refinement  = struct
             let t_param_tp_id = TCommon.id_of_tp param_tp in
             match TCommon.is_primitive param_tp_id with
             | true -> member_access
-            | false -> begin 
+            | false ->  
               AST.Prog.Suffixed (
                 abstractify_seq_token, 
                 AST.Prog.ArgList ((
@@ -243,8 +307,61 @@ module Refinement  = struct
                   }
                 , None))
               )
-            end
           end
+          | 2 -> (
+            let r, param_tp_v = List.unsnoc tp_gen_inst in
+            let param_tp_id_v = TCommon.id_of_tp param_tp_v in
+            let _, param_tp_k = List.unsnoc r in
+            let param_tp_id_k = TCommon.id_of_tp param_tp_k in
+
+            let r, t_param_tp_v = List.unsnoc t_tp_gen_inst in
+            let t_param_tp_id_v = TCommon.id_of_tp t_param_tp_v in
+            let _, t_param_tp_k = List.unsnoc r in
+            let t_param_tp_id_k = TCommon.id_of_tp t_param_tp_k in
+
+            let argv_2, argv_4 = 
+            (
+              match (
+                (TCommon.is_primitive param_tp_id_k) ||
+                (TCommon.is_primitive t_param_tp_id_k)
+              ) with 
+              | true -> 
+                (TCommon.expr_of_str "NoChange", 
+                  TCommon.expr_of_str "NoChange")
+              | false ->
+                (
+                  (generate_abstractify_token 
+                    t_param_tp_id_k param_tp_id_k)
+                  ,
+                  (generate_abstractify_token 
+                    param_tp_id_k t_param_tp_id_k)
+                )
+            )
+            in
+            let argv_3 = 
+            (
+              match (
+                (TCommon.is_primitive param_tp_id_v) ||
+                (TCommon.is_primitive t_param_tp_id_v)
+              ) with 
+              | true -> TCommon.expr_of_str "NoChange"
+              | false ->
+                generate_abstractify_token
+                  t_param_tp_id_v param_tp_id_v
+            )
+            in
+            AST.Prog.Suffixed (
+              abstractify_map_token, 
+              AST.Prog.ArgList ((
+                {
+                  positional = [                 
+                    member_access; 
+                    argv_2 ; argv_3 ; argv_4]; 
+                  named = []
+                }
+              , None))
+            )
+          )
           | _ -> assert false
         end
 
@@ -292,14 +409,22 @@ module Refinement  = struct
           match lst with
           | [] -> []
           | h :: rest -> (
-            let t_id, abs_4_ctor = h in
-            AST.Prog.Case ([], AST.Prog.EPatVar (t_id, None), abs_4_ctor) 
+            let pat, abs_4_ctor = h in
+            AST.Prog.Case ([],pat, abs_4_ctor) 
           ) :: (aux rest)
         in
-        let t_ctors_ids = List.map (
-          fun x -> match x with AST.TopDecl.DataCtor (_, id, _) -> id
+        let t_ctors_pats = List.map (
+          fun x -> match x with AST.TopDecl.DataCtor (_, id, fmls) -> 
+            let fml_ids = List.map 
+              (fun x -> match x with AST.TopDecl.Formal (_, id, _) -> id)
+              fmls 
+            in
+            let pats = 
+              List.map (fun x -> AST.Prog.EPatVar (x, None)) fml_ids
+            in
+            AST.Prog.EPatCtor (Some id, pats)
         ) t_ctors in
-        let zipped = List.combine t_ctors_ids abs_4_ctors in
+        let zipped = List.combine t_ctors_pats abs_4_ctors in
         AST.Prog.Match (None, s, aux zipped)
       )
     in
