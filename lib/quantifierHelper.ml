@@ -95,9 +95,9 @@ module QuantifierHelper = struct
 
   let construct_map_qtf
     (booker : quantifier_booker)
-    : (AST.Prog.expr_t * AST.Prog.expr_t) option = 
+    : (AST.Prog.map_comp_t * AST.Prog.expr_t) option = 
     let aux (map : col_map) :
-      (AST.Prog.expr_t * AST.Prog.expr_t) option = 
+      (AST.Prog.map_comp_t * AST.Prog.expr_t) option = 
       let rec aux lst = 
         match lst with 
         | [] -> None
@@ -107,8 +107,20 @@ module QuantifierHelper = struct
           | true ->  
             (let domain = h.dom in
               (* Printf.printf "%s" (str_of_expr domain); *)
-              Some
-              (AST.Prog.Quantifier (
+              Some 
+              (
+                let comp : AST.Prog.map_comp_t = 
+                {
+                  imap = false ;
+                  qdom = AST.Prog.QDom 
+                  {
+                    qvars = [AST.Prog.QVar (map.i, None, None, [])] ; 
+                    qrange = Some domain ; 
+                  };
+                  key = None ;
+                  valu = map.value ;
+                } in comp
+                (* AST.Prog.Quantifier (
                 None, 
                 {qt = Common.Forall ; 
                   qdom = AST.Prog.QDom 
@@ -117,7 +129,8 @@ module QuantifierHelper = struct
                       qrange = Some (domain) ; 
                     };
                   qbody = map.value;
-                }), map.collection_name)))
+                }) *)
+                , map.collection_name)))
       in aux booker.map_doms
     in
     match booker.map_maps with 

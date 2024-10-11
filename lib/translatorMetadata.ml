@@ -22,7 +22,7 @@ module Definitions = struct
   
   type quantification_forall_functionalize_collection_t =
     | QFSeq of ModerAST.Prog.seq_display_t
-    | QFMap of ModerAST.Prog.expr_t
+    | QFMap of ModerAST.Prog.map_comp_t
     | QFSet of ModerAST.Prog.set_comp_t
   [@@deriving show, eq]
 

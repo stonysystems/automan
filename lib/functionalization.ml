@@ -257,8 +257,9 @@ module Functionalization = struct
               Tracker.API.assign tracker k (TCommon.expr_of_str var_id) in
             ([let_helper], tracker', cnter)
           )
-          | QFMap v -> (
-            let v = Checker.Converter.Prog.convert_expr v in
+          | QFMap comp -> (
+            let comp' = Checker.Converter.Prog.convert_map_comp comp in
+            let v = AST.Prog.MapComp comp' in
             let cnter = cnter + 1 in
             let var_id = local_var cnter in
             let let_helper = {

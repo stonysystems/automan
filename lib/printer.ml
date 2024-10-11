@@ -332,6 +332,22 @@ module PrettyPrinter (M : MetaData) = struct
             String.concat ", " exprs'
           end
       end
+      | MapComp map_comp -> 
+        Printf.sprintf "(%s %s :: %s%s)"
+          (
+            match map_comp.imap with 
+            | true -> "imap"
+            | false -> "map"
+          )
+          (print_qdom map_comp.qdom)
+          (
+            match map_comp.key with 
+            | None -> ""
+            | Some key -> 
+              Printf.sprintf "%s := "
+              (print_expr_in_one_line key)
+          )
+          (print_expr_in_one_line map_comp.valu)
       | _ -> holder "..."
 
     and print_expr_in_one_line (x) = 
