@@ -471,28 +471,31 @@ module Translator = struct
             (fun f -> 
               match f with AST.TopDecl.Formal(_, id, _) -> id) fmls_rtn 
           in
-          let rtn_ids' = 
-            List.map (fun x -> (x ^ "'")) rtn_ids 
+          let t_rtn_ids = List.map
+          (fun f -> 
+            match f with AST.TopDecl.Formal(_, id, _) -> id) t_fmls_rtn 
           in
           let c_call = 
             get_self_call_from_func_id_and_args t_id t_args in
           let l_call = 
             get_self_call_from_func_id_and_args id args_for_l_call in
-          let fmls_rtn_with_id' = 
-            List.map 
-            (fun f -> 
-              match f with AST.TopDecl.Formal (b, id, tp) ->
-                AST.TopDecl.Formal (b, id ^ "'", tp)) fmls_rtn 
-          in
-          let t_fmls_rtn_with_id' = 
-            List.map 
-            (fun f -> 
-              match f with AST.TopDecl.Formal (b, id, tp) ->
-                AST.TopDecl.Formal (b, id ^ "'", tp)) t_fmls_rtn 
+          let fmls_rtn_with_tid = 
+            (
+              let rec aux lst  = 
+                match lst with 
+                | [] -> []
+                | h :: rest ->
+                  let t_id, fml = h in
+                  match fml with AST.TopDecl.Formal (b, _id, tp) ->
+                  AST.TopDecl.Formal (b, t_id, tp) :: (aux rest)
+              in
+              let lst = List.combine t_rtn_ids fmls_rtn in
+              aux lst
+            )
           in
           let c_tuples = 
             Refinement.generate_abstractify_4_formals 
-              fmls_rtn_with_id'
+              fmls_rtn_with_tid
               t_fmls_rtn
               false
           in
@@ -501,7 +504,7 @@ module Translator = struct
           in
           let is_valids = 
             Refinement.generate_checker_4_fmls
-              t_fmls_rtn_with_id'
+              t_fmls_rtn
               Refinement.is_valid_token
               false
           in
@@ -517,7 +520,7 @@ module Translator = struct
           let let_c_call = 
             AST.Prog.Let {
               ghost = false ;
-              pats = (pats_of_ids rtn_ids') ;
+              pats = (pats_of_ids t_rtn_ids) ;
               defs = NonEmptyList.coerce [c_call] ;
               body = body ;
             }
