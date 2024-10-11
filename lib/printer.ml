@@ -561,6 +561,17 @@ module PrettyPrinter (M : MetaData) = struct
       | ModuleDef d -> idnt_str ^ (print_module_def d idnt_lvl)
       | DatatypeDecl d -> "\n" ^ idnt_str ^ (print_datatype d idnt_lvl)
       | PredFunDecl x -> print_function x idnt_lvl
+      | SynonymTypeDecl x -> (
+        (* AD Hoc *)
+        Printf.sprintf "%stype %s = %s" 
+          idnt_str
+          x.id
+          (
+            match x.rhs with 
+            | Synonym tp -> Type.print tp
+            | _ -> assert false
+          )
+      )
       | _ -> "\n" ^ idnt_str ^ "[ Hasn't been implemented in Printer yet ]"
     
     and print (x : AST.TopDecl.t) (idnt_lvl : int) = 

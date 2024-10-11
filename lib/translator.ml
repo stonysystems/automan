@@ -743,8 +743,21 @@ module Translator = struct
     and translate' (x : AST.TopDecl.t') (type_table : TypeTableBuilder.t) = 
       match x with 
       | ModuleImport _ 
-      | SynonymTypeDecl _ 
       | MethLemDecl _ -> []
+      | SynonymTypeDecl x ->
+        let x' : AST.TopDecl.synonym_type_t = 
+        {
+          ann = x.ann ;
+          attrs = [] ;
+          id = remapper#id_remap x.id ;
+          params = x.params ; 
+          rhs = (
+            match x.rhs with 
+            | AST.TopDecl.Synonym tp -> 
+              AST.TopDecl.Synonym (Type.translate tp)
+            | _ -> assert false
+          ) ;
+        } in [AST.TopDecl.SynonymTypeDecl x']
       | ModuleDef x -> t_module_def x type_table
       | DatatypeDecl x -> (
         (* TCommon.debug_print (Printer.TopDecl.print' (DatatypeDecl x) 0) ; *)

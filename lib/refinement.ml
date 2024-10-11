@@ -220,6 +220,13 @@ module Refinement  = struct
     let _ = m, attrs, params in
     let ctors = NonEmptyList.as_list ctors in
     let expr = generate_checker_4_ctors ctors token t_id in
+    let expr = 
+      (
+        match TCommon.is_expr_blank expr with
+        | true -> TCommon.expr_of_str "true"
+        | false -> expr
+      )
+    in
     AST.TopDecl.Predicate (
       Moder.Definitions.Predicate (* Changed for MetaData *), 
       false, 
