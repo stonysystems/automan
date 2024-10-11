@@ -458,14 +458,79 @@ module Translator = struct
         in
         match List.length pos_of_output with
         | 0 -> (
-          let c_call = get_self_call_from_func_id_and_args t_id t_args in
+          (**
+            * In this step we are dealing with 
+            *   function -> function method
+            *)
+          let pats_of_ids (ids : string list) = 
+            NonEmptyList.coerce 
+              (List.map 
+                (fun id -> AST.Prog.PatVar (id, None)) ids)
+          in
+          let rtn_ids = List.map
+            (fun f -> 
+              match f with AST.TopDecl.Formal(_, id, _) -> id) fmls_rtn 
+          in
+          let rtn_ids' = 
+            List.map (fun x -> (x ^ "'")) rtn_ids 
+          in
+          let c_call = 
+            get_self_call_from_func_id_and_args t_id t_args in
           let l_call = 
             get_self_call_from_func_id_and_args id args_for_l_call in
+          let fmls_rtn_with_id' = 
+            List.map 
+            (fun f -> 
+              match f with AST.TopDecl.Formal (b, id, tp) ->
+                AST.TopDecl.Formal (b, id ^ "'", tp)) fmls_rtn 
+          in
+          let t_fmls_rtn_with_id' = 
+            List.map 
+            (fun f -> 
+              match f with AST.TopDecl.Formal (b, id, tp) ->
+                AST.TopDecl.Formal (b, id ^ "'", tp)) t_fmls_rtn 
+          in
+          let c_tuples = 
+            Refinement.generate_abstractify_4_formals 
+              fmls_rtn_with_id'
+              t_fmls_rtn
+              false
+          in
+          let l_tuples =
+            List.map TCommon.expr_of_str rtn_ids 
+          in
+          let is_valids = 
+            Refinement.generate_checker_4_fmls
+              t_fmls_rtn_with_id'
+              Refinement.is_valid_token
+              false
+          in
           let check = AST.Prog.Binary (
-            None, (* Changed for MetaData *)
-            Syntax.Common.Eq, c_call, l_call
+            None, Syntax.Common.Eq, 
+            AST.Prog.Tuple c_tuples, 
+            AST.Prog.Tuple l_tuples
           ) in
-          [AST.TopDecl.Ensures check]
+          let body = 
+            TCommon.expr_lst_to_and (is_valids @ [check])
+          in
+          (* Put everything together *)
+          let let_c_call = 
+            AST.Prog.Let {
+              ghost = false ;
+              pats = (pats_of_ids rtn_ids') ;
+              defs = NonEmptyList.coerce [c_call] ;
+              body = body ;
+            }
+          in
+          let let_l_call = 
+            AST.Prog.Let {
+              ghost = false ;
+              pats = (pats_of_ids rtn_ids) ;
+              defs = NonEmptyList.coerce [l_call] ;
+              body = let_c_call ;
+            }
+          in
+          [AST.TopDecl.Ensures let_l_call]
         )
         | _ -> (
           let t_rtn = get_args_from_fmls fmls_rtn in
@@ -615,15 +680,14 @@ module Translator = struct
             let rec aux lst cnt = 
               match lst with
               | [] -> []
-              | h :: rest -> (
-                (
+              | h :: rest -> 
+                ((
                   AST.TopDecl.Formal (
                     false, (* TODO: check for changes introduced by ghost formals *)
                     base_name ^ (string_of_int cnt), 
                     h
                   ) :: (aux rest (cnt + 1))
-                )
-              )
+                ))
             in
             aux tps 0
           )

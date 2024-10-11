@@ -177,8 +177,9 @@ module Refinement  = struct
           | 0 -> begin 
             (* AbstractifyCReplicaConstantsToLReplicaConstants(s.constants) *)
             AST.Prog.Suffixed (
-              generate_abstractify_token t_tp_id tp_id, 
-              let e = member_access in AST.Prog.ArgList (({positional=[e]; named=[]}, None))
+                generate_abstractify_token t_tp_id tp_id, 
+                let e = member_access in AST.Prog.ArgList 
+                  (({positional=[e]; named=[]}, None))
               )
           end
           | 1 -> begin 
@@ -187,13 +188,15 @@ module Refinement  = struct
               AST.Prog.Suffixed (
                   TCommon.expr_of_str 
                     "AbstractifyCBroadcastToRlsPacketSeq", 
-                  let e = member_access in AST.Prog.ArgList (({positional=[e]; named=[]}, None))
+                  let e = member_access in AST.Prog.ArgList 
+                    (({positional=[e]; named=[]}, None))
                 )
             | "OutboundPackets" -> (* Hard coded *)
               AST.Prog.Suffixed (
                   TCommon.expr_of_str 
                     "AbstractifyOutboundCPacketsToSeqOfRslPackets", 
-                  let e = member_access in AST.Prog.ArgList (({positional=[e]; named=[]}, None))
+                  let e = member_access in AST.Prog.ArgList 
+                    (({positional=[e]; named=[]}, None))
                 )
             | _ ->
             (* AbstractifySeq(s.last_checkpointed_operation, AbstractifyCOperationNumberToOperationNumber),  *)
