@@ -101,7 +101,7 @@ module Refinement  = struct
       end
     end
 
-  let generate_checker_4_ctors
+  let rec generate_checker_4_ctors
     (ctors : AST.TopDecl.datatype_ctor_t list)
     (token : string) = 
     match List.length ctors with
@@ -121,9 +121,34 @@ module Refinement  = struct
         | _ -> is_formals_valid_lst in
       TCommon.expr_lst_to_and extended_lst
     end
-    | _ -> assert false (* Multi-ctors; To be added later *)
+    | _ -> 
+      let get_case_expr (ctor : AST.TopDecl.datatype_ctor_t)
+        : AST.Prog.case_expr_t = 
+        let expr = generate_checker_4_ctors [ctor] token in
+        match ctor with AST.TopDecl.DataCtor (_, id, fmls) ->
+        let ids = List.map 
+          (fun x -> match x with AST.TopDecl.Formal (_, id, _) -> id)
+          fmls 
+        in
+        let pats = 
+          List.map (fun x -> AST.Prog.EPatVar (x, None)) ids
+        in
+        let expr = 
+          match TCommon.is_expr_blank expr with
+          | true -> TCommon.expr_of_str "true"
+          | false -> expr
+        in
+        AST.Prog.Case (
+          [], 
+          EPatCtor (Some id, pats),
+          expr
+        )
+      in
+      AST.Prog.Match (
+        None, s, List.map get_case_expr ctors
+      )
 
-  let generate_checker_4_datatype 
+  let generate_checker_4_datatype   
     (dtp : AST.TopDecl.datatype_t)
     (token : string) = 
     let m, attrs, t_id, params, ctors = dtp in

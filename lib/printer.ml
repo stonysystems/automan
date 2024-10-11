@@ -205,6 +205,24 @@ module PrettyPrinter (M : MetaData) = struct
             (String.concat ", " (pos' @ ns'))
         )
 
+    and print_extended_pattern
+      (x : AST.Prog.extended_pattern_t) : string = 
+      match x with 
+      | EPatLit lit -> CommonPrinter.print_lit lit 
+      | EPatVar (id, tpo) -> Printf.sprintf "%s%s" id (
+        match tpo with 
+        | None -> "" 
+        | Some tp -> Printf.sprintf " : %s" (Type.print tp)
+      )
+      | EPatCtor (ido, ext_pats) ->
+        Printf.sprintf 
+          "%s(%s)"
+          (match ido with | None -> "" | Some id -> id)
+          (
+            let strs = List.map print_extended_pattern ext_pats in
+            (String.concat ", " strs)
+          )
+
     and print_pattern (x : AST.Prog.pattern_t) = 
       match x with
       | PatVar (id, tp_option) -> (
@@ -356,6 +374,17 @@ module PrettyPrinter (M : MetaData) = struct
           | Not -> "!"
         )
         (print_expr_in_one_line e)
+      | Match (_, cond, cases) ->
+        Printf.sprintf "match %s%s\n"
+          (print_expr_in_one_line cond)
+          (
+            let strs = 
+              List.map 
+                (fun x -> idnt_str ^ (print_case_expr x))
+                cases
+            in
+            String.concat "" strs
+          )
       | _ -> holder "..."
 
     and print_expr_in_one_line (x) = 
@@ -398,6 +427,12 @@ module PrettyPrinter (M : MetaData) = struct
     and print_attributes (x : AST.Prog.attribute_t list) = 
       let x' = List.map print_attribute x in
       String.concat "" x'
+
+    and print_case_expr (x : AST.Prog.case_expr_t) = 
+      match x with Case (_, ext_pat, expr) ->
+        Printf.sprintf "case %s => %s"
+          (print_extended_pattern ext_pat)
+          (print_expr_in_one_line expr)
 
     and print_qvar_decl (x : AST.Prog.qvar_decl_t) = 
       match x with QVar (id, tp_o, cdom, attrs) ->
