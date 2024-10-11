@@ -28,13 +28,6 @@ module Translator = struct
           gen_inst = List.map translate gen_inst
         }
         in
-        (* (
-          if (List.length gen_inst) = 2 then
-            (
-              TCommon.debug_print (Printer.Type.print_name_seg x) ;
-              TCommon.debug_print (Printer.Type.print_name_seg x') ;
-            )
-        ) ; *)
         x'
 
     and translate (x : AST.Type.t) = 
@@ -486,6 +479,17 @@ module Translator = struct
           (fun f -> 
             match f with AST.TopDecl.Formal(_, id, _) -> id) t_fmls_rtn 
           in
+          let rtn_ids, t_rtn_ids = 
+          (
+            match rtn_ids with 
+            | h :: [] -> 
+              if h = "" then
+                ["lr"], ["cr"]
+              else
+                rtn_ids, t_rtn_ids
+            | _ -> rtn_ids, t_rtn_ids
+          )
+          in
           let c_call = 
             get_self_call_from_func_id_and_args t_id t_args in
           let l_call = 
@@ -618,9 +622,6 @@ module Translator = struct
 
         let fmls_input, fmls_rtn = 
           get_fmls_input_and_rtn origin_fmls in_ou_metadata in
-        
-        (* TCommon.debug_print (string_of_int (List.length fmls_input)) ;
-        TCommon.debug_print (string_of_int (List.length fmls_rtn)) ; *)
         
         let rtn = get_rtn_from_fmls fmls_rtn in
         let t_e = 
