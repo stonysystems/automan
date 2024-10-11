@@ -22,18 +22,26 @@ module Translator = struct
       | true -> remapper#get_from_config x_str
       | false ->
         let TpIdSeg { id = id; gen_inst = gen_inst } = x in
+        let x' = 
         AST.Type.TpIdSeg {
           id = remapper#id_remap id; (* NOTICE: what about alias ? *)
           gen_inst = List.map translate gen_inst
         }
+        in
+        (* (
+          if (List.length gen_inst) = 2 then
+            (
+              TCommon.debug_print (Printer.Type.print_name_seg x) ;
+              TCommon.debug_print (Printer.Type.print_name_seg x') ;
+            )
+        ) ; *)
+        x'
 
     and translate (x : AST.Type.t) = 
       match x with
       | TpName (m, name_seg_lst) -> AST.Type.TpName (
           m, 
-          NonEmptyList.coerce (
-            List.map t_name_seg (NonEmptyList.as_list name_seg_lst)
-          )
+          NonEmptyList.map t_name_seg name_seg_lst
         )
       | TpTup t_lst -> AST.Type.TpTup (List.map translate t_lst)
 
@@ -302,7 +310,10 @@ module Translator = struct
       let _ = attr_lst in
       let t_id = remapper#id_remap id in
       let t_formals = List.map t_formal formals in
-      AST.TopDecl.DataCtor ([], t_id, t_formals)
+      let x' = AST.TopDecl.DataCtor ([], t_id, t_formals) in
+      (* TCommon.debug_print (Printer.TopDecl.print_datatype_ctor x 0);
+      TCommon.debug_print (Printer.TopDecl.print_datatype_ctor x' 0); *)
+      x'
 
     let t_data_type_decl (x : AST.TopDecl.datatype_t) = 
       let m, attr_lst, id, generic_params, ctors = x in
@@ -734,7 +745,10 @@ module Translator = struct
       | SynonymTypeDecl _ 
       | MethLemDecl _ -> []
       | ModuleDef x -> t_module_def x type_table
-      | DatatypeDecl x -> t_data_type_decl x
+      | DatatypeDecl x -> (
+        (* TCommon.debug_print (Printer.TopDecl.print' (DatatypeDecl x) 0) ; *)
+        t_data_type_decl x
+      )
       | PredFunDecl x -> t_function x
 
     and t_module_def 

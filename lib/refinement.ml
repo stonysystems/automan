@@ -16,6 +16,7 @@ module Refinement  = struct
   let is_valid_token = "IsValid"
   let is_abstractable_token = "IsAbstractable"
   let abstractify_seq_token = TCommon.expr_of_str "AbstractifySeq"
+  let abstractify_set_token = TCommon.expr_of_str "AbstractifySet"
   let abstractify_map_token = TCommon.expr_of_str "AbstractifyMap"
 
 
@@ -296,8 +297,13 @@ module Refinement  = struct
             match TCommon.is_primitive param_tp_id with
             | true -> member_access
             | false ->  
+              let token = (
+                match tp_id with 
+                | "set" -> abstractify_set_token
+                | _ -> abstractify_seq_token
+              ) in
               AST.Prog.Suffixed (
-                abstractify_seq_token, 
+                token, 
                 AST.Prog.ArgList ((
                   {
                     positional = [                 

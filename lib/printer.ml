@@ -130,8 +130,8 @@ module PrettyPrinter (M : MetaData) = struct
               Printf.sprintf "%s<%s>" id elem_str
             )
             | "map" -> (
-              let k_str, rest = aux gen_inst in
-              let v_str, _ = aux rest in
+              let v_str, rest = aux gen_inst in
+              let k_str, _ = aux rest in
               Printf.sprintf "%s<%s, %s>" id k_str v_str
             )
             | _ -> (
