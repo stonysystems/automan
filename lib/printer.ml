@@ -348,6 +348,14 @@ module PrettyPrinter (M : MetaData) = struct
               (print_expr_in_one_line key)
           )
           (print_expr_in_one_line map_comp.valu)
+      | Unary (op, e) ->
+        Printf.sprintf "%s%s"
+        (
+          match op with 
+          | Neg -> "[I don't know what is this]"
+          | Not -> "!"
+        )
+        (print_expr_in_one_line e)
       | _ -> holder "..."
 
     and print_expr_in_one_line (x) = 
