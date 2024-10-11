@@ -179,9 +179,9 @@ module PrettyPrinter (M : MetaData) = struct
         let aux (x : AST.Prog.expr_t option) = 
           match x with
           | None -> ""
-          | Some x -> print_expr x 0
+          | Some x -> print_expr_in_one_line x
         in
-        Printf.sprintf "[%s : %s]" (aux lb) (aux ub)
+        Printf.sprintf "[%s .. %s]" (aux lb) (aux ub)
       )
       | SliceLen x -> (
         let sublens, to_end = x.sublens, x.to_end in
