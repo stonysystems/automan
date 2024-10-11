@@ -279,7 +279,8 @@ module PrettyPrinter (M : MetaData) = struct
           )
           (
             let defs_lst = Internal.NonEmptyList.as_list x.defs in
-            let defs_lst' = List.map print_expr_in_one_line defs_lst in
+            let defs_lst' = List.map 
+              (fun x -> print_expr x (idnt_lvl + 1)) defs_lst in
             String.concat ", " defs_lst'
           )
           (get_indt_str idnt_lvl)
