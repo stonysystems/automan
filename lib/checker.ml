@@ -672,8 +672,6 @@ module Checker = struct
           let e_else', tracker_else, _ = 
             check_expr e_else empty_tracker qtf_booker in
 
-          (* TCommon.debug_print (TCommon.str_of_expr e_then') ; *)
-
           assert_helper 
             (Tracker.API.compare tracker_then tracker_else)
             "checker: then-branch and else-branch return different set of assignments"
@@ -695,7 +693,12 @@ module Checker = struct
                   vars );
             branch_permutations = meta ;
           }) in
+          
+          (* TCommon.debug_print "start the buggy merge." ; *)
           let tracker' = Tracker.API.merge tracker merged_tracker in
+          (* TCommon.debug_print "end the buggy merge." ; *)
+          (* (Printf.printf "%s\n" (Tracker.show tracker') ) ; *)
+
           let expr' = 
             TranslatorAST.Prog.If 
               (Some meta', e_cond', e_then', e_else') in
@@ -792,9 +795,9 @@ module Checker = struct
               let _ = tracker' in
 
               (* Printf.printf "%s\n" (Tracker.show tracker') ; *)
-              (* assert_helper
+              assert_helper
                 (Tracker.API.saturation_check tracker')
-                ("Saturation Check for " ^ id ^ " failed") ; *)
+                ("Saturation Check for " ^ id ^ " failed") ;
               
               TranslatorAST.TopDecl.Predicate (
                 meta, 

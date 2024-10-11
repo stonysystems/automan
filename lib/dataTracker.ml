@@ -422,26 +422,49 @@ module DataTracker = struct
     let merge_two_v
       (v1 : tracker_v)
       (v2 : tracker_v) : tracker_v = 
+
+      (* (
+        match v1.t with Tracker (k, _) ->
+        match k with AST.TopDecl.Formal (_, id, _) ->
+        TCommon.debug_print ("checking " ^ id) ;
+      ) ; *)
+
       let is_v1_filled = TCommon.is_expr_n_blank v1.assigned_v in
       let is_v2_filled = TCommon.is_expr_n_blank v2.assigned_v in 
-      match is_v1_filled == is_v2_filled with 
-      | false -> 
+      match is_v1_filled = is_v2_filled with  
+      | false -> (* one is filled and the other one is not *)
         (
+          (* TCommon.debug_print "filled unequal";
+          TCommon.debug_print_expr v1.assigned_v ;
+          TCommon.debug_print_expr v2.assigned_v ; *)
           let sub_t = merge v1.t v2.t in
+          (**
+            * label the node closer to root as filled 
+            * in this way the generated code will be shorter
+            *)
           match is_v1_filled with 
           | true ->
+            (* TCommon.debug_print_expr v1.assigned_v ; *)
             {assigned_v = v1.assigned_v ;
               t = sub_t ;}
           | false ->
+            (* TCommon.debug_print_expr v2.assigned_v ; *)
             {assigned_v = v2.assigned_v ;
               t = sub_t ;}
         )
-      | true -> 
-        match is_v1_filled with
-        | true -> v2 | false -> v1
+      | true ->  
+        let is_all_filled = is_v1_filled in
+        match is_all_filled with 
+        | true -> v1 | false -> 
+          {
+            assigned_v = v1.assigned_v ;
+            t = merge v1.t v2.t ;
+          }
     in
     match t1 with Tracker (k, v1_lst) ->
     match t2 with Tracker (_, v2_lst) ->
+      match k with AST.TopDecl.Formal (_, _, _) ->
+      (* TCommon.debug_print ("merging key (" ^ id ^ ") " ^ (string_of_int (List.length v1_lst))) ; *)
       Tracker (k, 
                 (List.map 
                   (fun x -> let v1, v2 = x in (merge_two_v v1 v2))
@@ -464,6 +487,9 @@ module DataTracker = struct
     match v.t with Tracker (k, sub_vs) ->
     match k with AST.TopDecl.Formal (_, _, tp) ->
     let args = List.map construct sub_vs in
+
+    assert ((List.length args) <> 0) ;
+    
     let tp_id = TCommon.id_of_tp tp in
     AST.Prog.Suffixed 
       (TCommon.expr_of_str tp_id, 
@@ -838,28 +864,21 @@ module DataTracker = struct
 
       tracker
 
-    let rec saturation_check (t : t) : bool = 
-      match t with Tracker (_k, vs) -> 
-        let rec aux lst = 
-        match lst with
-        | [] -> true
-        | h :: rest -> ((
-          (* TCommon.debug_print_expr h.assigned_v ; *)
-          match TCommon.is_expr_n_blank h.assigned_v with 
-          | true -> true
-          | false -> 
-            (
-              match h.t with Tracker (_k, sub_vs) ->
-                (* TCommon.debug_print (Printer.TopDecl.print_formal _k) ; *)
-                ( (List.length sub_vs) > 0 ) &&
-                (
-                  List.for_all (
-                    fun sub_v -> saturation_check sub_v.t
-                  ) sub_vs
-                ) 
-            )
-        ) && (aux rest)) in
-        aux vs
+    let saturation_check (t : t) : bool = 
+      let rec aux (v : tracker_v) : bool =
+        match TCommon.is_expr_n_blank v.assigned_v with
+        | true -> true | false ->
+          (* (
+            match v.t with Tracker (k, _) ->
+              match k with AST.TopDecl.Formal (_, _, _) ->
+              TCommon.debug_print (id ^ " unfilled.") ;
+          ) ; *)
+          match v.t with Tracker (_, sub_vs) ->
+          let check_args = List.for_all aux sub_vs in
+          check_args && ((List.length sub_vs) <> 0 )
+      in
+      match t with Tracker(_, vs) ->
+        List.for_all aux vs
 
     let compare
       (t1 : t) (t2 : t) : bool = compare t1 t2
