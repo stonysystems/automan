@@ -146,10 +146,16 @@ module DataTracker = struct
                       Tracker (k, vs)
                   )
                 | _ -> 
-                  assert_helper 
+                  (**
+                    * AdHoc Solution, will be improved later  
+                    *)
+
+                  empty_t
+
+                  (* assert_helper 
                     false
                     "data tracker: cannot handle multi-constructors";
-                  assert false
+                  assert false *)
               )
             | SynonymTypeDecl _synonym_type -> 
               if print_log then 

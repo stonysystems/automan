@@ -377,7 +377,7 @@ module Translator = struct
         (
           let abs = 
           Refinement.generate_abstractify_4_formals 
-            [t_fml] [fml] false
+            [fml] [t_fml] false
           in
           match abs with 
           | [] -> assert false
