@@ -42,6 +42,10 @@ module Functionalization = struct
       Tracker.t        *    (* Tracker constructed for members_to_be_output *)
       int                   (* Increased counter                            *)
     ) =   
+    (* TCommon.debug_print_expr x ;
+    TCommon.debug_print 
+    (String.concat " + " 
+      (List.map TCommon.str_of_expr members_to_be_output)) ; *)
     match x with 
     | Suffixed (callee, suffix) -> 
       (
@@ -92,6 +96,13 @@ module Functionalization = struct
                 | 1 -> [TCommon.expr_of_str var_id]
                 | _ -> access 
               in
+
+              (* TCommon.debug_print (string_of_int (List.length access)) ;
+              TCommon.debug_print (string_of_int (List.length members_to_be_output)) ;
+              TCommon.debug_print 
+                (String.concat " + " 
+                  (List.map TCommon.str_of_expr members_to_be_output)) ; *)
+              
               let tracker' = (* all output added *)
                 List.fold_left 
                   (fun t x ->

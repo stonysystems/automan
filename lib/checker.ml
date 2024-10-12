@@ -634,27 +634,32 @@ module Checker = struct
               (**
                 * meta is not useful at all; 
                 *)
-              let e1', tracker', qtf_booker = check_expr e1 tracker qtf_booker in
+              let clean_tracker = Tracker.API.clear tracker in
+
+              let e1', tracker_l, qtf_booker = check_expr e1 clean_tracker qtf_booker in
               let lft_vars = 
                 List.map
                 (fun x : Moder.Definitions.outvar_lhs_t -> 
                   let id = TCommon.str_of_expr x in
                   { mq_outvar = NonEmptyList.coerce [id] ; 
                     fieldlike = None ; } ) 
-                (Tracker.API.get_assigned_lst tracker') in
-              let e2', tracker', qtf_booker = check_expr e2 tracker' qtf_booker in
+                (Tracker.API.get_assigned_lst tracker_l) in
+
+              let e2', tracker_r, qtf_booker = check_expr e2 clean_tracker qtf_booker in
               let rht_vars = 
                 List.map
                 (fun x : Moder.Definitions.outvar_lhs_t -> 
                   let id = TCommon.str_of_expr x in
                   { mq_outvar = NonEmptyList.coerce [id] ; 
                     fieldlike = None ; } ) 
-                (Tracker.API.get_assigned_lst tracker') in
+                (Tracker.API.get_assigned_lst tracker_r) in
               let meta' = 
                 Some (Moder.Definitions.And {
                   conj_left  = lft_vars ; 
                   conj_right = rht_vars ;
                 }) in
+              let tracker' = Tracker.API.merge tracker tracker_l in
+              let tracker' = Tracker.API.merge tracker' tracker_r in
               let x' = TranslatorAST.Prog.Binary 
                 (meta', bop, e1', e2') in
               (x', tracker', qtf_booker)
