@@ -135,9 +135,8 @@ module Refinement  = struct
                         [AST.Prog.Suffixed (
                           generate_token param_tp_v_id token, 
                           AST.Prog.ArgList ({positional=[
-                            AST.Prog.Suffixed (i, 
-                              AST.Prog.ArgList 
-                                ({positional=[coll]; named=[]}, None ) )
+                            AST.Prog.Suffixed 
+                              (coll, AST.Prog.Sel (i))
                           ]; named=[]}, None)
                         )]
                     )
@@ -360,7 +359,7 @@ module Refinement  = struct
               | true -> TCommon.expr_of_str "NoChange"
               | false ->
                 generate_abstractify_token
-                  t_param_tp_id_v param_tp_id_v
+                  param_tp_id_v t_param_tp_id_v
             )
             in
             AST.Prog.Suffixed (

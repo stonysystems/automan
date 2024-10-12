@@ -384,9 +384,6 @@ module Translator = struct
           | h :: _ -> h
         )
       in
-      (* TCommon.debug_print_expr abstractable_body ;
-      TCommon.debug_print_expr valid_body ;
-      TCommon.debug_print_expr abstractify_body ; *)
       let _ = valid_body, abstractable_body, abstractify_body in
       [
         AST.TopDecl.SynonymTypeDecl 
@@ -424,11 +421,7 @@ module Translator = struct
             [AST.TopDecl.Formal (false, m_id, TCommon.tp_of_id t_id)], 
             TCommon.tp_of_id x.id, 
             [AST.TopDecl.Requires (
-              AST.Prog.Suffixed (
-                is_abstractable, 
-                AST.Prog.ArgList 
-                  ({positional=[TCommon.expr_of_str m_id]; named=[]}, None)
-              )
+              is_abstractable
             )], 
             abstractify_body
           )) ;
