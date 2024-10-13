@@ -97,12 +97,13 @@ module Functionalization = struct
                 | _ -> access 
               in
 
-              (* TCommon.debug_print (string_of_int (List.length access)) ;
-              TCommon.debug_print (string_of_int (List.length members_to_be_output)) ;
-              TCommon.debug_print 
-                (String.concat " + " 
-                  (List.map TCommon.str_of_expr members_to_be_output)) ; *)
-              
+              (**
+                * Uncertain about the reason why members_to_be_output needs 
+                * to be reversed,  
+                * it is likely that there was an error in a previous 
+                * step of the process
+                *)
+              let members_to_be_output = List.rev members_to_be_output in
               let tracker' = (* all output added *)
                 List.fold_left 
                   (fun t x ->
