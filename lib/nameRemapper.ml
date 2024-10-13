@@ -8,12 +8,17 @@ object (self)
   val config = [
     ("seq<RslPacket>", (AST.Type.TpIdSeg {id = "OutboundPackets"; gen_inst = []}));
     ("NodeIdentity", (AST.Type.TpIdSeg {id = "EndPoint"; gen_inst = []}));
+    ("UpperBoundedAddition", (AST.Type.TpIdSeg {id = "UpperBoundedAdditionImpl"; gen_inst = []}));
+    ("LBroadcastToEveryone", (AST.Type.TpIdSeg {id = "BuildBroadcastToEveryone"; gen_inst = []}));
     ("KeyPlus", (AST.Type.TpIdSeg {id = "KeyPlus"; gen_inst = []}));
     ("KeyRange", (AST.Type.TpIdSeg {id = "KeyRange"; gen_inst = []}));
     ("KeyPlusLt", (AST.Type.TpIdSeg {id = "KeyPlusLt"; gen_inst = []}));
     ("KeyPlusLe", (AST.Type.TpIdSeg {id = "KeyPlusLe"; gen_inst = []}));
     ("Key", (AST.Type.TpIdSeg {id = "Key"; gen_inst = []}));
     ("Hashtable", (AST.Type.TpIdSeg {id = "Hashtable"; gen_inst = []}));
+    ("OptionalValue", (AST.Type.TpIdSeg {id = "OptionalValue"; gen_inst = []}));
+    ("Option", (AST.Type.TpIdSeg {id = "Option"; gen_inst = []}));
+    ("AppRequest", (AST.Type.TpIdSeg {id = "AppRequest"; gen_inst = []}));
   ]
 
   method is_tp_in_config (x : string) = 

@@ -601,18 +601,24 @@ let rec mode_expr_no_out_vars_pattern
     (vars_out: AnnotationPass.TopDecl.formal_t list)
     (pat: AnnotationPass.Prog.pattern_t)
   : (ModePass.Prog.pattern_t, error_outvar_occur_t) m =
-  let here = "Moder.mode_expr_no_out_vars_pattern" in
+  (* let here = "Moder.mode_expr_no_out_vars_pattern" in *)
 
   match pat with
   | PatVar (p_id, tp_opt) ->
-    let* () =
+    let is_outvar = Util.id_in_formals p_id vars_out in
+    let _ = if is_outvar then
+        ()
+    in
+    let tp_opt' = Option.map Convert.typ tp_opt in
+    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt'))
+    (* let* () =
       Result.error_when (Util.id_in_formals p_id vars_out)
         (lazy
           { callstack = [here]
           ; sort = {occurring_outvar = p_id; shadowed = true }})
     in
     let tp_opt' = Option.map Convert.typ tp_opt in
-    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt'))
+    Result.Ok (ModePass.Prog.PatVar (p_id, tp_opt')) *)
   | PatCtor (ctor_id, pats) ->
     let* pats' = List.mapMResult (mode_expr_no_out_vars_pattern vars_out) pats in
     Result.Ok (ModePass.Prog.PatCtor (ctor_id, pats'))
@@ -620,11 +626,16 @@ let rec mode_expr_no_out_vars_pattern
 let rec mode_expr_no_out_vars
     (vars_out: AnnotationPass.TopDecl.formal_t list)
     ?(except: Common.member_qualified_name_t option = None) (* functional record update exception *)
+    ?(in_quantifier_context: bool = false)
     (e: AnnotationPass.Prog.expr_t)
   : ( ModePass.Prog.expr_t * Common.member_qualified_name_t list option
     , error_mode_expr_no_out_vars_t) m =
   let here = "Moder.mode_expr_no_out_vars:" in
   let no_unassigneds = Option.map (Fun.const []) except in
+
+  let mode_expr_no_out_vars_recursive vars_out ?(except: Common.member_qualified_name_t option = None) (e: AnnotationPass.Prog.expr_t) =
+    mode_expr_no_out_vars vars_out ~except ~in_quantifier_context e
+  in
 
   let aux_suffix
       ~(except: (Common.member_qualified_name_t * Common.member_qualified_name_t list) option)
@@ -640,7 +651,7 @@ let rec mode_expr_no_out_vars
               NonEmptyList.as_list dataupd
               |> List.mapMResult begin function (m_id, new_val) ->
                 let* (new_val', _discard) =
-                  mode_expr_no_out_vars vars_out ~except:None new_val in
+                mode_expr_no_out_vars_recursive vars_out ~except:None new_val in
                 Result.Ok (m_id, new_val')
               end
               |> Result.map NonEmptyList.coerce
@@ -663,7 +674,7 @@ let rec mode_expr_no_out_vars
 
                     (* TODO: outvar_lhs_t needs dotsuffix qualifications, we
                        aren't tracking numeric fields yet *)
-                    let* (new_val', _) = mode_expr_no_out_vars vars_out ~except:None new_val in
+                    let* (new_val', _) = mode_expr_no_out_vars_recursive vars_out ~except:None new_val in
                     let unassigneds' =
                       List.filter
                         (fun ov ->
@@ -718,14 +729,14 @@ let rec mode_expr_no_out_vars
         let* lb' =
           Result.map_option
             (fun x ->
-               let* (lb', _) = mode_expr_no_out_vars vars_out ~except:None x in
+               let* (lb', _) = mode_expr_no_out_vars_recursive vars_out ~except:None x in
                Result.Ok lb')
             lb
         in
         let* ub' =
           Result.map_option
             (fun x ->
-               let* (ub', _) = mode_expr_no_out_vars vars_out ~except:None x in
+               let* (ub', _) = mode_expr_no_out_vars_recursive vars_out ~except:None x in
                Result.Ok ub')
             ub
         in
@@ -737,7 +748,7 @@ let rec mode_expr_no_out_vars
         let* sublens' =
           NonEmptyList.as_list sublens
           |> List.mapMResult begin fun sublen ->
-            let* (sublen', _) = mode_expr_no_out_vars vars_out ~except:None sublen in
+            let* (sublen', _) = mode_expr_no_out_vars_recursive vars_out ~except:None sublen in
             Result.Ok sublen'
           end
           |> Result.map NonEmptyList.coerce
@@ -749,13 +760,13 @@ let rec mode_expr_no_out_vars
           , no_unassigneds )
 
       | SeqUpd {idx = idx; v = v} ->
-        let* (idx', _) = mode_expr_no_out_vars vars_out ~except:None idx in
-        let* (v', _)   = mode_expr_no_out_vars vars_out ~except:None v in
+        let* (idx', _) = mode_expr_no_out_vars_recursive vars_out ~except:None idx in
+        let* (v', _)   = mode_expr_no_out_vars_recursive vars_out ~except:None v in
         Result.Ok
           ( ModePass.Prog.SeqUpd {idx = idx'; v = v'}
           , no_unassigneds )
       | Sel e ->
-        let* (e', _) = mode_expr_no_out_vars vars_out ~except:None e in
+        let* (e', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e in
         Result.Ok (ModePass.Prog.Sel e', no_unassigneds)
       | ArgList (args, ann) ->
         (* NOTE: If no output variables are allowed, no predicates marked for
@@ -773,13 +784,13 @@ let rec mode_expr_no_out_vars
         let* args_pos' =
           List.mapMResult
             (fun x ->
-               let* (x', _) = mode_expr_no_out_vars vars_out ~except:None x in
+               let* (x', _) = mode_expr_no_out_vars_recursive vars_out ~except:None x in
                Result.Ok x')
             args.positional in
         let* args_nam' =
           List.mapMResult
             begin function (id, arg) ->
-              let* (arg', _) = mode_expr_no_out_vars vars_out ~except:None arg in
+              let* (arg', _) = mode_expr_no_out_vars_recursive vars_out ~except:None arg in
               Result.Ok (id, arg')
             end
             args.named in
@@ -811,7 +822,7 @@ let rec mode_expr_no_out_vars
 
   match e with
   | Suffixed (pref, suff) ->
-    let* (pref', unassigned) = mode_expr_no_out_vars vars_out ~except:except pref in
+    let* (pref', unassigned) = mode_expr_no_out_vars_recursive vars_out ~except:except pref in
     let* (suff', unassigned) =
       aux_suffix
         ~except:(Option.liftA2 (fun x y -> (x, y)) except unassigned)
@@ -819,7 +830,13 @@ let rec mode_expr_no_out_vars
     in
     Result.Ok (ModePass.Prog.Suffixed (pref', suff'), unassigned)
   | NameSeg (seg_id, seg_tp_args) ->
-    let* () =
+    let is_outvar = Util.id_in_formals seg_id vars_out in
+    if is_outvar && in_quantifier_context then
+      Result.Error { callstack = [here]; sort = OutVarOccur { occurring_outvar = seg_id; shadowed = false } }
+    else
+      let tp_args' = List.map Convert.typ seg_tp_args in
+      Result.Ok (ModePass.Prog.NameSeg (seg_id, tp_args'), no_unassigneds)
+    (* let* () =
       Result.error_when (Util.id_in_formals seg_id vars_out)
         (lazy
           { callstack = [here]
@@ -827,7 +844,7 @@ let rec mode_expr_no_out_vars
     in
     let seg_tp_args' = List.map Convert.typ seg_tp_args in
     Result.Ok
-      (ModePass.Prog.NameSeg (seg_id, seg_tp_args'), no_unassigneds)
+      (ModePass.Prog.NameSeg (seg_id, seg_tp_args'), no_unassigneds) *)
 
   | Lambda (lam_ps, lam_body) ->
     let* lam_ps' =
@@ -846,15 +863,15 @@ let rec mode_expr_no_out_vars
         end
         lam_ps
     in
-    let* (lam_body', _) = mode_expr_no_out_vars vars_out ~except:None lam_body in
+    let* (lam_body', _) = mode_expr_no_out_vars_recursive vars_out ~except:None lam_body in
     Result.Ok (ModePass.Prog.Lambda (lam_ps', lam_body'), no_unassigneds)
 
   | MapDisplay kvs ->
     let* kvs' =
       List.mapMResult
         begin function (k, v) ->
-          let* (k', _) = mode_expr_no_out_vars vars_out ~except:None k in
-          let* (v', _) = mode_expr_no_out_vars vars_out ~except:None v in
+          let* (k', _) = mode_expr_no_out_vars_recursive vars_out ~except:None k in
+          let* (v', _) = mode_expr_no_out_vars_recursive vars_out ~except:None v in
           Result.Ok (k', v')
         end
         kvs
@@ -868,15 +885,15 @@ let rec mode_expr_no_out_vars
         let* seqd_enum' =
           seqd_enum
           |> List.mapMResult begin fun e ->
-            let* (e', _) = mode_expr_no_out_vars vars_out ~except:None e in
+            let* (e', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e in
             Result.Ok e'
           end
         in
         Result.Ok (ModePass.Prog.SeqEnumerate seqd_enum')
       | SeqTabulate seqd_tab ->
         let tp_args' = List.map Convert.typ seqd_tab.gen_inst in
-        let* (len', _) = mode_expr_no_out_vars vars_out ~except:None seqd_tab.len in
-        let* (func', _) = mode_expr_no_out_vars vars_out ~except:None seqd_tab.func in
+        let* (len', _) = mode_expr_no_out_vars_recursive vars_out ~except:None seqd_tab.len in
+        let* (func', _) = mode_expr_no_out_vars_recursive vars_out ~except:None seqd_tab.func in
         Result.Ok
           (ModePass.Prog.SeqTabulate
              { gen_inst = tp_args'
@@ -889,7 +906,7 @@ let rec mode_expr_no_out_vars
     let* setd' =
       setd
       |> List.mapMResult begin fun e ->
-        let* (e', _) = mode_expr_no_out_vars vars_out ~except:None e in
+        let* (e', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e in
         Result.Ok e'
       end
     in
@@ -898,23 +915,23 @@ let rec mode_expr_no_out_vars
   (* TODO: we should be tracking unassigneds like assignments, for now the
      unassigneds analysis is shallow *)
   | If (_, g, t, e) ->
-    let* (g', _) = mode_expr_no_out_vars vars_out ~except:None g in
+    let* (g', _) = mode_expr_no_out_vars_recursive vars_out ~except:None g in
     (* NOTE: These two below need changing for more sophisticated analysis *)
-    let* (t', _) = mode_expr_no_out_vars vars_out ~except:None t in
-    let* (e', _) = mode_expr_no_out_vars vars_out ~except:None e in
+    let* (t', _) = mode_expr_no_out_vars_recursive vars_out ~except:None t in
+    let* (e', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e in
     Result.Ok (ModePass.Prog.If (None, g', t', e'), no_unassigneds)
 
   (* TODO: we should be tracking unassigneds like assignments, for now the
      unassigneds analysis is shallow *)
   | Match (_, scrut, branches) ->
-    let* (scrut', _) = mode_expr_no_out_vars vars_out ~except:None scrut in
+    let* (scrut', _) = mode_expr_no_out_vars_recursive vars_out ~except:None scrut in
     let* branches' =
       List.mapMResult begin function
         | AnnotationPass.Prog.Case (_attrs, e_pat, body) ->
           let attrs' = [] in
           let* e_pat' = aux_extended_pattern e_pat in
           (* NOTE: The line below needs changing for more sophisticated analysis *)
-          let* (body', _) = mode_expr_no_out_vars vars_out ~except:None body in
+          let* (body', _) = mode_expr_no_out_vars_recursive vars_out ~except:None body in
           Result.Ok (ModePass.Prog.Case (attrs', e_pat', body'))
       end branches
     in
@@ -923,7 +940,7 @@ let rec mode_expr_no_out_vars
   | Quantifier (_, qt) ->
     let* qdom' =
       mode_expr_no_out_vars_quantifier_domain vars_out qt.qdom in
-    let* (qbody', _) = mode_expr_no_out_vars vars_out ~except:None qt.qbody in
+    let* (qbody', _) = mode_expr_no_out_vars vars_out ~except:None ~in_quantifier_context:true qt.qbody in
     Result.Ok ModePass.Prog.(
         ( Quantifier (None, {qt = qt.qt; qdom = qdom'; qbody = qbody'})
         , no_unassigneds ))
@@ -934,7 +951,7 @@ let rec mode_expr_no_out_vars
     let* setc_body' =
       setc.body
       |> Result.map_option begin fun bod ->
-        let* (bod', _) = mode_expr_no_out_vars vars_out ~except:None bod in
+        let* (bod', _) = mode_expr_no_out_vars_recursive vars_out ~except:None bod in
         Result.Ok bod'
       end
     in
@@ -946,7 +963,7 @@ let rec mode_expr_no_out_vars
     (* NOTE: For now, we (silently) drop statements in expressions
        TODO: Generate something for the user indicating that the
        assert/assume/reveal/etc was dropped *)
-    mode_expr_no_out_vars vars_out ~except:except e
+      mode_expr_no_out_vars_recursive vars_out ~except:except e
 
   | Let {ghost = ghost; pats = pats; defs = defs; body = body} ->
     let* pats' =
@@ -960,12 +977,12 @@ let rec mode_expr_no_out_vars
       NonEmptyList.as_list defs
       |> List.mapMResult
         begin fun def ->
-          let* (def', _) = mode_expr_no_out_vars vars_out ~except:None def in
+          let* (def', _) = mode_expr_no_out_vars_recursive vars_out ~except:None def in
           Result.Ok def'
         end
       |> Result.map NonEmptyList.coerce
     in
-    let* (body', unassigneds) = mode_expr_no_out_vars vars_out ~except:except body in
+    let* (body', unassigneds) = mode_expr_no_out_vars_recursive vars_out ~except:except body in
     Result.Ok (ModePass.Prog.(
         ( Let {ghost = ghost; pats = pats'; defs = defs'; body = body'}
         , unassigneds )))
@@ -976,11 +993,11 @@ let rec mode_expr_no_out_vars
     let* mapc_key' =
       mapc.key
       |> Result.map_option begin fun k ->
-        let* (k', _) = mode_expr_no_out_vars vars_out ~except:None k in
+        let* (k', _) = mode_expr_no_out_vars_recursive vars_out ~except:None k in
         Result.Ok k'
       end
     in
-    let* (mapc_valu', _) = mode_expr_no_out_vars vars_out ~except:None mapc.valu in
+    let* (mapc_valu', _) = mode_expr_no_out_vars_recursive vars_out ~except:None mapc.valu in
     Result.Ok
       ( ModePass.Prog.MapComp
           { imap = mapc.imap
@@ -996,7 +1013,7 @@ let rec mode_expr_no_out_vars
     failwith (here ^ " `this` not supported (should have been caught earlier!)")
 
   | Cardinality e ->
-    let* (e', _) = mode_expr_no_out_vars vars_out ~except:None e in
+    let* (e', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e in
     Result.Ok (ModePass.Prog.Cardinality e', no_unassigneds)
 
   (* TODO: tuples have "named" (numbered) components, these could be unassigned *)
@@ -1004,25 +1021,25 @@ let rec mode_expr_no_out_vars
     let* es' =
       es
       |> List.mapMResult begin fun e ->
-        let* (e', _) = mode_expr_no_out_vars vars_out ~except:None e in
+        let* (e', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e in
         Result.Ok e'
       end
     in
     Result.Ok (ModePass.Prog.Tuple es', no_unassigneds)
 
   | Unary (uop, e) ->
-    let* (e', _) = mode_expr_no_out_vars vars_out ~except:None e in
+    let* (e', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e in
     Result.Ok (ModePass.Prog.Unary (uop, e'), no_unassigneds)
 
   (* TODO: consider all the binary operations *)
   | Binary (_, bop, e1, e2) ->
-    let* (e1', _) = mode_expr_no_out_vars vars_out ~except:None e1 in
-    let* (e2', _) = mode_expr_no_out_vars vars_out ~except:None e2 in
+    let* (e1', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e1 in
+    let* (e2', _) = mode_expr_no_out_vars_recursive vars_out ~except:None e2 in
     Result.Ok (ModePass.Prog.Binary (None, bop, e1', e2'), no_unassigneds)
 
   | Lemma {lem = lem; e = e} ->
-    let* (lem', _) = mode_expr_no_out_vars vars_out ~except:None lem in
-    let* (e', unassigneds) = mode_expr_no_out_vars vars_out ~except:except e in
+    let* (lem', _) = mode_expr_no_out_vars_recursive vars_out ~except:None lem in
+    let* (e', unassigneds) = mode_expr_no_out_vars_recursive vars_out ~except:except e in
     Result.Ok (ModePass.Prog.Lemma {lem = lem'; e = e'}, unassigneds)
 
 
@@ -1050,7 +1067,7 @@ and mode_expr_no_out_vars_quantifier_domain
           let* dom_col' =
             dom_col
             |> Result.map_option begin fun e ->
-              let* (e', _) = mode_expr_no_out_vars vars_out e in
+              let* (e', _) = mode_expr_no_out_vars vars_out ~in_quantifier_context:true e in
               Result.Ok e'
             end
           in
@@ -1062,7 +1079,7 @@ and mode_expr_no_out_vars_quantifier_domain
   let* qrange' =
     qrange
     |> Result.map_option begin fun e ->
-      let* (e', _) = mode_expr_no_out_vars vars_out e in
+      let* (e', _) = mode_expr_no_out_vars vars_out ~in_quantifier_context:true e in
       Result.Ok e'
     end
   in
