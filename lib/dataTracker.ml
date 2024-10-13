@@ -479,13 +479,36 @@ module DataTracker = struct
   let query_value
     (tracker : t)
     (member : AST.Prog.expr_t) : AST.Prog.expr_t = 
-
+    let aux 
+    (tracker : t)
+    (member : AST.Prog.expr_t) : AST.Prog.expr_t = 
+      let rec aux (t : t) (member_id_lst : string NonEmptyList.t ) : AST.Prog.expr_t = 
+        let (h, rest) = NonEmptyList.uncons member_id_lst in
+        let sub_v = query_sub_tracker_v t h in
+        match rest with 
+        | [] -> sub_v.assigned_v
+        | _ -> 
+          match TCommon.is_expr_blank sub_v.assigned_v with
+          | true -> aux sub_v.t (NonEmptyList.coerce rest)
+          | false -> 
+            TCommon.expr_lst_to_dot_expr 
+              ([sub_v.assigned_v] @ (
+                List.map TCommon.expr_of_str rest
+              ))
+      in
+      let member_lst = TCommon.dot_expr_to_expr_lst member in
+      let member_id_lst = List.map (
+        fun x -> TCommon.str_of_expr x
+      ) member_lst in
+      let member_id_lst = NonEmptyList.coerce member_id_lst in
+      aux tracker member_id_lst
+    in
     if print_log then
       TCommon.debug_print 
         ("[Tracker] " ^ "query value for " ^ (TCommon.str_of_expr member)) ;
 
-    let v = query_tracker_v_top_lvl tracker member in
-    v.assigned_v
+    let v = aux tracker member in
+    v
 
   let rec construct (v : tracker_v) : AST.Prog.expr_t = 
     match TCommon.is_expr_n_blank v.assigned_v with
@@ -553,7 +576,9 @@ module DataTracker = struct
           match is_it_an_obligation t (TCommon.str_of_expr h) with 
           | true -> (
             (* TCommon.debug_print_expr e ; *)
-            Some (query_value t e)
+            let result = query_value t e in
+            (* TCommon.debug_print_expr result ; *)
+            Some (result)
           )
           | false -> None
         )

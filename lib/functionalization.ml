@@ -180,8 +180,9 @@ module Functionalization = struct
           entry e_then tracker members_to_be_output' in
         let e_else' = 
           entry e_else tracker members_to_be_output' in
+        let e_cond' = Tracker.Obligation.Prog.solve_expr tracker e_cond in
         let expr' = 
-          AST.Prog.If (None, e_cond, e_then', e_else') in
+          AST.Prog.If (None, e_cond', e_then', e_else') in
         let cnter = cnter + 1 in
         let var_id = local_var cnter in
         let let_helper = {
