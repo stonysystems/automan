@@ -230,7 +230,13 @@ module PrettyPrinter (M : MetaData) = struct
           | Some tp -> Printf.sprintf "%s: %s" id (Type.print tp)
           | None -> id
       )
-      | PatCtor _ -> holder "Prog.pattern_t.PatCtor"
+      | PatCtor (ido, pats) -> 
+        let pats = List.map print_pattern pats in
+        let pats_str = String.concat ", " pats in
+        Printf.sprintf 
+          "%s(%s)"
+            (match ido with | None -> "" | Some id -> id)
+            pats_str
 
     and print_expr (x : AST.Prog.expr_t) (idnt_lvl : int) = 
       let idnt_str = (get_indt_str_with_new_line idnt_lvl) in
@@ -395,7 +401,7 @@ module PrettyPrinter (M : MetaData) = struct
             in
             String.concat "" strs
           )
-      | _ -> holder "..."
+      | _ -> holder "."
 
     and print_expr_in_one_line (x) = 
       let res = print_expr x 0 in
