@@ -1,9 +1,0 @@
-module LiveRSL__Executor_i {
-  LExecutorInit(-,+);
-  LExecutorGetDecision(+,-,+,+,+);
-  LExecutorExecute(+,-,-);
-  LExecutorProcessAppStateSupply(+,-,+);
-  LExecutorProcessAppStateRequest(+,-,+,-);
-  LExecutorProcessStartingPhase2(+,-,+,-);
-  LExecutorProcessRequest(+,+,-);
-}

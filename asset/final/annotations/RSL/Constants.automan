@@ -1,3 +1,0 @@
-module LiveRSL__Constants_i {
-    LReplicaConstantsValid(+);
-}

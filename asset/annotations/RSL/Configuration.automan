@@ -1,4 +1,3 @@
 module LiveRSL__Configuration_i {
-  ReplicasDistinct(+,+,+);
-  IsReplicaIndex(+,+,+);
+  
 }

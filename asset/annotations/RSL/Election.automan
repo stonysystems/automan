@@ -1,8 +1,0 @@
-module LiveRSL__Election_i {
-  ElectionStateInit(-,+);
-  ElectionStateProcessHeartbeat(+,-,+,+);
-  ElectionStateCheckForViewTimeout(+,-,+);
-  ElectionStateCheckForQuorumOfViewSuspicions(+,-,+);
-  ElectionStateReflectReceivedRequest(+,-,+);
-  ElectionStateReflectExecutedRequestBatch(+,-,+);
-}

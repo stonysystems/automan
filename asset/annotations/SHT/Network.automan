@@ -1,5 +1,0 @@
-module SHT__Network_i {
-    Network_Init(-);
-    Network_Receive(+,+,-);
-    Network_Send(+,-,+,-);
-}
