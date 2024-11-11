@@ -1,0 +1,69 @@
+module Collections__CountMatches_i {
+    IsNthHighestValueInSequence(+,+,+);
+}
+module SHT__Configuration_i {
+  HostsDistinct(+,+,+);
+  WFSHTConfiguration(+);
+}
+module SHT__Delegations_i {
+    DelegationMapComplete(+);
+    DelegateForKeyRangeIsHost(+,+,+);
+    DelegationMapsAreEqualUpToKey(+,+,+);
+}
+module SHT__Host_i {
+    ValidKeyPlus(+);
+    ValidOptionalValue(+);
+    ValidKeyRange(+);
+    Host_Init(-,+,+,+,+);
+    NextGetRequest_Reply(+,+,+,+,+,+,+,+,+);
+    NextGetRequest(+,+,+,+);
+    NextGetRequestReal(+,-,+,-,-,-,-);
+    NextSetRequest_Complete(+,+,+,+,+,+,+,+,+);
+    NextSetRequest(+,+,+,+);
+    NextSetRequestReal(+,-,+,-,-,-,-);
+    NextDelegate(+,+,+,+);
+    NextDelegateReal(+,-,+,-);
+    NextShard(+,+,+,+,+,+,+);
+    NextShard_Wrapper(+,+,+,+);
+    NextShardReal(+,-,+,-,-,-);
+    NextReply(+,+,+,+);
+    NextReplyReal(+,-,+,-);
+    NextRedirect(+,+,+,+);
+    NextRedirectReal(+,-,+,-);
+    ShouldProcessReceivedMessage(+);
+    Process_Message(+,-,-);
+    ReceivePacket(+,-,+,-,-);
+    ProcessReceivedPacket(+,-,-);
+    SpontaneouslyRetransmit(+,-,-);
+    Host_Next(+,-,+,-);
+}
+module SHT__Keys_i {
+    KeyLe(+,+);
+    KeyPlusLt(+,+);
+    KeyPlusLe(+,+);
+    KeyRangeContains(+,+);
+    RangesOverlap(+,+);
+    EmptyKeyRange(+);
+}
+module SHT__Network_i {
+    Network_Init(-);
+    Network_Receive(+,+,-);
+    Network_Send(+,-,+,-);
+}
+module SHT__SingleDelivery_i {
+    MessageNotReceived(+,+,+);
+    NewSingleMessage(+,+);
+    ReceiveAck(+,-,+,-);
+    ShouldAckSingleMessage(+,+);
+    SendAck(+,+,-,-);
+    MaybeAckPacket(+,+,-,-);
+    ReceiveRealPacket(+,-,+);
+    UnAckedMsgForDst(+,+,+);
+    ReceiveSingleMessage(+,-,+,-,-);
+    ReceiveNoMessage(+,-);
+    SendSingleMessage(+,-,+,-,+,-);
+    SendSingleMessageReal(+,-,+,+,-,+,-);
+    SendNoMessage(+,-);
+}
+module SHT__Message_i{
+}
