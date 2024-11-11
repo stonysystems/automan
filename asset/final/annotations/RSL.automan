@@ -33,6 +33,8 @@ module LiveRSL__Parameters_i {
 module LiveRSL__Types_i {
 
 }
+module LiveRSL__StateMachine_i {
+}
 module LiveRSL__Election_i {
   ElectionStateInit(-,+);
   ElectionStateProcessHeartbeat(+,-,+,+);
@@ -48,6 +50,7 @@ module LiveRSL__Environment_i {
 module LiveRSL__Executor_i {
   LExecutorInit(-,+);
   LExecutorGetDecision(+,-,+,+,+);
+  UpdateNewCache(+,-,+);
   LExecutorExecute(+,-,-);
   LExecutorProcessAppStateSupply(+,-,+);
   LExecutorProcessAppStateRequest(+,-,+,-);

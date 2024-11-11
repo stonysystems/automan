@@ -60,22 +60,22 @@ function DelegateForKey(dm:DelegationMap, k:Key) : NodeIdentity
 // delegation messages:
 //////////////////////////////////////////////////////////////////////////////
 
-function method BulkUpdateDomain(h:Hashtable, kr:KeyRange, u:Hashtable) : set<Key>
+function /*method*/ BulkUpdateDomain(h:Hashtable, kr:KeyRange, u:Hashtable) : set<Key>
 {
     // Clumsy heuristically-obviously-finite set construction
     set k | k in mapdomain(h)+mapdomain(u) && (KeyRangeContains(kr, KeyPlus(k)) ==> k in u)
 }
 
-function method BulkUpdateHashtable(h:Hashtable, kr:KeyRange, u:Hashtable) : Hashtable
+function /*method*/ BulkUpdateHashtable(h:Hashtable, kr:KeyRange, u:Hashtable) : Hashtable
 {
     map k {:auto_trigger} | k in BulkUpdateDomain(h, kr, u) :: if (k in u) then u[k] else h[k]
 }
 
-function method BulkRemoveHashtable(h:Hashtable, kr:KeyRange) : Hashtable {
+function /*method*/ BulkRemoveHashtable(h:Hashtable, kr:KeyRange) : Hashtable {
     map k | (k in h && !KeyRangeContains(kr, KeyPlus(k))) :: h[k]
 }
 
-function method ExtractRange(h:Hashtable, kr:KeyRange) : Hashtable {
+function /*method*/ ExtractRange(h:Hashtable, kr:KeyRange) : Hashtable {
     map k | (k in h && KeyRangeContains(kr, KeyPlus(k))) :: h[k]
 }
 

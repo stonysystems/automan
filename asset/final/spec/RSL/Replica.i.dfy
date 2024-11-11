@@ -23,8 +23,6 @@ import opened LiveRSL__Message_i
 import opened Common__UpperBound_s
 import opened Environment_s
 
-// 22
-
 datatype LReplica = LReplica(
   constants:LReplicaConstants,
   nextHeartbeatTime:int,
@@ -44,36 +42,36 @@ predicate LReplicaInit(r:LReplica, c:LReplicaConstants)
   && LExecutorInit(r.executor, c)
 }
 
-predicate LReplicaNextProcessInvalid(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcessInvalid(s:LReplica, s':LReplica, received_packet:RslPacket, non_empty_sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_Invalid?
 {
   && s' == s
-  && sent_packets == []
+  && non_empty_sequential_sent_packets == []
 }
 
-predicate LReplicaNextProcessRequest(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcessRequest(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_Request?
 {
   if  && received_packet.src in s.executor.reply_cache
       && s.executor.reply_cache[received_packet.src].Reply?
       && received_packet.msg.seqno_req <= s.executor.reply_cache[received_packet.src].seqno then
-     && LExecutorProcessRequest(s.executor, received_packet, sent_packets)
+     && LExecutorProcessRequest(s.executor, received_packet, sequential_sent_packets)
      && s' == s
   else
     && LProposerProcessRequest(s.proposer, s'.proposer, received_packet)
-    && sent_packets == []
+    && sequential_sent_packets == []
     && s' == s.(proposer := s'.proposer)
 }
 
-predicate LReplicaNextProcess1a(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcess1a(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_1a?
 {
-  && LAcceptorProcess1a(s.acceptor, s'.acceptor, received_packet, sent_packets)
+  && LAcceptorProcess1a(s.acceptor, s'.acceptor, received_packet, sequential_sent_packets)
   // UNCHANGED
   && s' == s.(acceptor := s'.acceptor)
 }
 
-predicate LReplicaNextProcess1b(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcess1b(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_1b?
 {
   if  && received_packet.src in s.proposer.constants.all.config.replica_ids
@@ -82,117 +80,118 @@ predicate LReplicaNextProcess1b(s:LReplica, s':LReplica, received_packet:RslPack
       && (forall other_packet :: other_packet in s.proposer.received_1b_packets ==> other_packet.src != received_packet.src) then
     && LProposerProcess1b(s.proposer, s'.proposer, received_packet)
     && LAcceptorTruncateLog(s.acceptor, s'.acceptor, received_packet.msg.log_truncation_point)
-    && sent_packets == []
+    && sequential_sent_packets == []
     && s' == s.(proposer := s'.proposer, acceptor := s'.acceptor)
   else
-    s' == s && sent_packets == []
+    s' == s && sequential_sent_packets == []
 }
 
-predicate LReplicaNextProcessStartingPhase2(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcessStartingPhase2(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_StartingPhase2?
 {
-  && LExecutorProcessStartingPhase2(s.executor, s'.executor, received_packet, sent_packets)
+  && LExecutorProcessStartingPhase2(s.executor, s'.executor, received_packet, sequential_sent_packets)
   && s' == s.(executor := s'.executor)
 }
 
-predicate LReplicaNextProcess2a(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcess2a(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_2a?
 {
   var m := received_packet.msg;
   if  && received_packet.src in s.acceptor.constants.all.config.replica_ids
       && BalLeq(s.acceptor.max_bal, m.bal_2a)
       && LeqUpperBound(m.opn_2a, s.acceptor.constants.all.params.max_integer_val) then
-    && LAcceptorProcess2a(s.acceptor, s'.acceptor, received_packet, sent_packets)
+    && LAcceptorProcess2a(s.acceptor, s'.acceptor, received_packet, sequential_sent_packets)
     && s' == s.(acceptor := s'.acceptor)
   else
-    s' == s && sent_packets == []
+    s' == s && sequential_sent_packets == []
 }
 
-predicate LReplicaNextProcess2b(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcess2b(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_2b?
 {
   var opn := received_packet.msg.opn_2b;
   var op_learnable := s.executor.ops_complete < opn || (s.executor.ops_complete == opn && s.executor.next_op_to_execute.OutstandingOpUnknown?);
   if op_learnable then
     && LLearnerProcess2b(s.learner, s'.learner, received_packet)
-    && sent_packets == []
+    && sequential_sent_packets == []
     && s' == s.(learner := s'.learner)
   else
     && s' == s
-    && sent_packets == []
+    && sequential_sent_packets == []
 }
 
-predicate LReplicaNextProcessReply(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcessReply(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_Reply?
 {
-  && sent_packets == []
+  && sequential_sent_packets == []
   && s' == s
 }
 
-predicate LReplicaNextProcessAppStateSupply(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcessAppStateSupply(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_AppStateSupply?
 {
   if received_packet.src in s.executor.constants.all.config.replica_ids && received_packet.msg.opn_state_supply > s.executor.ops_complete then
     && LLearnerForgetOperationsBefore(s.learner, s'.learner, received_packet.msg.opn_state_supply)
     && LExecutorProcessAppStateSupply(s.executor, s'.executor, received_packet)
-    && sent_packets == []
+    && sequential_sent_packets == []
     && s' == s.(learner := s'.learner, executor := s'.executor)
   else
-    s' == s && sent_packets == []
+    s' == s && sequential_sent_packets == []
 }
 
-predicate LReplicaNextProcessAppStateRequest(s:LReplica, s':LReplica, received_packet:RslPacket, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcessAppStateRequest(s:LReplica, s':LReplica, received_packet:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_AppStateRequest?
 {
-  && LExecutorProcessAppStateRequest(s.executor, s'.executor, received_packet, sent_packets)
+  && LExecutorProcessAppStateRequest(s.executor, s'.executor, received_packet, sequential_sent_packets)
   && s' == s.(executor := s'.executor)
 }
 
-predicate LReplicaNextProcessHeartbeat(s:LReplica, s':LReplica, received_packet:RslPacket, clock:int, sent_packets:seq<RslPacket>)
+predicate LReplicaNextProcessHeartbeat(s:LReplica, s':LReplica, received_packet:RslPacket, clock:int, sequential_sent_packets:seq<RslPacket>)
   requires received_packet.msg.RslMessage_Heartbeat?
 {
   && LProposerProcessHeartbeat(s.proposer, s'.proposer, received_packet, clock)
   && LAcceptorProcessHeartbeat(s.acceptor, s'.acceptor, received_packet)
-  && sent_packets == []
+  && sequential_sent_packets == []
   && s' == s.(proposer := s'.proposer, acceptor := s'.acceptor)
 }
 
-predicate LReplicaNextSpontaneousMaybeEnterNewViewAndSend1a(s:LReplica, s':LReplica, sent_packets:seq<RslPacket>)
+predicate LReplicaNextSpontaneousMaybeEnterNewViewAndSend1a(s:LReplica, s':LReplica, sequential_sent_packets:seq<RslPacket>)
 {
-  && LProposerMaybeEnterNewViewAndSend1a(s.proposer, s'.proposer, sent_packets)
+  && LProposerMaybeEnterNewViewAndSend1a(s.proposer, s'.proposer, sequential_sent_packets)
   && s' == s.(proposer := s'.proposer)
 }
 
-predicate LReplicaNextSpontaneousMaybeEnterPhase2(s:LReplica, s':LReplica, sent_packets:seq<RslPacket>)
+predicate LReplicaNextSpontaneousMaybeEnterPhase2(s:LReplica, s':LReplica, sequential_sent_packets:seq<RslPacket>)
 {
-  && LProposerMaybeEnterPhase2(s.proposer, s'.proposer, s.acceptor.log_truncation_point, sent_packets)
+  && LProposerMaybeEnterPhase2(s.proposer, s'.proposer, s.acceptor.log_truncation_point, sequential_sent_packets)
   && s' == s.(proposer := s'.proposer)
 }
 
-predicate LReplicaNextReadClockMaybeNominateValueAndSend2a(s:LReplica, s':LReplica, clock:ClockReading, sent_packets:seq<RslPacket>)
+predicate LReplicaNextReadClockMaybeNominateValueAndSend2a(s:LReplica, s':LReplica, clock:ClockReading, sequential_sent_packets:seq<RslPacket>)
 {
-  && LProposerMaybeNominateValueAndSend2a(s.proposer, s'.proposer, clock.t, s.acceptor.log_truncation_point, sent_packets)
+  && LProposerMaybeNominateValueAndSend2a(s.proposer, s'.proposer, clock.t, s.acceptor.log_truncation_point, sequential_sent_packets)
   && s' == s.(proposer := s'.proposer)
 }
 
-// predicate LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s:LReplica, s':LReplica, sent_packets:seq<RslPacket>)
-// {
-//   (exists opn ::
-//         && IsLogTruncationPointValid(opn, s.acceptor.last_checkpointed_operation, s.constants.all.config)
-//         && opn > s.acceptor.log_truncation_point
-//         && LAcceptorTruncateLog(s.acceptor, s'.acceptor, opn)
-//         && s' == s.(acceptor := s'.acceptor)
-//         && sent_packets == []
-//   )
-//   ||
-//   (exists opn ::
-//         && IsLogTruncationPointValid(opn, s.acceptor.last_checkpointed_operation, s.constants.all.config)
-//         && opn <= s.acceptor.log_truncation_point
-//         && s' == s
-//         && sent_packets == []
-//   )
-// }
-
+/* 这个需要被修改, 不能翻译
+predicate LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s:LReplica, s':LReplica, sequential_sent_packets:seq<RslPacket>)
+{
+  (exists opn ::
+        && IsLogTruncationPointValid(opn, s.acceptor.last_checkpointed_operation, s.constants.all.config)
+        && opn > s.acceptor.log_truncation_point
+        && LAcceptorTruncateLog(s.acceptor, s'.acceptor, opn)
+        && s' == s.(acceptor := s'.acceptor)
+        && sequential_sent_packets == []
+  )
+  ||
+  (exists opn ::
+        && IsLogTruncationPointValid(opn, s.acceptor.last_checkpointed_operation, s.constants.all.config)
+        && opn <= s.acceptor.log_truncation_point
+        && s' == s
+        && sequential_sent_packets == []
+  )
+}
+*/
 predicate LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s:LReplica, s':LReplica, sent_packets:seq<RslPacket>)
 {
     exists opn ::
@@ -207,7 +206,7 @@ predicate LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s:LReplica, s':LR
             && sent_packets == []
 }
 
-predicate LReplicaNextSpontaneousMaybeMakeDecision(s:LReplica, s':LReplica, sent_packets:seq<RslPacket>)
+predicate LReplicaNextSpontaneousMaybeMakeDecision(s:LReplica, s':LReplica, sequential_sent_packets:seq<RslPacket>)
 {
   var opn := s.executor.ops_complete;
   if  && s.executor.next_op_to_execute.OutstandingOpUnknown?
@@ -216,12 +215,12 @@ predicate LReplicaNextSpontaneousMaybeMakeDecision(s:LReplica, s':LReplica, sent
     && LExecutorGetDecision(s.executor, s'.executor, s.learner.max_ballot_seen, opn,
                            s.learner.unexecuted_learner_state[opn].candidate_learned_value)
     && s' == s.(executor := s'.executor)
-    && sent_packets == []
+    && sequential_sent_packets == []
   else
-    s' == s && sent_packets == []
+    s' == s && sequential_sent_packets == []
 }
 
-predicate LReplicaNextSpontaneousMaybeExecute(s:LReplica, s':LReplica, sent_packets:seq<RslPacket>)
+predicate LReplicaNextSpontaneousMaybeExecute(s:LReplica, s':LReplica, sequential_sent_packets:seq<RslPacket>)
 {
   if  && s.executor.next_op_to_execute.OutstandingOpKnown?
       && LtUpperBound(s.executor.ops_complete, s.executor.constants.all.params.max_integer_val)
@@ -229,40 +228,41 @@ predicate LReplicaNextSpontaneousMaybeExecute(s:LReplica, s':LReplica, sent_pack
     var v := s.executor.next_op_to_execute.v;
     && LProposerResetViewTimerDueToExecution(s.proposer, s'.proposer, v)
     && LLearnerForgetDecision(s.learner, s'.learner, s.executor.ops_complete)
-    && LExecutorExecute(s.executor, s'.executor, sent_packets)
+    && LExecutorExecute(s.executor, s'.executor, sequential_sent_packets)
     && s' == s.(proposer := s'.proposer, learner := s'.learner, executor := s'.executor)
   else
-    s' == s && sent_packets == []
+    s' == s && sequential_sent_packets == []
 }
 
-predicate LReplicaNextReadClockMaybeSendHeartbeat(s:LReplica, s':LReplica, clock:ClockReading, sent_packets:seq<RslPacket>)
+predicate LReplicaNextReadClockMaybeSendHeartbeat(s:LReplica, s':LReplica, clock:ClockReading, sequential_sent_packets:seq<RslPacket>)
 {
   if clock.t < s.nextHeartbeatTime then
-    s' == s && sent_packets == []
+    s' == s && sequential_sent_packets == []
   else
     && s'.nextHeartbeatTime == UpperBoundedAddition(clock.t, s.constants.all.params.heartbeat_period, s.constants.all.params.max_integer_val)
     && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index,
                            RslMessage_Heartbeat(s.proposer.election_state.current_view,
                                                 s.constants.my_index in s.proposer.election_state.current_view_suspectors,
                                                 s.executor.ops_complete),
-                           sent_packets)
+                           sequential_sent_packets)
     && s' == s.(nextHeartbeatTime := s'.nextHeartbeatTime)
 }
 
-predicate LReplicaNextReadClockCheckForViewTimeout(s:LReplica, s':LReplica, clock:ClockReading, sent_packets:seq<RslPacket>)
+predicate LReplicaNextReadClockCheckForViewTimeout(s:LReplica, s':LReplica, clock:ClockReading, sequential_sent_packets:seq<RslPacket>)
 {
   && LProposerCheckForViewTimeout(s.proposer, s'.proposer, clock.t)
-  && sent_packets == []
+  && sequential_sent_packets == []
   && s' == s.(proposer := s'.proposer)
 }
 
-predicate LReplicaNextReadClockCheckForQuorumOfViewSuspicions(s:LReplica, s':LReplica, clock:ClockReading, sent_packets:seq<RslPacket>)
+predicate LReplicaNextReadClockCheckForQuorumOfViewSuspicions(s:LReplica, s':LReplica, clock:ClockReading, sequential_sent_packets:seq<RslPacket>)
 {
   && LProposerCheckForQuorumOfViewSuspicions(s.proposer, s'.proposer, clock.t)
-  && sent_packets == []
+  && sequential_sent_packets == []
   && s' == s.(proposer := s'.proposer)
 }
 
+/*
 function {:opaque} ExtractSentPacketsFromIos(ios:seq<RslIo>) : seq<RslPacket>
   ensures forall p :: p in ExtractSentPacketsFromIos(ios) <==> LIoOpSend(p) in ios
 {
@@ -388,5 +388,7 @@ predicate LSchedulerNext(s:LScheduler, s':LScheduler, ios:seq<RslIo>)
     else
       LReplicaNoReceiveNext(s.replica, s.nextActionIndex, s'.replica, ios)
 }
+
+*/
 
 } 

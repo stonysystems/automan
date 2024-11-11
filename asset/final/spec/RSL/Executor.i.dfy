@@ -21,6 +21,7 @@ import opened Concrete_NodeIdentity_i
 import opened Environment_s
 import opened Common__UpperBound_s
 
+
 datatype OutstandingOperation = OutstandingOpKnown(v:RequestBatch, bal:Ballot) | OutstandingOpUnknown()
 
 datatype LExecutor = LExecutor(
@@ -61,39 +62,39 @@ function GetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:s
     + GetPacketsFromReplies(me, requests[1..], replies[1..])
 }
 
-lemma lemma_SizeOfGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>, packets:seq<RslPacket>)
-  requires |requests| == |replies|
-  requires forall r :: r in replies ==> r.Reply?
-  requires packets == GetPacketsFromReplies(me, requests, replies)
-  ensures  |packets| == |requests|
-  decreases |requests|
-{
-  if |requests| > 0
-  {
-    lemma_SizeOfGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..]);
-  }
-}
+// lemma lemma_SizeOfGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>, packets:seq<RslPacket>)
+//   requires |requests| == |replies|
+//   requires forall r :: r in replies ==> r.Reply?
+//   requires packets == GetPacketsFromReplies(me, requests, replies)
+//   ensures  |packets| == |requests|
+//   decreases |requests|
+// {
+//   // if |requests| > 0
+//   // {
+//   //   lemma_SizeOfGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..]);
+//   // }
+// }
 
-lemma lemma_SpecificPacketInGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>,
-                                                  packets:seq<RslPacket>, batch_idx:int)
-  requires |requests| == |replies|
-  requires forall r :: r in replies ==> r.Reply?
-  requires 0 <= batch_idx < |requests|
-  requires packets == GetPacketsFromReplies(me, requests, replies)
-  ensures  |packets| == |requests|
-  ensures  packets[batch_idx] == LPacket(requests[batch_idx].client, me, RslMessage_Reply(requests[batch_idx].seqno, replies[batch_idx].reply))
-  decreases |requests|
-{
-  lemma_SizeOfGetPacketsFromReplies(me, requests, replies, packets);
+// lemma lemma_SpecificPacketInGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>,
+//                                                   packets:seq<RslPacket>, batch_idx:int)
+//   requires |requests| == |replies|
+//   requires forall r :: r in replies ==> r.Reply?
+//   requires 0 <= batch_idx < |requests|
+//   requires packets == GetPacketsFromReplies(me, requests, replies)
+//   ensures  |packets| == |requests|
+//   ensures  packets[batch_idx] == LPacket(requests[batch_idx].client, me, RslMessage_Reply(requests[batch_idx].seqno, replies[batch_idx].reply))
+//   decreases |requests|
+// {
+//   // lemma_SizeOfGetPacketsFromReplies(me, requests, replies, packets);
 
-  if |requests| > 0
-  {
-    if batch_idx > 0
-    {
-      lemma_SpecificPacketInGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..], batch_idx-1);
-    }
-  }
-}
+//   // if |requests| > 0
+//   // {
+//   //   if batch_idx > 0
+//   //   {
+//   //     lemma_SpecificPacketInGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..], batch_idx-1);
+//   //   }
+//   // }
+// }
 
 function LClientsInReplies(replies:seq<Reply>) : ReplyCache
   ensures var m := LClientsInReplies(replies);
@@ -108,13 +109,6 @@ function LClientsInReplies(replies:seq<Reply>) : ReplyCache
     LClientsInReplies(replies[1..])[replies[0].client := replies[0]]
 }
 
-// predicate UpdateNewCache(c:ReplyCache, c':ReplyCache, nc:ReplyCache)
-// {
-//   && (forall client :: client in c' <==> (client in nc || client in c))
-//   && (forall client :: client in c' ==> c'[client] == (if client in c then c[client] else nc[client]))
-//   && (forall client :: client in nc || client in c ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
-// }
-
 predicate UpdateNewCache(c:ReplyCache, c':ReplyCache, replies:seq<Reply>)
   // ensures forall client :: client in c' ==> (|| (client in c && c'[client] == c[client])
   //                                            || (exists req_idx :: && 0 <= req_idx < |replies|
@@ -122,16 +116,19 @@ predicate UpdateNewCache(c:ReplyCache, c':ReplyCache, replies:seq<Reply>)
   //                                                           && c'[client] == replies[req_idx]))
 {
   var nc := LClientsInReplies(replies);
-  && (forall client :: client in c' ==> (|| (client in c && c'[client] == c[client])
-                                             || (exists req_idx :: && 0 <= req_idx < |replies|
-                                                            && replies[req_idx].client == client
-                                                            && c'[client] == replies[req_idx])))
-  && (forall client :: client in c' <==> (client in nc || client in c))
+  // && (forall client :: client in c' ==> (|| (client in c && c'[client] == c[client])
+  //                                            || (exists req_idx :: && 0 <= req_idx < |replies|
+  //                                                           && replies[req_idx].client == client
+  //                                                           && c'[client] == replies[req_idx])))
+  // && (forall client :: client in c' <==> (client in nc || client in c))
+  // && (forall client :: client in c' ==> c'[client] == (if client in c then c[client] else nc[client]))
+  // // && (forall client :: client in nc || client in c ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
+  // && (forall client :: client in c.Keys + nc.Keys ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
+  && (forall client :: client in c' <==> client in c.Keys + nc.Keys)
   && (forall client :: client in c' ==> c'[client] == (if client in c then c[client] else nc[client]))
-  && (forall client :: client in nc || client in c ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
 }
 
-predicate LExecutorExecute(s:LExecutor, s':LExecutor, sent_packets:seq<RslPacket>)
+predicate LExecutorExecute(s:LExecutor, s':LExecutor, non_empty_sequential_sent_packets:seq<RslPacket>)
   requires s.next_op_to_execute.OutstandingOpKnown?
   requires LtUpperBound(s.ops_complete, s.constants.all.params.max_integer_val)
   requires LReplicaConstantsValid(s.constants)
@@ -146,45 +143,9 @@ predicate LExecutorExecute(s:LExecutor, s':LExecutor, sent_packets:seq<RslPacket
   && s'.ops_complete == s.ops_complete + 1
   && s'.max_bal_reflected == (if BalLeq(s.max_bal_reflected, s.next_op_to_execute.bal) then s.next_op_to_execute.bal else s.max_bal_reflected)
   && s'.next_op_to_execute == OutstandingOpUnknown()
-
-  // && (forall client :: client in s'.reply_cache ==> (|| (client in s.reply_cache && s'.reply_cache[client] == s.reply_cache[client])
-  //                                            || (exists req_idx :: && 0 <= req_idx < |batch|
-  //                                                           && replies[req_idx].client == client
-  //                                                           && s'.reply_cache[client] == replies[req_idx])))
-
   && UpdateNewCache(s.reply_cache, s'.reply_cache, replies)
-  // && (forall client :: client in s'.reply_cache <==> (client in clients || client in s.reply_cache))
-  // && (forall client :: client in s'.reply_cache ==> s'.reply_cache[client] == (if client in clients then clients[client] else s.reply_cache[client]))
-  
-  // && (forall client :: client in s'.reply_cache ==> (|| (client in s.reply_cache && s'.reply_cache[client] == s.reply_cache[client])
-  //                                            || (exists req_idx :: && 0 <= req_idx < |batch|
-  //                                                           && replies[req_idx].client == client
-  //                                                           && s'.reply_cache[client] == replies[req_idx])))
-
-  && sent_packets == GetPacketsFromReplies(s.constants.all.config.replica_ids[s.constants.my_index], batch, replies)  
+  && non_empty_sequential_sent_packets == GetPacketsFromReplies(s.constants.all.config.replica_ids[s.constants.my_index], batch, replies)  
 }
-
-    
-// predicate LExecutorExecute(s:LExecutor, s':LExecutor, sent_packets:seq<RslPacket>)
-//   requires s.next_op_to_execute.OutstandingOpKnown?
-//   requires LtUpperBound(s.ops_complete, s.constants.all.params.max_integer_val)
-//   requires LReplicaConstantsValid(s.constants)
-// {
-//   var batch := s.next_op_to_execute.v;
-//   var temp := HandleRequestBatch(s.app, batch);
-//   var new_state := temp.0[|temp.0|-1];
-//   var replies := temp.1;
-//   && s'.constants == s.constants
-//   && s'.app == new_state
-//   && s'.ops_complete == s.ops_complete + 1
-//   && s'.max_bal_reflected == (if BalLeq(s.max_bal_reflected, s.next_op_to_execute.bal) then s.next_op_to_execute.bal else s.max_bal_reflected)
-//   && s'.next_op_to_execute == OutstandingOpUnknown()
-//   && (forall client :: client in s'.reply_cache ==> (|| (client in s.reply_cache && s'.reply_cache[client] == s.reply_cache[client])
-//                                              || (exists req_idx :: && 0 <= req_idx < |batch|
-//                                                             && replies[req_idx].client == client
-//                                                             && s'.reply_cache[client] == replies[req_idx])))
-//   && sent_packets == GetPacketsFromReplies(s.constants.all.config.replica_ids[s.constants.my_index], batch, replies)
-// }
 
 predicate LExecutorProcessAppStateSupply(s:LExecutor, s':LExecutor, inp:RslPacket)
   requires inp.msg.RslMessage_AppStateSupply?
@@ -198,7 +159,7 @@ predicate LExecutorProcessAppStateSupply(s:LExecutor, s':LExecutor, inp:RslPacke
            reply_cache := m.reply_cache)
 }
 
-predicate LExecutorProcessAppStateRequest(s:LExecutor, s':LExecutor, inp:RslPacket, sent_packets:seq<RslPacket>)
+predicate LExecutorProcessAppStateRequest(s:LExecutor, s':LExecutor, inp:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires inp.msg.RslMessage_AppStateRequest?
 {
   var m := inp.msg;
@@ -207,23 +168,23 @@ predicate LExecutorProcessAppStateRequest(s:LExecutor, s':LExecutor, inp:RslPack
      && s.ops_complete >= m.opn_state_req
      && LReplicaConstantsValid(s.constants) then
      && s' == s
-     && sent_packets == [ LPacket(inp.src, s.constants.all.config.replica_ids[s.constants.my_index],
+     && sequential_sent_packets == [ LPacket(inp.src, s.constants.all.config.replica_ids[s.constants.my_index],
                                  RslMessage_AppStateSupply(s.max_bal_reflected, s.ops_complete, s.app, s.reply_cache)) ]
   else
-    s' == s && sent_packets == []
+    s' == s && sequential_sent_packets == []
 }
 
-predicate LExecutorProcessStartingPhase2(s:LExecutor, s':LExecutor, inp:RslPacket, sent_packets:seq<RslPacket>)
+predicate LExecutorProcessStartingPhase2(s:LExecutor, s':LExecutor, inp:RslPacket, broadcast_sent_packets:seq<RslPacket>)
   requires inp.msg.RslMessage_StartingPhase2?
 {
   if inp.src in s.constants.all.config.replica_ids && inp.msg.logTruncationPoint_2 > s.ops_complete then
     s' == s && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index,
-                                   RslMessage_AppStateRequest(inp.msg.bal_2, inp.msg.logTruncationPoint_2), sent_packets)
+                                   RslMessage_AppStateRequest(inp.msg.bal_2, inp.msg.logTruncationPoint_2), broadcast_sent_packets)
   else
-    s' == s && sent_packets == []
+    s' == s && broadcast_sent_packets == []
 }
 
-predicate LExecutorProcessRequest(s:LExecutor, inp:RslPacket, sent_packets:seq<RslPacket>)
+predicate LExecutorProcessRequest(s:LExecutor, inp:RslPacket, sequential_sent_packets:seq<RslPacket>)
   requires inp.msg.RslMessage_Request?
   requires inp.src in s.reply_cache
   requires s.reply_cache[inp.src].Reply?
@@ -231,9 +192,9 @@ predicate LExecutorProcessRequest(s:LExecutor, inp:RslPacket, sent_packets:seq<R
 {
   if inp.msg.seqno_req == s.reply_cache[inp.src].seqno && LReplicaConstantsValid(s.constants) then
     var r := s.reply_cache[inp.src];
-    sent_packets == [ LPacket(r.client, s.constants.all.config.replica_ids[s.constants.my_index], RslMessage_Reply(r.seqno, r.reply)) ]
+    sequential_sent_packets == [ LPacket(r.client, s.constants.all.config.replica_ids[s.constants.my_index], RslMessage_Reply(r.seqno, r.reply)) ]
   else
-    sent_packets == []
+    sequential_sent_packets == []
 }
 
 } 

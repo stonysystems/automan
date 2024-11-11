@@ -70,11 +70,12 @@ function TruncateUnAckList(unAcked:seq<SingleMessage>, seqnoAcked:nat) : seq<Sin
 predicate ReceiveAck(s:SingleDeliveryAcct, s':SingleDeliveryAcct, pkt:Packet, acks:set<Packet>)
     requires pkt.msg.Ack?
 {
-    acks == {} &&   // We don't ack acks
     var oldAckState := AckStateLookup(pkt.src, s.sendState);
+    var msgs := TruncateUnAckList(oldAckState.unAcked, pkt.msg.ack_seqno);
+    var newAckState := oldAckState.(numPacketsAcked := pkt.msg.ack_seqno,
+                                        unAcked := msgs);
+    && acks == {} &&   // We don't ack acks
     if pkt.msg.ack_seqno > oldAckState.numPacketsAcked then
-        var newAckState := oldAckState.(numPacketsAcked := pkt.msg.ack_seqno,
-                                        unAcked := TruncateUnAckList(oldAckState.unAcked, pkt.msg.ack_seqno));
         s' == s.(sendState := s.sendState[pkt.src := newAckState])
     else 
         s' == s
@@ -87,25 +88,25 @@ predicate ShouldAckSingleMessage(s:SingleDeliveryAcct, pkt:Packet)
     pkt.msg.seqno <= last_seqno
 }
 
-// predicate SendAck(s:SingleDeliveryAcct, pkt:Packet, ack:Packet, acks:set<Packet>) 
-//     requires ShouldAckSingleMessage(s, pkt)
-// {
-//     var m := Ack(pkt.msg.seqno);
-//     && ack == Packet(dst:=pkt.src, src:=pkt.dst, msg:=m)
-//     // mode checking
-//     // ack is uased as input
-//     && acks == { ack }
-// }
-
 predicate SendAck(s:SingleDeliveryAcct, pkt:Packet, ack:Packet, acks:set<Packet>) 
     requires ShouldAckSingleMessage(s, pkt)
 {
     var m := Ack(pkt.msg.seqno);
-    var p := Packet(dst:=pkt.src, src:=pkt.dst, msg:=m);
-    && ack == p
+    && ack == Packet(dst:=pkt.src, src:=pkt.dst, msg:=m)
+    // mode checking
     // ack is uased as input
-    && acks == { p }
+    && acks == { ack }
 }
+
+// predicate SendAck(s:SingleDeliveryAcct, pkt:Packet, ack:Packet, acks:set<Packet>) 
+//     requires ShouldAckSingleMessage(s, pkt)
+// {
+//     var m := Ack(pkt.msg.seqno);
+//     var p := Packet(dst:=pkt.src, src:=pkt.dst, msg:=m);
+//     && ack == p
+//     // ack is uased as input
+//     && acks == { p }
+// }
 
 predicate MaybeAckPacket(s:SingleDeliveryAcct, pkt:Packet, ack:Packet, acks:set<Packet>) 
 {
@@ -113,17 +114,11 @@ predicate MaybeAckPacket(s:SingleDeliveryAcct, pkt:Packet, ack:Packet, acks:set<
     if ShouldAckSingleMessage(s, pkt) then
         && SendAck(s, pkt, ack, acks)
     else 
+        && ack == pkt /** manually added to pass harmony check */
         // saturation check
         && acks == {}
 }
 
-// predicate MaybeAckPacket(s:SingleDeliveryAcct, pkt:Packet, acks:set<Packet>) 
-// {
-//     if ShouldAckSingleMessage(s, pkt) then
-//         && SendAck(s, pkt, acks)
-//     else 
-//         && acks == {}
-// }
 
 predicate ReceiveRealPacket(s:SingleDeliveryAcct, s':SingleDeliveryAcct, pkt:Packet)
     requires pkt.msg.SingleMessage?
@@ -154,17 +149,11 @@ function UnAckedMessages(s:SingleDeliveryAcct, src:NodeIdentity):set<Packet>
 // marked, relational spec
 predicate ReceiveSingleMessage(s:SingleDeliveryAcct, s':SingleDeliveryAcct, pkt:Packet, ack:Packet, acks:set<Packet>)
 {
-    // match pkt.msg {
-    //     case Ack(_) => ReceiveAck(s, s', pkt, acks)
-    //     case SingleMessage(seqno, _, m) => ReceiveRealPacket(s, s', pkt) && MaybeAckPacket(s', pkt, ack, acks) 
-    //             && (|acks| > 0 ==> ack == var m := Ack(pkt.msg.seqno); Packet(dst:=pkt.src, src:=pkt.dst, msg:=m))
-    //     case InvalidMessage => (s' == s && acks == {})
-    // }
-
     // saturation check
     // ack is not assigned
     if pkt.msg.Ack? then
-        ReceiveAck(s, s', pkt, acks)
+        && ReceiveAck(s, s', pkt, acks)
+        && ack == pkt /** manually added to pass harmony check */
     else if pkt.msg.SingleMessage? then
         && ReceiveRealPacket(s, s', pkt)
         // mode checking
@@ -173,37 +162,15 @@ predicate ReceiveSingleMessage(s:SingleDeliveryAcct, s':SingleDeliveryAcct, pkt:
         && MaybeAckPacket(s', pkt, ack, acks)
     else 
         && s' == s 
+        && ack == pkt /** manually added to pass harmony check */
         && acks == {}
 }
 
-// rewrite
-// predicate ReceiveSingleMessage(s:SingleDeliveryAcct, s':SingleDeliveryAcct, pkt:Packet, ack:Packet, acks:set<Packet>)
-// {
-//     // saturation check
-//     // ack is not assigned
-//     if pkt.msg.Ack? then
-//         ReceiveAck(s, s', pkt, acks)
-//     else if pkt.msg.SingleMessage? then
-//         var new_s := if NewSingleMessage(s, pkt) then 
-//             var last_seqno := TombstoneTableLookup(pkt.src, s.receiveState);
-//             s.(receiveState := s.receiveState[pkt.src := (last_seqno + 1) /*as nat*/]) 
-//             else s;
-//         // && ReceiveRealPacket(s, s', pkt)
-//         // mode checking
-//         // here s' is output, but in MaybeAckPacket, s' is input
-//         // when calling MaybeAckPacket, s' is already assigned value, can it allowed to be a input variable? 
-//         && MaybeAckPacket(new_s, pkt, ack, acks)
-//         && s' == new_s
-//     else 
-//         && s' == s 
-//         && acks == {}
-// }
-
 // marked: 这个不用翻译成action
-predicate ReceiveNoMessage(s1:SingleDeliveryAcct, s2:SingleDeliveryAcct)
-{
-    s2.receiveState == s1.receiveState
-}
+// predicate ReceiveNoMessage(s1:SingleDeliveryAcct, s2:SingleDeliveryAcct)
+// {
+//     s2.receiveState == s1.receiveState
+// }
 
 
 // Highest sequence number we've sent to dst
@@ -216,37 +183,20 @@ function HighestSeqnoSent(s:SingleDeliveryAcct, dst:NodeIdentity) : nat
 // Client should SendSingleMessage or SendNoMessage
 // marked: 包含多个要构建的状态，且构建状态的信息不够
 // marked: used as property checking predicate
-predicate SendSingleMessage(s:SingleDeliveryAcct, s':SingleDeliveryAcct, m:Message, sm:SingleMessage, params:Parameters, shouldSend:bool)
-{
-       sm.SingleMessage? 
-    && sm.m == m
-    // mode checking
-    // sm is output, but it used as input to call function AckStateLookup
-    && var oldAckState := AckStateLookup(sm.dst, s.sendState); 
-       var new_seqno := oldAckState.numPacketsAcked + |oldAckState.unAcked| + 1;
-       if new_seqno > params.max_seqno then
-           s' == s && !shouldSend // Packet shouldn't be sent if we exceed the maximum sequence number
-       else
-           (s' == s.(sendState := s.sendState[sm.dst := oldAckState.(unAcked := oldAckState.unAcked + [sm])])
-            && sm.seqno == new_seqno
-            && shouldSend)
-}
-
-// predicate SendSingleMessageReal(s:SingleDeliveryAcct, s':SingleDeliveryAcct, m:Message, dst:NodeIdentity, sm:SingleMessage, params:Parameters, shouldSend:bool)
-//     ensures SendSingleMessageReal(s,s',m,dst,sm,params,shouldSend) ==> SendSingleMessage(s,s',m,sm,params,shouldSend)
+// predicate SendSingleMessage(s:SingleDeliveryAcct, s':SingleDeliveryAcct, m:Message, sm:SingleMessage, params:Parameters, shouldSend:bool)
 // {
-//     var oldAckState := AckStateLookup(dst, s.sendState); 
-//     var new_seqno := oldAckState.numPacketsAcked + |oldAckState.unAcked| + 1;
-//     if new_seqno > params.max_seqno then
-//         && s' == s
-//         && shouldSend == false
-//         && sm == SingleMessage(0, dst, m)
-//     else 
-//         && sm == SingleMessage((oldAckState.numPacketsAcked + |oldAckState.unAcked| + 1), dst, m)
-//         // mode checking
-//         // here sm is used as input (sm.dst)
-//         && s' == s.(sendState := s.sendState[sm.dst := oldAckState.(unAcked := oldAckState.unAcked + [sm])])
-//         && shouldSend == true
+//        sm.SingleMessage? 
+//     && sm.m == m
+//     // mode checking
+//     // sm is output, but it used as input to call function AckStateLookup
+//     && var oldAckState := AckStateLookup(sm.dst, s.sendState); 
+//        var new_seqno := oldAckState.numPacketsAcked + |oldAckState.unAcked| + 1;
+//        if new_seqno > params.max_seqno then
+//            s' == s && !shouldSend // Packet shouldn't be sent if we exceed the maximum sequence number
+//        else
+//            (s' == s.(sendState := s.sendState[sm.dst := oldAckState.(unAcked := oldAckState.unAcked + [sm])])
+//             && sm.seqno == new_seqno
+//             && shouldSend)
 // }
 
 predicate SendSingleMessageReal(s:SingleDeliveryAcct, s':SingleDeliveryAcct, m:Message, dst:NodeIdentity, sm:SingleMessage, params:Parameters, shouldSend:bool)
@@ -267,10 +217,11 @@ predicate SendSingleMessageReal(s:SingleDeliveryAcct, s':SingleDeliveryAcct, m:M
         && shouldSend == true
 }
 
+
 // marked: 这个不用翻译成action
-predicate SendNoMessage(s1:SingleDeliveryAcct, s2:SingleDeliveryAcct)
-{
-   s2.sendState == s1.sendState    // UNCHANGED
-}
+// predicate SendNoMessage(s1:SingleDeliveryAcct, s2:SingleDeliveryAcct)
+// {
+//    s2.sendState == s1.sendState    // UNCHANGED
+// }
 
 } 

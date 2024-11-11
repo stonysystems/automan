@@ -58,11 +58,6 @@ predicate LLearnerForgetDecision(s:LLearner, s':LLearner, opn:OperationNumber)
     s' == s
 }
 
-// predicate LLearnerRemoveOperationsBefore(m:LearnerState, m':LearnerState, opn:OperationNumber)
-// {
-//   m' == map op | op in m && op >= opn :: m[op]
-// }
-
 predicate LLearnerForgetOperationsBefore(s:LLearner, s':LLearner, ops_complete:OperationNumber)
 {
   s' == s.(unexecuted_learner_state := (map op | op in s.unexecuted_learner_state && op >= ops_complete :: s.unexecuted_learner_state[op]))

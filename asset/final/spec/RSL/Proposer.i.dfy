@@ -18,6 +18,9 @@ module LiveRSL__Proposer_i {
   import opened Common__UpperBound_s
 
 
+  // 21
+  // 13
+
   ///////////////////////////////////
   // DATATYPE DEFINITION
   ///////////////////////////////////
@@ -71,7 +74,6 @@ module LiveRSL__Proposer_i {
     (forall p :: p in received_1b_packets && p.msg.RslMessage_1b? ==> p.msg.log_truncation_point <= opn)
   }
 
-
   predicate LSetOfMessage1b(S:set<RslPacket>)
   {
     forall p :: p in S ==> p.msg.RslMessage_1b?
@@ -81,6 +83,12 @@ module LiveRSL__Proposer_i {
   {
     && LSetOfMessage1b(S)
     && (forall p :: p in S ==> p.msg.bal_1b == b)
+  }
+
+  predicate LAllAcceptorsHadNoProposal(S:set<RslPacket>, opn:OperationNumber)
+    requires LSetOfMessage1b(S)
+  {
+    forall p :: p in S ==> !(opn in p.msg.votes)
   }
 
   predicate LExistVotesHasProposalLargeThanOpn(p:RslPacket, op:OperationNumber)
@@ -96,11 +104,7 @@ module LiveRSL__Proposer_i {
     exists p :: p in S && LExistVotesHasProposalLargeThanOpn(p, op)
   }
 
-  predicate LAllAcceptorsHadNoProposal(S:set<RslPacket>, opn:OperationNumber)
-    requires LSetOfMessage1b(S)
-  {
-    forall p :: p in S ==> !(opn in p.msg.votes)
-  }
+  /* ---- */
 
   predicate Lmax_balInS(c:Ballot, S:set<RslPacket>, opn:OperationNumber)
     requires LSetOfMessage1b(S)
@@ -127,7 +131,6 @@ module LiveRSL__Proposer_i {
   predicate LValIsHighestNumberedProposal(v:RequestBatch, S:set<RslPacket>, opn:OperationNumber)
     requires LSetOfMessage1b(S)
   {
-    // exists c :: c in S && opn in c.msg.votes && LValIsHighestNumberedProposalAtBallot(v, c, S, opn)
     exists c :: LValIsHighestNumberedProposalAtBallot(v, c, S, opn)
   }
 
@@ -162,12 +165,12 @@ module LiveRSL__Proposer_i {
     && s.received_1b_packets == {}
     && s.highest_seqno_requested_by_client_this_view == map[]
     && ElectionStateInit(s.election_state, c)
-    && s.incomplete_batch_timer.IncompleteBatchTimerOff?
+    && s.incomplete_batch_timer == IncompleteBatchTimerOff()
   }
 
-  ///////////////////////////////////
-  // ACTIONS
-  ///////////////////////////////////
+  // ///////////////////////////////////
+  // // ACTIONS
+  // ///////////////////////////////////
 
   predicate LProposerProcessRequest(s:LProposer, s':LProposer, packet:RslPacket)
     requires packet.msg.RslMessage_Request?
@@ -184,7 +187,7 @@ module LiveRSL__Proposer_i {
          s' == s.(election_state := s'.election_state)
   }
 
-  predicate LProposerMaybeEnterNewViewAndSend1a(s:LProposer, s':LProposer, sent_packets:seq<RslPacket>)
+  predicate LProposerMaybeEnterNewViewAndSend1a(s:LProposer, s':LProposer, broadcast_sent_packets:seq<RslPacket>)
   {
     if  && s.election_state.current_view.proposer_id == s.constants.my_index
         && BalLt(s.max_ballot_i_sent_1a, s.election_state.current_view) then
@@ -193,9 +196,9 @@ module LiveRSL__Proposer_i {
                received_1b_packets := {},
                highest_seqno_requested_by_client_this_view := map[],
                request_queue := s.election_state.requests_received_prev_epochs + s.election_state.requests_received_this_epoch)
-      && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index, RslMessage_1a(s.election_state.current_view), sent_packets)
+      && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index, RslMessage_1a(s.election_state.current_view), broadcast_sent_packets)
     else
-      s' == s && sent_packets == []
+      s' == s && broadcast_sent_packets == []
   }
 
   predicate LProposerProcess1b(s:LProposer, s':LProposer, p:RslPacket)
@@ -208,7 +211,7 @@ module LiveRSL__Proposer_i {
     s' == s.(received_1b_packets := s.received_1b_packets + { p })
   }
 
-  predicate LProposerMaybeEnterPhase2(s:LProposer, s':LProposer, log_truncation_point:OperationNumber, sent_packets:seq<RslPacket>)
+  predicate LProposerMaybeEnterPhase2(s:LProposer, s':LProposer, log_truncation_point:OperationNumber, broadcast_sent_packets:seq<RslPacket>)
   {
     if  && |s.received_1b_packets| >= LMinQuorumSize(s.constants.all.config)
         && LSetOfMessage1bAboutBallot(s.received_1b_packets, s.max_ballot_i_sent_1a)
@@ -216,13 +219,13 @@ module LiveRSL__Proposer_i {
       && s' == s.(current_state := 2,
                next_operation_number_to_propose := log_truncation_point)
       && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index,
-                              RslMessage_StartingPhase2(s.max_ballot_i_sent_1a, log_truncation_point), sent_packets)
+                              RslMessage_StartingPhase2(s.max_ballot_i_sent_1a, log_truncation_point), broadcast_sent_packets)
     else
-      s' == s && sent_packets == []
+      s' == s && broadcast_sent_packets == []
   }
 
   predicate LProposerNominateNewValueAndSend2a(s:LProposer, s':LProposer, clock:int, log_truncation_point:OperationNumber,
-                                               sent_packets:seq<RslPacket>)
+                                               broadcast_sent_packets:seq<RslPacket>)
     requires LProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose)
     requires LAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose)
   {
@@ -235,66 +238,50 @@ module LiveRSL__Proposer_i {
     && s' == s.(request_queue := s.request_queue[batchSize..],
              next_operation_number_to_propose := s.next_operation_number_to_propose + 1,
              incomplete_batch_timer := if |s.request_queue| > batchSize then IncompleteBatchTimerOn(UpperBoundedAddition(clock, s.constants.all.params.max_batch_delay, s.constants.all.params.max_integer_val)) else IncompleteBatchTimerOff())
-    && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index, RslMessage_2a(s.max_ballot_i_sent_1a, opn, v), sent_packets)
+    && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index, RslMessage_2a(s.max_ballot_i_sent_1a, opn, v), broadcast_sent_packets)
   }
-
-
-  // predicate LProposerNominateOldValueAndSend2a(s:LProposer, s':LProposer, log_truncation_point:OperationNumber, sent_packets:seq<RslPacket>)
-  //   requires LProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose)
-  //   requires !LAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose)
-  // {
-  //   var opn := s.next_operation_number_to_propose;
-
-  //   exists v ::
-  //     && LValIsHighestNumberedProposal(v, s.received_1b_packets, opn)
-  //     && s' == s.(next_operation_number_to_propose := s.next_operation_number_to_propose + 1)
-  //     && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index, RslMessage_2a(s.max_ballot_i_sent_1a, opn, v), sent_packets)
-  // }
-
-  predicate LProposerNominateOldValueAndSend2a(s:LProposer, s':LProposer, log_truncation_point:OperationNumber, sent_packets:seq<RslPacket>)
+  
+  predicate LProposerNominateOldValueAndSend2a(s:LProposer, s':LProposer, log_truncation_point:OperationNumber, broadcast_sent_packets:seq<RslPacket>)
     requires LProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose)
     requires !LAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose)
   {
     var opn := s.next_operation_number_to_propose;
-    exists p ::
-      p in s.received_1b_packets && opn in p.msg.votes 
-      && LValIsHighestNumberedProposal(p.msg.votes[opn].max_val, s.received_1b_packets, opn)
+
+    exists v ::
+      && LValIsHighestNumberedProposal(v, s.received_1b_packets, opn)
       && s' == s.(next_operation_number_to_propose := s.next_operation_number_to_propose + 1)
-      && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index, RslMessage_2a(s.max_ballot_i_sent_1a, opn, p.msg.votes[opn].max_val), sent_packets)
+      && LBroadcastToEveryone(s.constants.all.config, s.constants.my_index, RslMessage_2a(s.max_ballot_i_sent_1a, opn, v), broadcast_sent_packets)
   }
 
-  /**
-  byzpaxos中，通过LAllAcceptorsHadNoProposal检查当前ballot是否有人给opn投过票，和BPCon的KnowsSafeAt的第一个条件一样
-  如果没有，发送1c，附加上收到的1b list
-  如果有，通过KnowsSafeAt的第二个条件，选出这个值，并附加上收到的1b list */
-  predicate LProposerMaybeNominateValueAndSend2a(s:LProposer, s':LProposer, clock:int, log_truncation_point:int, sent_packets:seq<RslPacket>)
+  /* Here */
+  predicate LProposerMaybeNominateValueAndSend2a(s:LProposer, s':LProposer, clock:int, log_truncation_point:int, broadcast_sent_packets:seq<RslPacket>)
   {
     if !LProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose) then
-      s' == s && sent_packets == []
+      s' == s && broadcast_sent_packets == []
     else if !LAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose) then
-      LProposerNominateOldValueAndSend2a(s, s', log_truncation_point, sent_packets)
+      LProposerNominateOldValueAndSend2a(s, s', log_truncation_point, broadcast_sent_packets)
     else if
       LExistsAcceptorHasProposalLargeThanOpn(s.received_1b_packets, s.next_operation_number_to_propose)
       || |s.request_queue| >= s.constants.all.params.max_batch_size
       || (|s.request_queue| > 0 && s.incomplete_batch_timer.IncompleteBatchTimerOn? && clock >= s.incomplete_batch_timer.when) then
-      LProposerNominateNewValueAndSend2a(s, s', clock, log_truncation_point, sent_packets)
+      LProposerNominateNewValueAndSend2a(s, s', clock, log_truncation_point, broadcast_sent_packets)
     else if |s.request_queue| > 0 && s.incomplete_batch_timer.IncompleteBatchTimerOff? then
       && s' == s.(incomplete_batch_timer := IncompleteBatchTimerOn(UpperBoundedAddition(clock, s.constants.all.params.max_batch_delay, s.constants.all.params.max_integer_val)))
-      && sent_packets == []
+      && broadcast_sent_packets == []
     else
-      s' == s && sent_packets == []
+      s' == s && broadcast_sent_packets == []
   }
 
   predicate LProposerProcessHeartbeat(s:LProposer, s':LProposer, p:RslPacket, clock:int)
     requires p.msg.RslMessage_Heartbeat?
   {
-    && ElectionStateProcessHeartbeat(s.election_state, s'.election_state, p, clock)
-    // mode checking
+    
     && (if BalLt(s.election_state.current_view, s'.election_state.current_view) then
          s'.current_state == 0 && s'.request_queue == []
        else
          s'.current_state == s.current_state && s'.request_queue == s.request_queue
          )
+    && ElectionStateProcessHeartbeat(s.election_state, s'.election_state, p, clock)
     && s' == s.(election_state := s'.election_state,
              current_state := s'.current_state,
              request_queue := s'.request_queue)
@@ -324,5 +311,4 @@ module LiveRSL__Proposer_i {
     && ElectionStateReflectExecutedRequestBatch(s.election_state, s'.election_state, val)
     && s' == s.(election_state := s'.election_state)
   }
-
-}
+} 

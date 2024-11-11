@@ -26,10 +26,10 @@ predicate Network_Receive(n:Network, dst:NodeIdentity, recv:set<Packet>) {
     recv == PacketsTo(n, dst)
 }
 
-predicate Network_Send(n:Network, n':Network, src:NodeIdentity, out:set<Packet>)
-{
-       (forall p :: p in out ==> p.src == src)  // Jay rewired this to have OutboundPackets
-    && n' == n + out
-}
+// predicate Network_Send(n:Network, n':Network, src:NodeIdentity, out:set<Packet>)
+// {
+//        (forall p :: p in out ==> p.src == src)  // Jay rewired this to have OutboundPackets
+//     && n' == n + out
+// }
 
 } 

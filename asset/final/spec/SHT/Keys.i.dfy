@@ -3,73 +3,73 @@ include "../../Services/SHT/AppInterface.i.dfy"
 module SHT__Keys_i {
 import opened AppInterface_i`All
 
-predicate method KeyLe(ka:Key, kb:Key) {
+predicate /*method*/ KeyLe(ka:Key, kb:Key) {
     ka == kb || KeyLt(ka, kb)
 }
 
 lemma KeyAntisymmetry(ka:Key, kb:Key)
-    ensures KeyLt(ka,kb) ==> !KeyLe(kb,ka);
-    ensures !KeyLt(ka,kb) ==> KeyLe(kb,ka);
-    ensures KeyLe(ka,kb) ==> !KeyLt(kb,ka);
-    ensures !KeyLe(ka,kb) ==> KeyLt(kb,ka);
+    ensures KeyLt(ka,kb) ==> !KeyLe(kb,ka)
+    ensures !KeyLt(ka,kb) ==> KeyLe(kb,ka)
+    ensures KeyLe(ka,kb) ==> !KeyLt(kb,ka)
+    ensures !KeyLe(ka,kb) ==> KeyLt(kb,ka)
 {
-    lemma_KeyOrdering();
+    // lemma_KeyOrdering();
 }
 
 lemma KeyEq(ka:Key, kb:Key)
-    requires ka==kb;
-    ensures KeyLe(ka, kb);
-    ensures KeyLe(kb, ka);
+    requires ka==kb
+    ensures KeyLe(ka, kb)
+    ensures KeyLe(kb, ka)
 {
 }
 
 lemma KeyReflexivity(ka:Key, kb:Key)
-    requires KeyLe(ka, kb);
-    requires KeyLe(kb, ka);
-    ensures ka==kb;
+    requires KeyLe(ka, kb)
+    requires KeyLe(kb, ka)
+    ensures ka==kb
 {
-    lemma_KeyOrdering();
+    // lemma_KeyOrdering();
 }
 
 lemma KeyTransitivityLe(ka:Key, kb:Key, kc:Key)
-    requires KeyLe(ka,kb) && KeyLe(kb,kc);
-    ensures KeyLe(ka,kc);
+    requires KeyLe(ka,kb) && KeyLe(kb,kc)
+    ensures KeyLe(ka,kc)
 {
-    lemma_KeyOrdering();
+    // lemma_KeyOrdering();
 }
 
 lemma KeyTransitivity(ka:Key, kb:Key, kc:Key)
-    ensures KeyLt(ka,kb) && KeyLe(kb,kc) ==> KeyLt(ka,kc);
-    ensures KeyLe(ka,kb) && KeyLt(kb,kc) ==> KeyLt(ka,kc);
-    ensures KeyLt(ka,kb) && KeyLt(kb,kc) ==> KeyLt(ka,kc);
-    ensures KeyLe(ka,kb) && KeyLe(kb,kc) ==> KeyLe(ka,kc);
+    ensures KeyLt(ka,kb) && KeyLe(kb,kc) ==> KeyLt(ka,kc)
+    ensures KeyLe(ka,kb) && KeyLt(kb,kc) ==> KeyLt(ka,kc)
+    ensures KeyLt(ka,kb) && KeyLt(kb,kc) ==> KeyLt(ka,kc)
+    ensures KeyLe(ka,kb) && KeyLe(kb,kc) ==> KeyLe(ka,kc)
 {
-    lemma_KeyOrdering();
+    // lemma_KeyOrdering();
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // KeyPlus creates lower and upper bounds for keys
     
-datatype KeyPlus = KeyZero() | KeyPlus(k:Key) | KeyInf()
+// datatype KeyPlus = KeyZero() | KeyPlus(k:Key) | KeyInf()
 
-predicate KeyPlusIsAbstractable(kp:KeyPlus)
-{
-    match kp
-        case KeyZero() => true
-        case KeyPlus(k:Key) => KeyIsAbstractable(k)
-        case KeyInf() => true
-}
+// predicate KeyPlusIsAbstractable(kp:KeyPlus)
+// {
+//     match kp
+//         case KeyZero() => true
+//         case KeyPlus(k:Key) => KeyIsAbstractable(k)
+//         case KeyInf() => true
+// }
 
-predicate KeyPlusIsValid(kp:KeyPlus)
-{
-    && KeyPlusIsAbstractable(kp)
-    && match kp
-        case KeyZero() => true
-        case KeyPlus(k:Key) => KeyIsValid(k)
-        case KeyInf() => true
-}
+// predicate KeyPlusIsValid(kp:KeyPlus)
+// {
+//     && KeyPlusIsAbstractable(kp)
+//     && match kp
+//         case KeyZero() => true
+//         case KeyPlus(k:Key) => KeyIsValid(k)
+//         case KeyInf() => true
+// }
 
-predicate method KeyPlusLt(kp:KeyPlus, kp':KeyPlus) {
+predicate /*method*/ KeyPlusLt(kp:KeyPlus, kp':KeyPlus) {
     kp != kp' &&
     match kp {
         case KeyZero => true
@@ -83,29 +83,29 @@ predicate method KeyPlusLt(kp:KeyPlus, kp':KeyPlus) {
     }
 }
 
-predicate method KeyPlusLe(kp:KeyPlus, kp':KeyPlus) {
+predicate /*method*/ KeyPlusLe(kp:KeyPlus, kp':KeyPlus) {
     kp == kp' || KeyPlusLt(kp, kp')
 }
 
 lemma KeyPlusAntisymmetry(ka:KeyPlus, kb:KeyPlus)
-    ensures KeyPlusLt(ka,kb) ==> !KeyPlusLe(kb,ka);
-    ensures !KeyPlusLt(ka,kb) ==> KeyPlusLe(kb,ka);
-    ensures KeyPlusLe(ka,kb) ==> !KeyPlusLt(kb,ka);
-    ensures !KeyPlusLe(ka,kb) ==> KeyPlusLt(kb,ka);
+    ensures KeyPlusLt(ka,kb) ==> !KeyPlusLe(kb,ka)
+    ensures !KeyPlusLt(ka,kb) ==> KeyPlusLe(kb,ka)
+    ensures KeyPlusLe(ka,kb) ==> !KeyPlusLt(kb,ka)
+    ensures !KeyPlusLe(ka,kb) ==> KeyPlusLt(kb,ka)
 {
-    if ka.KeyPlus? && kb.KeyPlus? {
-        KeyAntisymmetry(ka.k, kb.k);
-    }
+    // if ka.KeyPlus? && kb.KeyPlus? {
+    //     KeyAntisymmetry(ka.k, kb.k);
+    // }
 }
 
 
 lemma KeyPlusTransitivity(ka:KeyPlus, kb:KeyPlus, kc:KeyPlus)
-    ensures KeyPlusLt(ka,kb) && KeyPlusLe(kb,kc) ==> KeyPlusLt(ka,kc);
-    ensures KeyPlusLe(ka,kb) && KeyPlusLt(kb,kc) ==> KeyPlusLt(ka,kc);
-    ensures KeyPlusLt(ka,kb) && KeyPlusLt(kb,kc) ==> KeyPlusLt(ka,kc);
-    ensures KeyPlusLe(ka,kb) && KeyPlusLe(kb,kc) ==> KeyPlusLe(ka,kc);
+    ensures KeyPlusLt(ka,kb) && KeyPlusLe(kb,kc) ==> KeyPlusLt(ka,kc)
+    ensures KeyPlusLe(ka,kb) && KeyPlusLt(kb,kc) ==> KeyPlusLt(ka,kc)
+    ensures KeyPlusLt(ka,kb) && KeyPlusLt(kb,kc) ==> KeyPlusLt(ka,kc)
+    ensures KeyPlusLe(ka,kb) && KeyPlusLe(kb,kc) ==> KeyPlusLe(ka,kc)
 {
-    lemma_KeyOrdering();
+    // lemma_KeyOrdering();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -114,20 +114,20 @@ lemma KeyPlusTransitivity(ka:KeyPlus, kb:KeyPlus, kc:KeyPlus)
 datatype KeyRange = KeyRange(klo:KeyPlus, khi:KeyPlus)
     // range includes all keys klo <= k < khi
 
-predicate KeyRangeIsAbstractable(kr:KeyRange)
-{
-    && KeyPlusIsAbstractable(kr.klo)
-    && KeyPlusIsAbstractable(kr.khi)
-}
+// predicate KeyRangeIsAbstractable(kr:KeyRange)
+// {
+//     && KeyPlusIsAbstractable(kr.klo)
+//     && KeyPlusIsAbstractable(kr.khi)
+// }
 
-predicate KeyRangeIsValid(kr:KeyRange)
-{
-    && KeyRangeIsAbstractable(kr)
-    && KeyPlusIsValid(kr.klo)
-    && KeyPlusIsValid(kr.khi)
-}
+// predicate KeyRangeIsValid(kr:KeyRange)
+// {
+//     && KeyRangeIsAbstractable(kr)
+//     && KeyPlusIsValid(kr.klo)
+//     && KeyPlusIsValid(kr.khi)
+// }
 
-predicate method KeyRangeContains(range:KeyRange, kp:KeyPlus) {
+predicate /*method*/ KeyRangeContains(range:KeyRange, kp:KeyPlus) {
     KeyPlusLe(range.klo, kp) && KeyPlusLt(kp, range.khi)
 }
 
@@ -143,15 +143,15 @@ function CompleteRange() : KeyRange
     KeyRange(KeyZero(), KeyInf())
 }
 
-predicate method EmptyKeyRange(kr:KeyRange)
+predicate /*method*/ EmptyKeyRange(kr:KeyRange)
 {
     KeyPlusLe(kr.khi, kr.klo)
 }
 
 lemma lemma_EmptyKeyRange(kr:KeyRange)
-    ensures EmptyKeyRange(kr) <==> !KeyPlusLt(kr.klo, kr.khi);
+    ensures EmptyKeyRange(kr) <==> !KeyPlusLt(kr.klo, kr.khi)
 {
-    KeyPlusAntisymmetry(kr.klo, kr.khi);
+    // KeyPlusAntisymmetry(kr.klo, kr.khi);
 }
 
 } 

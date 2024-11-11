@@ -28,7 +28,7 @@ module SHT__Host_i {
     NextShardReal(+,-,+,-,-,-);
     NextReply(+,+,+,+);
     NextReplyReal(+,-,+,-);
-    NextRedirect(+,+,+,+);
+    NextRedirect(+,-,+,-);
     NextRedirectReal(+,-,+,-);
     ShouldProcessReceivedMessage(+);
     Process_Message(+,-,-);
