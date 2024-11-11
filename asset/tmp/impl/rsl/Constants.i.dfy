@@ -58,7 +58,7 @@ module Impl_LiveRSL__Constants_i
 
 	function method CReplicaConstantsValid(c: CReplicaConstants) : bool 
 		requires CReplicaConstantsIsValid(c)
-		ensures CReplicaConstantsValid(c) == LReplicaConstantsValid(AbstractifyCReplicaConstantsToLReplicaConstants(c))
+		ensures var lr := LReplicaConstantsValid(AbstractifyCReplicaConstantsToLReplicaConstants(c)); var cr := CReplicaConstantsValid(c); (cr) == (lr)
 	{
 		0 <= c.my_index 
 		&& 

@@ -34,7 +34,7 @@ module Impl_LiveRSL__Parameters_i
 
 	function method CWFLParameters(p: CParameters) : bool 
 		requires CParametersIsValid(p)
-		ensures CWFLParameters(p) == WFLParameters(AbstractifyCParametersToLParameters(p))
+		ensures var lr := WFLParameters(AbstractifyCParametersToLParameters(p)); var cr := CWFLParameters(p); (cr) == (lr)
 	{
 		p.max_log_length > 0 
 		&& 

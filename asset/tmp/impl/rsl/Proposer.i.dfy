@@ -93,6 +93,7 @@ module Impl_LiveRSL__Proposer_i
 		LProposer(AbstractifyCReplicaConstantsToLReplicaConstants(s.constants), s.current_state, AbstractifySeq(s.request_queue, AbstractifyCRequestToRequest), AbstractifyCBallotToBallot(s.max_ballot_i_sent_1a), s.next_operation_number_to_propose, AbstractifySet(s.received_1b_packets, AbstractifyCPacketToRslPacket), AbstractifyMap(s.highest_seqno_requested_by_client_this_view, AbstractifyEndPointToNodeIdentity, NoChange, AbstractifyNodeIdentityToEndPoint), AbstractifyCIncompleteBatchTimerToIncompleteBatchTimer(s.incomplete_batch_timer), AbstractifyCElectionStateToElectionState(s.election_state))
 	}
 
+<<<<<<< HEAD
 	function method CIsAfterLogTruncationPoint(opn: COperationNumber, received_1b_packets: set<CPacket>) : bool 
 		requires COperationNumberIsValid(opn)
 		requires (forall i :: i in received_1b_packets ==> CPacketIsValid(i))
@@ -441,6 +442,8 @@ module Impl_LiveRSL__Proposer_i
 		t2
 	}
 
+=======
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	function method CProposerCheckForQuorumOfViewSuspicions(s: CProposer, clock: int) : CProposer 
 		requires CProposerIsValid(s)
 		ensures var s' := CProposerCheckForQuorumOfViewSuspicions(s, clock); CProposerIsValid(s') && LProposerCheckForQuorumOfViewSuspicions(AbstractifyCProposerToLProposer(s), AbstractifyCProposerToLProposer(s'), clock)
@@ -448,7 +451,11 @@ module Impl_LiveRSL__Proposer_i
 		var t1 := 
 			CElectionStateCheckForQuorumOfViewSuspicions(s.election_state, clock); 		
 		var t2 := 
+<<<<<<< HEAD
 			if CBalLt(s.election_state.current_view, s'.election_state.current_view) then 
+=======
+			if CBalLt(s.election_state.current_view, t1.current_view) then 
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 				var t1 := 
 					0; 				
 				var t2 := 

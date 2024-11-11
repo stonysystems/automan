@@ -44,6 +44,7 @@ module Impl_LiveRSL__Election_i
 	{
 		ElectionState(AbstractifyCReplicaConstantsToLReplicaConstants(s.constants), AbstractifyCBallotToBallot(s.current_view), s.current_view_suspectors, s.epoch_end_time, s.epoch_length, AbstractifySeq(s.requests_received_this_epoch, AbstractifyCRequestToRequest), AbstractifySeq(s.requests_received_prev_epochs, AbstractifyCRequestToRequest))
 	}
+<<<<<<< HEAD
 
 	function method CComputeSuccessorView(b: CBallot, c: CConstants) : CBallot 
 		requires CBallotIsValid(b)
@@ -263,4 +264,6 @@ module Impl_LiveRSL__Election_i
 			es.(requests_received_prev_epochs := CRemoveExecutedRequestBatch(es.requests_received_prev_epochs, batch), requests_received_this_epoch := CRemoveExecutedRequestBatch(es.requests_received_this_epoch, batch)); 		
 		t1
 	}
+=======
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 }

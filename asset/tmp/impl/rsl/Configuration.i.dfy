@@ -29,21 +29,25 @@ module Impl_LiveRSL__Configuration_i
 
 	function method CMinQuorumSize(c: CConfiguration) : int 
 		requires CConfigurationIsValid(c)
-		ensures CMinQuorumSize(c) == LMinQuorumSize(AbstractifyCConfigurationToLConfiguration(c))
+		ensures var lr := LMinQuorumSize(AbstractifyCConfigurationToLConfiguration(c)); var cr := CMinQuorumSize(c); (cr) == (lr)
 	{
 		|c.replica_ids| / 2 + 1
 	}
 
 	function method CReplicasDistinct(replica_ids: seq<EndPoint>, i: int, j: int) : bool 
 		requires (forall i :: i in replica_ids ==> EndPointIsValid(i))
+<<<<<<< HEAD
 		ensures CReplicasDistinct(replica_ids, i, j) == ReplicasDistinct(AbstractifySeq(replica_ids, AbstractifyEndPointToNodeIdentity), i, j)
+=======
+		ensures var lr := ReplicasDistinct(AbstractifySeq(replica_ids, AbstractifyEndPointToNodeIdentity), i, j); var cr := CReplicasDistinct(replica_ids, i, j); (cr) == (lr)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	{
 		0 <= i && i < |replica_ids| && 0 <= j && j < |replica_ids| && replica_ids[i] == replica_ids[j] ==> i == j
 	}
 
 	function method CWellFormedLConfiguration(c: CConfiguration) : bool 
 		requires CConfigurationIsValid(c)
-		ensures CWellFormedLConfiguration(c) == WellFormedLConfiguration(AbstractifyCConfigurationToLConfiguration(c))
+		ensures var lr := WellFormedLConfiguration(AbstractifyCConfigurationToLConfiguration(c)); var cr := CWellFormedLConfiguration(c); (cr) == (lr)
 	{
 		0 < |c.replica_ids| 
 		&& 
@@ -53,7 +57,11 @@ module Impl_LiveRSL__Configuration_i
 	function method CIsReplicaIndex(idx: int, id: EndPoint, c: CConfiguration) : bool 
 		requires EndPointIsValid(id)
 		requires CConfigurationIsValid(c)
+<<<<<<< HEAD
 		ensures CIsReplicaIndex(idx, id, c) == IsReplicaIndex(idx, AbstractifyEndPointToNodeIdentity(id), AbstractifyCConfigurationToLConfiguration(c))
+=======
+		ensures var lr := IsReplicaIndex(idx, AbstractifyEndPointToNodeIdentity(id), AbstractifyCConfigurationToLConfiguration(c)); var cr := CIsReplicaIndex(idx, id, c); (cr) == (lr)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	{
 		0 <= idx && idx < |c.replica_ids| 
 		&& 
@@ -65,7 +73,11 @@ module Impl_LiveRSL__Configuration_i
 		requires CConfigurationIsValid(c)
 		requires id in c.replica_ids
 		ensures var idx := CGetReplicaIndex(id, c); 0 <= idx && idx < |c.replica_ids| && c.replica_ids[idx] == id
+<<<<<<< HEAD
 		ensures CGetReplicaIndex(id, c) == GetReplicaIndex(AbstractifyEndPointToNodeIdentity(id), AbstractifyCConfigurationToLConfiguration(c))
+=======
+		ensures var lr := GetReplicaIndex(AbstractifyEndPointToNodeIdentity(id), AbstractifyCConfigurationToLConfiguration(c)); var cr := CGetReplicaIndex(id, c); (cr) == (lr)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	{
 		CFindIndexInSeq(c.replica_ids, id)
 	}

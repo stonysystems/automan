@@ -114,8 +114,13 @@ module Impl_LiveRSL__Replica_i
 		var t1 := 
 			CAcceptorProcess1a(s.acceptor, received_packet); 		
 		var t2 := 
+<<<<<<< HEAD
 			s.(acceptor := t1.1); 		
 		(t2, t1.0)
+=======
+			s.(acceptor := t1.0); 		
+		(t2, t1.1)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	}
 
 	function method CReplicaNextProcess1b(s: CReplica, received_packet: CPacket) : (CReplica, OutboundPackets) 
@@ -153,8 +158,13 @@ module Impl_LiveRSL__Replica_i
 		var t1 := 
 			CExecutorProcessStartingPhase2(s.executor, received_packet); 		
 		var t2 := 
+<<<<<<< HEAD
 			s.(executor := t1.1); 		
 		(t2, t1.0)
+=======
+			s.(executor := t1.0); 		
+		(t2, t1.1)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	}
 
 	function method CReplicaNextProcess2a(s: CReplica, received_packet: CPacket) : (CReplica, OutboundPackets) 
@@ -171,8 +181,13 @@ module Impl_LiveRSL__Replica_i
 					var t1 := 
 						CAcceptorProcess2a(s.acceptor, received_packet); 					
 					var t2 := 
+<<<<<<< HEAD
 						s.(acceptor := t1.1); 					
 					(t2, t1.0) 
+=======
+						s.(acceptor := t1.0); 					
+					(t2, t1.1) 
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 				else 
 					var t1 := 
 						s; 					
@@ -263,8 +278,13 @@ module Impl_LiveRSL__Replica_i
 		var t1 := 
 			CExecutorProcessAppStateRequest(s.executor, received_packet); 		
 		var t2 := 
+<<<<<<< HEAD
 			s.(executor := t1.1); 		
 		(t2, t1.0)
+=======
+			s.(executor := t1.0); 		
+		(t2, t1.1)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	}
 
 	function method CReplicaNextProcessHeartbeat(s: CReplica, received_packet: CPacket, clock: int) : (CReplica, OutboundPackets) 
@@ -291,8 +311,13 @@ module Impl_LiveRSL__Replica_i
 		var t1 := 
 			CProposerMaybeEnterNewViewAndSend1a(s.proposer); 		
 		var t2 := 
+<<<<<<< HEAD
 			s.(proposer := t1.1); 		
 		(t2, t1.0)
+=======
+			s.(proposer := t1.0); 		
+		(t2, t1.1)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	}
 
 	function method CReplicaNextSpontaneousMaybeEnterPhase2(s: CReplica) : (CReplica, OutboundPackets) 
@@ -302,8 +327,13 @@ module Impl_LiveRSL__Replica_i
 		var t1 := 
 			CProposerMaybeEnterPhase2(s.proposer, s.acceptor.log_truncation_point); 		
 		var t2 := 
+<<<<<<< HEAD
 			s.(proposer := t1.1); 		
 		(t2, t1.0)
+=======
+			s.(proposer := t1.0); 		
+		(t2, t1.1)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	}
 
 	function method CReplicaNextReadClockMaybeNominateValueAndSend2a(s: CReplica, clock: CClockReading) : (CReplica, OutboundPackets) 
@@ -314,6 +344,7 @@ module Impl_LiveRSL__Replica_i
 		var t1 := 
 			CProposerMaybeNominateValueAndSend2a(s.proposer, clock.t, s.acceptor.log_truncation_point); 		
 		var t2 := 
+<<<<<<< HEAD
 			s.(proposer := t1.1); 		
 		(t2, t1.0)
 	}
@@ -325,6 +356,10 @@ module Impl_LiveRSL__Replica_i
 		ensures var lr := LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(AbstractifyCReplicaToLReplica(s), AbstractifyCReplicaToLReplica(s'), AbstractifyOutboundCPacketsToSeqOfRslPackets(sent_packets)); var cr := CReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s, s', sent_packets); (cr) == (lr)
 	{
 		(exists opn :: opn in s.acceptor.last_checkpointed_operation && CIsLogTruncationPointValid(opn, s.acceptor.last_checkpointed_operation, s.constants.all.config) && if opn > s.acceptor.log_truncation_point then CAcceptorTruncateLog(s.acceptor, s'.acceptor, opn) && s' == s.(acceptor := s'.acceptor) && sent_packets == [] else s' == s && sent_packets == [])
+=======
+			s.(proposer := t1.0); 		
+		(t2, t1.1)
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 	}
 
 	function method CReplicaNextSpontaneousMaybeMakeDecision(s: CReplica) : (CReplica, OutboundPackets) 
@@ -369,8 +404,13 @@ module Impl_LiveRSL__Replica_i
 					var t3 := 
 						CExecutorExecute(s.executor); 					
 					var t4 := 
+<<<<<<< HEAD
 						s.(proposer := t1, learner := t2, executor := t3.1); 					
 					(t4, t3.0); 				
+=======
+						s.(proposer := t1, learner := t2, executor := t3.0); 					
+					(t4, t3.1); 				
+>>>>>>> f0e13dcc7666fa3f27260947fdcb2879e4dc9ada
 				(t1.1, t1.0) 
 			else 
 				var t1 := 
