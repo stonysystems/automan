@@ -16,7 +16,7 @@
   (flags
     :standard
     --external-tokens Tokens
-    --trace --dump))
+    --dump))
 
 (menhir
   (modules tokens annotationParser)
