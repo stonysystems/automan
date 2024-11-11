@@ -16,14 +16,14 @@ rsl_files=(
 )
 
 kv_files=(
-  Message.i.dfy
-  SingleMessage.i.dfy
-  Network.i.dfy
-  Parameters.i.dfy
-  Configuration.i.dfy
-  Delegations.i.dfy
+  # Message.i.dfy
+  # SingleMessage.i.dfy
+  # Network.i.dfy
+  # Parameters.i.dfy
+  # Configuration.i.dfy
+  # Delegations.i.dfy
   SingleDelivery.i.dfy
-  Host.i.dfy
+  # Host.i.dfy
 )
 
 if [ $# -eq 0 ]; then
@@ -35,14 +35,14 @@ if [ "$1" == "rsl" ]; then
   for file in "${rsl_files[@]}"
   do
     echo "[+] rsl/spec -> rsl/impl | "$file
-    dune exe test/test_automan.exe ./asset/tmp/spec/rsl/$file asset/tmp/annotations/RSL.automan  > \
+    dune exe test/test_automan.exe ./asset/tmp/spec/rsl/$file asset/tmp/annotations/RSL.automan > \
       ./asset/tmp/impl/rsl/$file
   done
 elif [ "$1" == "kv" ]; then
   for file in "${kv_files[@]}"
   do
     echo "[+] kv/spec -> kv/impl | "$file
-    dune exe test/test_automan.exe ./asset/tmp/spec/kv/$file > \
+    dune exe test/test_automan.exe ./asset/tmp/spec/kv/$file asset/tmp/annotations/SHT.automan > \
       ./asset/tmp/impl/kv/$file
   done
 else
