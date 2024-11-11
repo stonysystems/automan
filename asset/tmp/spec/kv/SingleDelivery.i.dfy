@@ -209,10 +209,11 @@ predicate SendSingleMessageReal(s:SingleDeliveryAcct, s':SingleDeliveryAcct, m:M
         && shouldSend == false
         && sm == SingleMessage(0, dst, m)
     else 
-        && sm == SingleMessage((oldAckState.numPacketsAcked + |oldAckState.unAcked| + 1), dst, m)
+        var new_sm := SingleMessage(new_seqno, dst, m);
+        && sm == new_sm
         // mode checking
         // here sm is used as input (sm.dst)
-        && s' == s.(sendState := s.sendState[sm.dst := oldAckState.(unAcked := oldAckState.unAcked + [sm])])
+        && s' == s.(sendState := s.sendState[new_sm.dst := oldAckState.(unAcked := oldAckState.unAcked + [new_sm])])
         && shouldSend == true
 }
 

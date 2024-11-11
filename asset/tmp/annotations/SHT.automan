@@ -15,20 +15,20 @@ module SHT__Host_i {
     ValidOptionalValue(+);
     ValidKeyRange(+);
     Host_Init(-,+,+,+,+);
-    NextGetRequest_Reply(+,-,+,+,+,-,-,-,-);
-    NextGetRequest(+,-,+,-);
+    NextGetRequest_Reply(+,+,+,+,+,+,+,+,+);
+    NextGetRequest(+,+,+,+);
     NextGetRequestReal(+,-,+,-,-,-,-);
-    NextSetRequest_Complete(+,-,+,+,+,-,-,-,-);
-    NextSetRequest(+,-,+,-);
+    NextSetRequest_Complete(+,+,+,+,+,+,+,+,+);
+    NextSetRequest(+,+,+,+);
     NextSetRequestReal(+,-,+,-,-,-,-);
-    NextDelegate(+,-,+,-);
+    NextDelegate(+,+,+,+);
     NextDelegateReal(+,-,+,-);
-    NextShard(+,-,-,+,+,-,-);
-    NextShard_Wrapper(+,-,+,-);
+    NextShard(+,+,+,+,+,+,+);
+    NextShard_Wrapper(+,+,+,+);
     NextShardReal(+,-,+,-,-,-);
-    NextReply(+,-,+,-);
+    NextReply(+,+,+,+);
     NextReplyReal(+,-,+,-);
-    NextRedirect(+,-,+,-);
+    NextRedirect(+,+,+,+);
     NextRedirectReal(+,-,+,-);
     ShouldProcessReceivedMessage(+);
     Process_Message(+,-,-);
@@ -64,4 +64,6 @@ module SHT__SingleDelivery_i {
     SendSingleMessage(+,-,+,-,+,-);
     SendSingleMessageReal(+,-,+,+,-,+,-);
     SendNoMessage(+,-);
+}
+module SHT__Message_i{
 }

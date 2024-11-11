@@ -48,198 +48,198 @@ module LiveRSL__Election_i {
   // BALLOT MATH
   //////////////////////
 
-  // function ComputeSuccessorView(b:Ballot, c:LConstants):Ballot
-  // {
-  //   if b.proposer_id + 1 < |c.config.replica_ids| then
-  //     Ballot(b.seqno, b.proposer_id + 1)
-  //   else
-  //     Ballot(b.seqno + 1, 0)
-  // }
+  function ComputeSuccessorView(b:Ballot, c:LConstants):Ballot
+  {
+    if b.proposer_id + 1 < |c.config.replica_ids| then
+      Ballot(b.seqno, b.proposer_id + 1)
+    else
+      Ballot(b.seqno + 1, 0)
+  }
 
-  // //////////////////////
-  // // SEQUENCE MATH
-  // //////////////////////
+  //////////////////////
+  // SEQUENCE MATH
+  //////////////////////
 
-  // function BoundRequestSequence(s:seq<Request>, lengthBound:UpperBound):seq<Request>
-  // {
-  //   if lengthBound.UpperBoundFinite? && 0 <= lengthBound.n < |s| then s[..lengthBound.n] else s
-  // }
+  function BoundRequestSequence(s:seq<Request>, lengthBound:UpperBound):seq<Request>
+  {
+    if lengthBound.UpperBoundFinite? && 0 <= lengthBound.n < |s| then s[..lengthBound.n] else s
+  }
 
-  // //////////////////////
-  // // REQUESTS
-  // //////////////////////
+  //////////////////////
+  // REQUESTS
+  //////////////////////
 
-  // predicate RequestsMatch(r1:Request, r2:Request)
-  // {
-  //   r1.Request? && r2.Request? && r1.client == r2.client && r1.seqno == r2.seqno
-  // }
+  predicate RequestsMatch(r1:Request, r2:Request)
+  {
+    r1.Request? && r2.Request? && r1.client == r2.client && r1.seqno == r2.seqno
+  }
 
-  // predicate RequestSatisfiedBy(r1:Request, r2:Request)
-  // {
-  //   r1.Request? && r2.Request? && r1.client == r2.client && r1.seqno <= r2.seqno
-  // }
+  predicate RequestSatisfiedBy(r1:Request, r2:Request)
+  {
+    r1.Request? && r2.Request? && r1.client == r2.client && r1.seqno <= r2.seqno
+  }
 
-  // function RemoveAllSatisfiedRequestsInSequence(s:seq<Request>, r:Request):seq<Request>
-  // {
-  //   if |s| == 0 then
-  //     []
-  //   else if RequestSatisfiedBy(s[0], r) then
-  //     RemoveAllSatisfiedRequestsInSequence(s[1..], r)
-  //   else
-  //     [s[0]] + RemoveAllSatisfiedRequestsInSequence(s[1..], r)
-  // }
+  function RemoveAllSatisfiedRequestsInSequence(s:seq<Request>, r:Request):seq<Request>
+  {
+    if |s| == 0 then
+      []
+    else if RequestSatisfiedBy(s[0], r) then
+      RemoveAllSatisfiedRequestsInSequence(s[1..], r)
+    else
+      [s[0]] + RemoveAllSatisfiedRequestsInSequence(s[1..], r)
+  }
 
-  // //////////////////////
-  // // INITIALIZATION
-  // //////////////////////
+  //////////////////////
+  // INITIALIZATION
+  //////////////////////
 
-  // predicate ElectionStateInit(
-  //   es:ElectionState,
-  //   c:LReplicaConstants
-  // )
-  //   requires |c.all.config.replica_ids| > 0
-  // {
-  //   && es.constants == c
-  //   && es.current_view == Ballot(1, 0)
-  //   && es.current_view_suspectors == {}
-  //   && es.epoch_end_time == 0
-  //   && es.epoch_length == c.all.params.baseline_view_timeout_period
-  //   && es.requests_received_this_epoch == []
-  //   && es.requests_received_prev_epochs == []
-  // }
+  predicate ElectionStateInit(
+    es:ElectionState,
+    c:LReplicaConstants
+  )
+    requires |c.all.config.replica_ids| > 0
+  {
+    && es.constants == c
+    && es.current_view == Ballot(1, 0)
+    && es.current_view_suspectors == {}
+    && es.epoch_end_time == 0
+    && es.epoch_length == c.all.params.baseline_view_timeout_period
+    && es.requests_received_this_epoch == []
+    && es.requests_received_prev_epochs == []
+  }
 
-  // //////////////////////
-  // // ACTIONS
-  // //////////////////////
+  //////////////////////
+  // ACTIONS
+  //////////////////////
 
-  // predicate ElectionStateProcessHeartbeat(
-  //   es:ElectionState,
-  //   es':ElectionState,
-  //   p:RslPacket,
-  //   clock:int
-  // )
-  //   requires p.msg.RslMessage_Heartbeat?
-  // {
-  //   if p.src !in es.constants.all.config.replica_ids then
-  //     es' == es
-  //   else
-  //     var sender_index := GetReplicaIndex(p.src, es.constants.all.config);
-  //     if p.msg.bal_heartbeat == es.current_view && p.msg.suspicious then
-  //       es' == es.(current_view_suspectors := es.current_view_suspectors + {sender_index})
-  //     else if BalLt(es.current_view, p.msg.bal_heartbeat)  then
-  //       var new_epoch_length := UpperBoundedAddition(es.epoch_length, es.epoch_length, es.constants.all.params.max_integer_val);
-  //       es' == es.(current_view := p.msg.bal_heartbeat,
-  //       current_view_suspectors := (if p.msg.suspicious then {sender_index} else {}),
-  //       epoch_length := new_epoch_length,
-  //       epoch_end_time := UpperBoundedAddition(clock, new_epoch_length, es.constants.all.params.max_integer_val),
-  //       requests_received_prev_epochs := BoundRequestSequence(es.requests_received_prev_epochs + es.requests_received_this_epoch, es.constants.all.params.max_integer_val),
-  //       requests_received_this_epoch := [])
-  //     else
-  //       es' == es
-  // }
+  predicate ElectionStateProcessHeartbeat(
+    es:ElectionState,
+    es':ElectionState,
+    p:RslPacket,
+    clock:int
+  )
+    requires p.msg.RslMessage_Heartbeat?
+  {
+    if p.src !in es.constants.all.config.replica_ids then
+      es' == es
+    else
+      var sender_index := GetReplicaIndex(p.src, es.constants.all.config);
+      if p.msg.bal_heartbeat == es.current_view && p.msg.suspicious then
+        es' == es.(current_view_suspectors := es.current_view_suspectors + {sender_index})
+      else if BalLt(es.current_view, p.msg.bal_heartbeat)  then
+        var new_epoch_length := UpperBoundedAddition(es.epoch_length, es.epoch_length, es.constants.all.params.max_integer_val);
+        es' == es.(current_view := p.msg.bal_heartbeat,
+        current_view_suspectors := (if p.msg.suspicious then {sender_index} else {}),
+        epoch_length := new_epoch_length,
+        epoch_end_time := UpperBoundedAddition(clock, new_epoch_length, es.constants.all.params.max_integer_val),
+        requests_received_prev_epochs := BoundRequestSequence(es.requests_received_prev_epochs + es.requests_received_this_epoch, es.constants.all.params.max_integer_val),
+        requests_received_this_epoch := [])
+      else
+        es' == es
+  }
 
-  // predicate ElectionStateCheckForViewTimeout(
-  //   es:ElectionState,
-  //   es':ElectionState,
-  //   clock:int
-  // )
-  // {
-  //   if clock < es.epoch_end_time then
-  //     es' == es
-  //   else if |es.requests_received_prev_epochs| == 0 then
-  //     var new_epoch_length := es.constants.all.params.baseline_view_timeout_period;
-  //     es' == es.(epoch_length := new_epoch_length,
-  //     epoch_end_time := UpperBoundedAddition(clock, new_epoch_length, es.constants.all.params.max_integer_val),
-  //     requests_received_prev_epochs := es.requests_received_this_epoch,
-  //     requests_received_this_epoch := [])
-  //   else
-  //     es' == es.(current_view_suspectors := es.current_view_suspectors + {es.constants.my_index},
-  //     epoch_end_time := UpperBoundedAddition(clock, es.epoch_length, es.constants.all.params.max_integer_val),
-  //     requests_received_prev_epochs := BoundRequestSequence(es.requests_received_prev_epochs + es.requests_received_this_epoch, es.constants.all.params.max_integer_val),
-  //     requests_received_this_epoch := [])
-  // }
+  predicate ElectionStateCheckForViewTimeout(
+    es:ElectionState,
+    es':ElectionState,
+    clock:int
+  )
+  {
+    if clock < es.epoch_end_time then
+      es' == es
+    else if |es.requests_received_prev_epochs| == 0 then
+      var new_epoch_length := es.constants.all.params.baseline_view_timeout_period;
+      es' == es.(epoch_length := new_epoch_length,
+      epoch_end_time := UpperBoundedAddition(clock, new_epoch_length, es.constants.all.params.max_integer_val),
+      requests_received_prev_epochs := es.requests_received_this_epoch,
+      requests_received_this_epoch := [])
+    else
+      es' == es.(current_view_suspectors := es.current_view_suspectors + {es.constants.my_index},
+      epoch_end_time := UpperBoundedAddition(clock, es.epoch_length, es.constants.all.params.max_integer_val),
+      requests_received_prev_epochs := BoundRequestSequence(es.requests_received_prev_epochs + es.requests_received_this_epoch, es.constants.all.params.max_integer_val),
+      requests_received_this_epoch := [])
+  }
 
-  // predicate ElectionStateCheckForQuorumOfViewSuspicions(
-  //   es:ElectionState,
-  //   es':ElectionState,
-  //   clock:int
-  // )
-  // {
-  //   if |es.current_view_suspectors| < LMinQuorumSize(es.constants.all.config) || !LtUpperBound(es.current_view.seqno, es.constants.all.params.max_integer_val) then
-  //     es' == es
-  //   else
-  //     var new_epoch_length := UpperBoundedAddition(es.epoch_length, es.epoch_length, es.constants.all.params.max_integer_val);
-  //     es' == es.(current_view := ComputeSuccessorView(es.current_view, es.constants.all),
-  //     current_view_suspectors := {},
-  //     epoch_length := new_epoch_length,
-  //     epoch_end_time := UpperBoundedAddition(clock, new_epoch_length, es.constants.all.params.max_integer_val),
-  //     requests_received_prev_epochs := BoundRequestSequence(es.requests_received_prev_epochs + es.requests_received_this_epoch, es.constants.all.params.max_integer_val),
-  //     requests_received_this_epoch := [])
-  // }
+  predicate ElectionStateCheckForQuorumOfViewSuspicions(
+    es:ElectionState,
+    es':ElectionState,
+    clock:int
+  )
+  {
+    if |es.current_view_suspectors| < LMinQuorumSize(es.constants.all.config) || !LtUpperBound(es.current_view.seqno, es.constants.all.params.max_integer_val) then
+      es' == es
+    else
+      var new_epoch_length := UpperBoundedAddition(es.epoch_length, es.epoch_length, es.constants.all.params.max_integer_val);
+      es' == es.(current_view := ComputeSuccessorView(es.current_view, es.constants.all),
+      current_view_suspectors := {},
+      epoch_length := new_epoch_length,
+      epoch_end_time := UpperBoundedAddition(clock, new_epoch_length, es.constants.all.params.max_integer_val),
+      requests_received_prev_epochs := BoundRequestSequence(es.requests_received_prev_epochs + es.requests_received_this_epoch, es.constants.all.params.max_integer_val),
+      requests_received_this_epoch := [])
+  }
 
-  // /*
-  // predicate ElectionStateReflectReceivedRequest(
-  //   es:ElectionState,
-  //   es':ElectionState,
-  //   req:Request
-  //   )
-  // {
-  //   if exists earlier_req :: && (earlier_req in es.requests_received_prev_epochs || earlier_req in es.requests_received_this_epoch)
-  //                      && RequestsMatch(earlier_req, req) then
-  //     es' == es
-  //   else
-  //     es' == es.(requests_received_this_epoch := BoundRequestSequence(es.requests_received_this_epoch + [req], es.constants.all.params.max_integer_val))
-  // }
-  // */
+  /*
+  predicate ElectionStateReflectReceivedRequest(
+    es:ElectionState,
+    es':ElectionState,
+    req:Request
+    )
+  {
+    if exists earlier_req :: && (earlier_req in es.requests_received_prev_epochs || earlier_req in es.requests_received_this_epoch)
+                       && RequestsMatch(earlier_req, req) then
+      es' == es
+    else
+      es' == es.(requests_received_this_epoch := BoundRequestSequence(es.requests_received_this_epoch + [req], es.constants.all.params.max_integer_val))
+  }
+  */
 
-  // predicate ElectionStateReflectReceivedRequest(
-  //   es:ElectionState,
-  //   es':ElectionState,
-  //   req:Request
-  // )
-  // {
-  //   /*
-  //   if exists earlier_req :: 
-  //     && (
-  //       earlier_req in es.requests_received_prev_epochs 
-  //       || 
-  //       earlier_req in es.requests_received_this_epoch
-  //     )
-  //     && RequestsMatch(earlier_req, req) then
-  //     es' == es
-  //   else
-  //     es' == es.(requests_received_this_epoch := BoundRequestSequence(es.requests_received_this_epoch + [req], es.constants.all.params.max_integer_val))
-  //   */
+  predicate ElectionStateReflectReceivedRequest(
+    es:ElectionState,
+    es':ElectionState,
+    req:Request
+  )
+  {
+    /*
+    if exists earlier_req :: 
+      && (
+        earlier_req in es.requests_received_prev_epochs 
+        || 
+        earlier_req in es.requests_received_this_epoch
+      )
+      && RequestsMatch(earlier_req, req) then
+      es' == es
+    else
+      es' == es.(requests_received_this_epoch := BoundRequestSequence(es.requests_received_this_epoch + [req], es.constants.all.params.max_integer_val))
+    */
 
-  //   if (exists earlier_req :: earlier_req in es.requests_received_prev_epochs && RequestsMatch(earlier_req, req))
-  //   then
-  //     es' == es
-  //   else if (exists earlier_req :: earlier_req in es.requests_received_this_epoch && RequestsMatch(earlier_req, req))
-  //     then
-  //       es' == es
-  //     else
-  //       es' == es.(requests_received_this_epoch := BoundRequestSequence(es.requests_received_this_epoch + [req], es.constants.all.params.max_integer_val))
+    if (exists earlier_req :: earlier_req in es.requests_received_prev_epochs && RequestsMatch(earlier_req, req))
+    then
+      es' == es
+    else if (exists earlier_req :: earlier_req in es.requests_received_this_epoch && RequestsMatch(earlier_req, req))
+      then
+        es' == es
+      else
+        es' == es.(requests_received_this_epoch := BoundRequestSequence(es.requests_received_this_epoch + [req], es.constants.all.params.max_integer_val))
 
-  // }
+  }
 
 
-  // function RemoveExecutedRequestBatch(reqs:seq<Request>, batch:RequestBatch):seq<Request>
-  //   decreases |batch|
-  // {
-  //   if |batch| == 0 then
-  //     reqs
-  //   else
-  //     RemoveExecutedRequestBatch(RemoveAllSatisfiedRequestsInSequence(reqs, batch[0]), batch[1..])
-  // }
+  function RemoveExecutedRequestBatch(reqs:seq<Request>, batch:RequestBatch):seq<Request>
+    decreases |batch|
+  {
+    if |batch| == 0 then
+      reqs
+    else
+      RemoveExecutedRequestBatch(RemoveAllSatisfiedRequestsInSequence(reqs, batch[0]), batch[1..])
+  }
 
-  // predicate ElectionStateReflectExecutedRequestBatch(
-  //   es:ElectionState,
-  //   es':ElectionState,
-  //   batch:RequestBatch
-  // )
-  // {
-  //   es' == es.(requests_received_prev_epochs := RemoveExecutedRequestBatch(es.requests_received_prev_epochs, batch),
-  //   requests_received_this_epoch := RemoveExecutedRequestBatch(es.requests_received_this_epoch, batch))
-  // }
+  predicate ElectionStateReflectExecutedRequestBatch(
+    es:ElectionState,
+    es':ElectionState,
+    batch:RequestBatch
+  )
+  {
+    es' == es.(requests_received_prev_epochs := RemoveExecutedRequestBatch(es.requests_received_prev_epochs, batch),
+    requests_received_this_epoch := RemoveExecutedRequestBatch(es.requests_received_this_epoch, batch))
+  }
 
 }

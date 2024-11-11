@@ -51,8 +51,8 @@ module LiveRSL__Configuration_i {
     requires 0 <= idx < |c.replica_ids|
     ensures  GetReplicaIndex(c.replica_ids[idx], c) == idx
   {
-    var j := GetReplicaIndex(c.replica_ids[idx], c);
-    assert ReplicasDistinct(c.replica_ids, idx, j);
+    // var j := GetReplicaIndex(c.replica_ids[idx], c);
+    // assert ReplicasDistinct(c.replica_ids, idx, j);
   }
 
 }

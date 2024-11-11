@@ -160,6 +160,7 @@ predicate NextGetRequestReal(s:Host, s':Host, pkt:Packet, sm:SingleMessage, m:Me
         && out == {}
 }
 
+
 // predicate NextGetRequestReal(s:Host, s':Host, pkt:Packet, sm:SingleMessage, m:Message, out:set<Packet>, shouldSend:bool)
 //     requires pkt.msg.SingleMessage?
 //     requires pkt.msg.m.GetRequest?

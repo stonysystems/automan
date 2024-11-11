@@ -60,6 +60,8 @@ module Impl_LiveRSL__Constants_i
 		requires CReplicaConstantsIsValid(c)
 		ensures CReplicaConstantsValid(c) == LReplicaConstantsValid(AbstractifyCReplicaConstantsToLReplicaConstants(c))
 	{
-		HOLDER
+		0 <= c.my_index 
+		&& 
+		c.my_index < |c.all.config.replica_ids|
 	}
 }

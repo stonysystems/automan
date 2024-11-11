@@ -62,39 +62,39 @@ function GetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:s
     + GetPacketsFromReplies(me, requests[1..], replies[1..])
 }
 
-lemma lemma_SizeOfGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>, packets:seq<RslPacket>)
-  requires |requests| == |replies|
-  requires forall r :: r in replies ==> r.Reply?
-  requires packets == GetPacketsFromReplies(me, requests, replies)
-  ensures  |packets| == |requests|
-  decreases |requests|
-{
-  if |requests| > 0
-  {
-    lemma_SizeOfGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..]);
-  }
-}
+// lemma lemma_SizeOfGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>, packets:seq<RslPacket>)
+//   requires |requests| == |replies|
+//   requires forall r :: r in replies ==> r.Reply?
+//   requires packets == GetPacketsFromReplies(me, requests, replies)
+//   ensures  |packets| == |requests|
+//   decreases |requests|
+// {
+//   // if |requests| > 0
+//   // {
+//   //   lemma_SizeOfGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..]);
+//   // }
+// }
 
-lemma lemma_SpecificPacketInGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>,
-                                                  packets:seq<RslPacket>, batch_idx:int)
-  requires |requests| == |replies|
-  requires forall r :: r in replies ==> r.Reply?
-  requires 0 <= batch_idx < |requests|
-  requires packets == GetPacketsFromReplies(me, requests, replies)
-  ensures  |packets| == |requests|
-  ensures  packets[batch_idx] == LPacket(requests[batch_idx].client, me, RslMessage_Reply(requests[batch_idx].seqno, replies[batch_idx].reply))
-  decreases |requests|
-{
-  lemma_SizeOfGetPacketsFromReplies(me, requests, replies, packets);
+// lemma lemma_SpecificPacketInGetPacketsFromReplies(me:NodeIdentity, requests:seq<Request>, replies:seq<Reply>,
+//                                                   packets:seq<RslPacket>, batch_idx:int)
+//   requires |requests| == |replies|
+//   requires forall r :: r in replies ==> r.Reply?
+//   requires 0 <= batch_idx < |requests|
+//   requires packets == GetPacketsFromReplies(me, requests, replies)
+//   ensures  |packets| == |requests|
+//   ensures  packets[batch_idx] == LPacket(requests[batch_idx].client, me, RslMessage_Reply(requests[batch_idx].seqno, replies[batch_idx].reply))
+//   decreases |requests|
+// {
+//   // lemma_SizeOfGetPacketsFromReplies(me, requests, replies, packets);
 
-  if |requests| > 0
-  {
-    if batch_idx > 0
-    {
-      lemma_SpecificPacketInGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..], batch_idx-1);
-    }
-  }
-}
+//   // if |requests| > 0
+//   // {
+//   //   if batch_idx > 0
+//   //   {
+//   //     lemma_SpecificPacketInGetPacketsFromReplies(me, requests[1..], replies[1..], packets[1..], batch_idx-1);
+//   //   }
+//   // }
+// }
 
 function LClientsInReplies(replies:seq<Reply>) : ReplyCache
   ensures var m := LClientsInReplies(replies);
@@ -116,14 +116,16 @@ predicate UpdateNewCache(c:ReplyCache, c':ReplyCache, replies:seq<Reply>)
   //                                                           && c'[client] == replies[req_idx]))
 {
   var nc := LClientsInReplies(replies);
-  && (forall client :: client in c' ==> (|| (client in c && c'[client] == c[client])
-                                             || (exists req_idx :: && 0 <= req_idx < |replies|
-                                                            && replies[req_idx].client == client
-                                                            && c'[client] == replies[req_idx])))
-  && (forall client :: client in c' <==> (client in nc || client in c))
+  // && (forall client :: client in c' ==> (|| (client in c && c'[client] == c[client])
+  //                                            || (exists req_idx :: && 0 <= req_idx < |replies|
+  //                                                           && replies[req_idx].client == client
+  //                                                           && c'[client] == replies[req_idx])))
+  // && (forall client :: client in c' <==> (client in nc || client in c))
+  // && (forall client :: client in c' ==> c'[client] == (if client in c then c[client] else nc[client]))
+  // // && (forall client :: client in nc || client in c ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
+  // && (forall client :: client in c.Keys + nc.Keys ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
+  && (forall client :: client in c' <==> client in c.Keys + nc.Keys)
   && (forall client :: client in c' ==> c'[client] == (if client in c then c[client] else nc[client]))
-  // && (forall client :: client in nc || client in c ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
-  && (forall client :: client in c.Keys + nc.Keys ==> client in c' && c'[client] == (if client in c then c[client] else nc[client]))
 }
 
 predicate LExecutorExecute(s:LExecutor, s':LExecutor, non_empty_sequential_sent_packets:seq<RslPacket>)

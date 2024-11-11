@@ -36,6 +36,16 @@ module Impl_LiveRSL__Parameters_i
 		requires CParametersIsValid(p)
 		ensures CWFLParameters(p) == WFLParameters(AbstractifyCParametersToLParameters(p))
 	{
-		HOLDER
+		p.max_log_length > 0 
+		&& 
+		p.baseline_view_timeout_period > 0 
+		&& 
+		p.heartbeat_period > 0 
+		&& 
+		(p.max_integer_val.CUpperBoundFinite? ==> p.max_integer_val.n > p.max_log_length) 
+		&& 
+		p.max_batch_size > 0 
+		&& 
+		p.max_batch_delay >= 0
 	}
 }

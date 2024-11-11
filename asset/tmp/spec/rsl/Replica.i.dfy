@@ -192,6 +192,19 @@ predicate LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s:LReplica, s':LR
   )
 }
 */
+predicate LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s:LReplica, s':LReplica, sent_packets:seq<RslPacket>)
+{
+    exists opn ::
+        && opn in s.acceptor.last_checkpointed_operation
+        && IsLogTruncationPointValid(opn, s.acceptor.last_checkpointed_operation, s.constants.all.config)
+        && if opn > s.acceptor.log_truncation_point then
+            && LAcceptorTruncateLog(s.acceptor, s'.acceptor, opn)
+            && s' == s.(acceptor := s'.acceptor)
+            && sent_packets == []
+          else
+            && s' == s
+            && sent_packets == []
+}
 
 predicate LReplicaNextSpontaneousMaybeMakeDecision(s:LReplica, s':LReplica, sequential_sent_packets:seq<RslPacket>)
 {
