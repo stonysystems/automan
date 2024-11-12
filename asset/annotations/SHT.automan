@@ -67,3 +67,7 @@ module SHT__SingleDelivery_i {
 }
 module SHT__Message_i{
 }
+module SHT__SingleMessage_i{
+}
+module Protocol_Parameters_i{
+}
