@@ -49,4 +49,3 @@ else
   echo "Usage: $0 [rsl | kv]"
 fi
 
-# dune exe test/test_annotator.exe asset/Acceptor.i.dfy asset/annotations/RSL.automan > ./final.ast
