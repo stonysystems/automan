@@ -1,3 +1,30 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] SHT__Host_i
+
+[Action] Host_Init
+Check passed
+
+[Action] NextGetRequestReal
+Check passed
+
+[Action] NextSetRequestReal
+Check passed
+
+[Action] NextDelegateReal
+Check passed
+
+[Action] NextShardReal
+Check passed
+
+[Action] NextReplyReal
+Check passed
+
+[Action] NextRedirectReal
+Check passed
+**********************************************************************/
+
 include ""
 
 
@@ -241,7 +268,7 @@ module Impl_SHT__Host_i
 								var t1 := 
 									CSendSingleMessageReal(s.sd, msg, src, s.constants.params); 								
 								var t2 := 
-									if CValidKey(k) && t1.2 then 
+									if CValidKey(k) && holder then 
 										var t1 := 
 											msg; 										
 										var t2 := 
@@ -368,7 +395,7 @@ module Impl_SHT__Host_i
 										var t1 := 
 											CSendSingleMessageReal(s.sd, msg, src, s.constants.params); 										
 										var t2 := 
-											if t1.2 && CValidKey(k) && CValidOptionalValue(ov) then 
+											if holder && CValidKey(k) && CValidOptionalValue(ov) then 
 												var t1 := 
 													msg; 												
 												var t2 := 
@@ -540,7 +567,7 @@ module Impl_SHT__Host_i
 						var t1 := 
 							CSendSingleMessageReal(s.sd, CDelegate(kr, CExtractRange(s.h, kr)), recipient, s.constants.params); 						
 						var t2 := 
-							if t1.2 then 
+							if holder then 
 								var t1 := 
 									{CPacket(recipient, s.me, t1.1)}; 								
 								var t2 := 

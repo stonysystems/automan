@@ -4,6 +4,7 @@ open Lexing
 open TestCommon
 open Checker
 open TypeTableBuilder
+open Logger
 
 
 module Translator = Translator.Translator
@@ -11,10 +12,10 @@ module Printer =
   Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
 
 
-let main dafny_fn automan_fn () =
-
+let main dafny_fn automan_fn name_remapping_fn () =
   let type_table = TypeTableBuilder.create () in
   let _ = TypeTableBuilder.build_type_table dafny_fn type_table in
+  let _ = NameRemapper.NameRemapper.build name_remapping_fn in
 
   let dafny = begin
     let inx = In_channel.create dafny_fn in
@@ -38,10 +39,11 @@ let main dafny_fn automan_fn () =
   | Result.Ok    dfy ->
     let (dfy_moded, log) = Moder.run dfy in
     let _ = log in 
-    let dfy_checked = Checker.check dfy_moded type_table in
+    let dfy_checked, logger = Checker.check dfy_moded type_table in
     let generated_code = Translator.translate dfy_checked type_table in
-    let str = Printer.print generated_code in
-    printf "%s\n" str 
+    let code = Printer.print generated_code in
+    let log = Logger.print logger in
+    printf "%s\n" (log ^ code)
 
 let () =
   Command.basic_spec
@@ -50,6 +52,7 @@ let () =
       empty
       +> anon ("dafnyFilename" %: string)
       +> anon ("automanFilename" %: string)
+      +> anon ("nameRemappingFilename" %: string)
     )
     main
   |> Command_unix.run

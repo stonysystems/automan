@@ -1,6 +1,7 @@
 open Syntax
 open Internal
 open TypeTableBuilder
+open Logger
 
 
 module TCommon = TranslatorCommon.TranslatorCommon
@@ -13,6 +14,8 @@ module AnnotationToTranslator =
   Convert
     (Annotator.AnnotationMetaData)
     (TranslatorMetadata.TranslationMetaData)
+
+module ModerPrinter = Printer.PrettyPrinter(Moder.ModingMetaData)
 
 module Converter = struct
 
@@ -539,7 +542,6 @@ module Checker = struct
   module Prog = struct 
     let v_holder = TCommon.expr_of_str "holder"
 
-    (* To be implemented: Quantifier and Match *)
     (* Ignore the eq_meta.unassigned_members at this moment: It's unassigned all the time *)
     let rec check_expr 
       (x : ModerAST.Prog.expr_t)
@@ -547,14 +549,19 @@ module Checker = struct
       (qtf_booker : QuantifierHelper.quantifier_booker) :
       (TranslatorAST.Prog.expr_t *
        DataTracker.DataTracker.t *
-       QuantifierHelper.quantifier_booker) = 
-      let basic = (Converter.Prog.convert_expr x, tracker, qtf_booker) in
+       QuantifierHelper.quantifier_booker *
+       bool *
+       Logger.t) = 
 
+      try
+
+      let basic = 
+        (Converter.Prog.convert_expr x, tracker, qtf_booker, true, []) 
+      in
       if print_checker_log then
         TCommon.debug_print 
           ("[Checker] " ^ 
           (TCommon.str_of_expr (Converter.Prog.convert_expr x))) ;
-
       match x with 
       | Suffixed (expr, suffix) -> 
         (
@@ -568,7 +575,7 @@ module Checker = struct
                   List.fold_left 
                     (fun t x ->
                         let k, v = x in
-                        Tracker.API.assign t k v) 
+                        let t = Tracker.API.assign t k v in t) 
                     tracker
                     (List.map
                         (fun x ->
@@ -581,24 +588,29 @@ module Checker = struct
                   TranslatorAST.Prog.ArgList (
                     Converter.Prog.convert_arglist arglist, 
                     meta
-                )) in (expr', tracker', qtf_booker)
+                )) in (expr', tracker', qtf_booker, true, [])
             )
           | _ -> basic
+          ) 
+      | Let l -> 
+        (
+          let (body_expr', tracker', qtf_booker, ok, logger) = 
+            check_expr l.body tracker qtf_booker
+          in
+          let expr' = 
+            TranslatorAST.Prog.Let {
+              ghost = l.ghost ; 
+              pats = NonEmptyList.map 
+                        Converter.Prog.convert_pattern l.pats ; 
+              defs = NonEmptyList.map 
+                        Converter.Prog.convert_expr l.defs ;
+              body = body_expr' ;
+            } in
+          (* Note that here we are solving for the binding part
+              We need to apply the old tracker here *)
+          (* let expr' = Tracker.Obligation.Prog.solve_expr tracker expr' in *)
+          (expr', tracker', qtf_booker, ok, logger)
         ) 
-      | Let x -> 
-        let (body_expr', tracker', qtf_booker) = 
-          check_expr x.body tracker qtf_booker
-        in
-        let expr' = 
-          TranslatorAST.Prog.Let {
-            ghost = x.ghost ; 
-            pats = NonEmptyList.map 
-                      Converter.Prog.convert_pattern x.pats ; 
-            defs = NonEmptyList.map 
-                      Converter.Prog.convert_expr x.defs ;
-            body = body_expr' ;
-          } in
-        (expr', tracker', qtf_booker)
       | Binary (meta, bop, e1, e2) ->        
         (
           match meta with 
@@ -615,8 +627,7 @@ module Checker = struct
                 QuantifierHelper.try_add_seq_dom x qtf_booker in
               
               if updated then 
-                (* let _ = QuantifierHelper.print_seq_doms qtf_booker in *)
-                (Converter.Prog.convert_expr x, tracker, qtf_booker)
+                (Converter.Prog.convert_expr x, tracker, qtf_booker, true, [])
               else
                 let k, v = 
                 (match eq_meta.outvar_is_left with
@@ -624,68 +635,126 @@ module Checker = struct
                 let k, v = 
                   Converter.Prog.convert_expr k, 
                   Converter.Prog.convert_expr v in
-                let tracker' = Tracker.API.assign tracker k v in
+
+                let tracker', logger, ok = 
+                  try 
+                    (Tracker.API.assign tracker k v), [], true with
+                  | Tracker.HarmonyCheckFailed -> 
+                      (tracker, 
+                        Logger.error_harmony_check_failed 
+                          [] (TCommon.str_of_expr k), 
+                        false)
+                  | Tracker.OutputVarUsedButNotAssigned ->
+                      (tracker,
+                        Logger.error_output_used_but_not_assigned
+                          [] (TCommon.str_of_expr v), 
+                        false)
+                in
+
+                (* TCommon.debug_print (Logger.print logger) ; *)
+                
                 (TranslatorAST.Prog.Binary
                   (meta, bop,
                     Converter.Prog.convert_expr e1,
-                    Converter.Prog.convert_expr e2), tracker', qtf_booker)
+                    Converter.Prog.convert_expr e2), tracker', qtf_booker, ok, logger)
             
             | Moder.Definitions.And _ ->
-              (**
-                * meta is not useful at all; 
-                *)
-              let clean_tracker = Tracker.API.clear tracker in
-
-              let e1', tracker_l, qtf_booker = check_expr e1 clean_tracker qtf_booker in
-              let lft_vars = 
+              try 
+              let e1', tracker_lft, qtf_booker, ok_lft, logger_lft = 
+                check_expr e1 tracker qtf_booker 
+              in
+              let e2', tracker_rht, qtf_booker, ok_rht, logger_rht = 
+                check_expr e2 tracker_lft qtf_booker 
+              in
+              let get_vars (str_lst : string list) : Moder.Definitions.outvar_lhs_t list = 
                 List.map
                 (fun x : Moder.Definitions.outvar_lhs_t -> 
-                  let id = TCommon.str_of_expr x in
-                  { mq_outvar = NonEmptyList.coerce [id] ; 
+                  { mq_outvar = NonEmptyList.coerce [x] ; 
                     fieldlike = None ; } ) 
-                (Tracker.API.get_assigned_lst tracker_l) in
-
-              let e2', tracker_r, qtf_booker = check_expr e2 clean_tracker qtf_booker in
-              let rht_vars = 
-                List.map
-                (fun x : Moder.Definitions.outvar_lhs_t -> 
-                  let id = TCommon.str_of_expr x in
-                  { mq_outvar = NonEmptyList.coerce [id] ; 
-                    fieldlike = None ; } ) 
-                (Tracker.API.get_assigned_lst tracker_r) in
+                (str_lst) 
+              in
+              let lft_vars = Tracker.API.get_assigned_lst tracker_lft in
+              let rht_vars = Tracker.API.get_assigned_lst tracker_rht in
+              let ini_vars = Tracker.API.get_assigned_lst tracker     in
+              let lft_vars_str = List.map TCommon.str_of_expr lft_vars in
+              let rht_vars_str = List.map TCommon.str_of_expr rht_vars in
+              let ini_vars_str = List.map TCommon.str_of_expr ini_vars in
+              let lft_vars_str = 
+                List.filter (fun x -> not (List.mem x ini_vars_str)) lft_vars_str in
+              let rht_vars_str = 
+                List.filter (fun x -> not (List.mem x ini_vars_str)) rht_vars_str in
+              let rht_vars_str = 
+                List.filter (fun x -> not (List.mem x lft_vars_str)) rht_vars_str in
               let meta' = 
                 Some (Moder.Definitions.And {
-                  conj_left  = lft_vars ; 
-                  conj_right = rht_vars ;
+                  conj_left  = get_vars lft_vars_str ; 
+                  conj_right = get_vars rht_vars_str ;
                 }) in
-              let tracker' = Tracker.API.merge tracker tracker_l in
-              let tracker' = Tracker.API.merge tracker' tracker_r in
               let x' = TranslatorAST.Prog.Binary 
                 (meta', bop, e1', e2') in
-              (x', tracker', qtf_booker)
+              if ok_lft && ok_rht then
+                (x', tracker_rht, qtf_booker, true, [])
+              else if ok_lft then
+                (x', tracker_rht, qtf_booker, false, logger_rht)
+              else 
+                (x', tracker_rht, qtf_booker, false, logger_lft)
+              with 
+              | Tracker.HarmonyCheckFailed ->
+                let logger = 
+                  Logger.error_harmony_check_failed
+                    [] (ModerPrinter.Prog.print_expr_in_one_line x) in
+                (TCommon.expr_blank, tracker, qtf_booker, false, logger)
+              | Tracker.OutputVarUsedButNotAssigned ->
+                let logger = 
+                  Logger.error_output_used_but_not_assigned
+                    [] (ModerPrinter.Prog.print_expr_in_one_line x) in
+                (TCommon.expr_blank, tracker, qtf_booker, false, logger)
         )
       | If (meta, e_cond, e_then, e_else) ->
         (
           match meta with 
           | None -> basic
           | Some meta ->
-          let empty_tracker = Tracker.API.clear tracker in
+          
+          (* let empty_tracker = Tracker.API.clear tracker in *)
           let e_cond' = Converter.Prog.convert_expr e_cond in
+          let e_cond' = Tracker.Obligation.Prog.solve_expr tracker e_cond' in
 
-          let e_then', tracker_then, _ = 
-            check_expr e_then empty_tracker qtf_booker in
-          let e_else', tracker_else, _ = 
-            check_expr e_else empty_tracker qtf_booker in
+          let e_then', tracker_then, _, ok_then, then_logger = 
+            check_expr e_then tracker qtf_booker in
+          let e_else', tracker_else, _, ok_else, else_logger = 
+            check_expr e_else tracker qtf_booker in
 
-          assert_helper 
-            (Tracker.API.compare tracker_then tracker_else)
-            "checker: then-branch and else-branch return different set of assignments"
-          ;
+          let dummy_e = Converter.Prog.convert_expr x in
+
+          if not (ok_then && ok_else) then
+            (
+              if ok_then then 
+                (dummy_e, tracker, qtf_booker, false, then_logger @ else_logger)
+              else
+                (dummy_e, tracker, qtf_booker, false, then_logger)
+            )
+          else if not (Tracker.API.compare tracker_then tracker_else) then 
+            let logger = 
+              Logger.error_then_else_not_assigning_same_set_of_vars
+                [] (ModerPrinter.Prog.print_expr_in_one_line x)            
+            in
+            (dummy_e, tracker, qtf_booker, false, logger)
+          
+          else
           
           let merged_tracker = 
             Tracker.API.merge tracker_then tracker_else in
+          
           let vars = 
             Tracker.API.get_assigned_lst merged_tracker in
+          
+          (* Correct ? *)
+          let vars_ini = 
+            Tracker.API.get_assigned_lst tracker in
+          let vars = 
+            List.filter (fun x -> not (List.mem x vars_ini)) vars in
+
           let vars = 
             NonEmptyList.coerce vars in
           let meta' : TranslatorMetadata.Definitions.ite_functionalize_t = ({
@@ -698,16 +767,12 @@ module Checker = struct
                   vars );
             branch_permutations = meta ;
           }) in
-          
-          (* TCommon.debug_print "start the buggy merge." ; *)
           let tracker' = Tracker.API.merge tracker merged_tracker in
-          (* TCommon.debug_print "end the buggy merge." ; *)
-          (* (Printf.printf "%s\n" (Tracker.show tracker') ) ; *)
-
           let expr' = 
             TranslatorAST.Prog.If 
               (Some meta', e_cond', e_then', e_else') in
-          (expr', tracker', qtf_booker)
+          
+          (expr', tracker', qtf_booker, true, [])
         ) 
       | Quantifier (_meta, quantification) -> 
         let (_is_map_dom, qtf_booker) = 
@@ -721,7 +786,7 @@ module Checker = struct
           (
             match QuantifierHelper.construct_seq_display qtf_booker with
             | None -> 
-              (Converter.Prog.convert_expr x, tracker, qtf_booker)
+              (Converter.Prog.convert_expr x, tracker, qtf_booker, true, [])
             | Some (seq_display, k) ->
               let expr' = 
                 TranslatorAST.Prog.Quantifier 
@@ -734,13 +799,13 @@ module Checker = struct
               let k' = Converter.Prog.convert_expr k in
               (* TCommon.debug_print_expr k' ; *)
               let tracker' = Tracker.API.assign tracker k' v_holder in
-              (expr', tracker', qtf_booker)
+              (expr', tracker', qtf_booker, true, [])
           )
         else if is_map_map then
           (
             match QuantifierHelper.construct_map_qtf qtf_booker with
             | None ->
-              (Converter.Prog.convert_expr x, tracker, qtf_booker)
+              (Converter.Prog.convert_expr x, tracker, qtf_booker, true, [])
             | Some (qtfier, k) ->
               let expr' = 
                 TranslatorAST.Prog.Quantifier
@@ -753,19 +818,30 @@ module Checker = struct
               in
               let k' = Converter.Prog.convert_expr k in
               let tracker' = Tracker.API.assign tracker k' v_holder in
-              (expr', tracker', qtf_booker)
+              (expr', tracker', qtf_booker, true, [])
           )
         else
-          (Converter.Prog.convert_expr x, tracker, qtf_booker)
+          (Converter.Prog.convert_expr x, tracker, qtf_booker, true, [])
       | _ -> basic
 
+      with
+      | Tracker.HarmonyCheckFailed ->
+        let logger = 
+          Logger.error_harmony_check_failed
+            [] (ModerPrinter.Prog.print_expr_in_one_line x) in
+        (TCommon.expr_blank, tracker, qtf_booker, false, logger)
+      | Tracker.OutputVarUsedButNotAssigned ->
+        let logger = 
+          Logger.error_output_used_but_not_assigned
+            [] (ModerPrinter.Prog.print_expr_in_one_line x) in
+        (TCommon.expr_blank, tracker, qtf_booker, false, logger)
   end
   
   module TopDecl = struct 
 
     let check_function 
       (x : ModerAST.TopDecl.function_t) : 
-      TranslatorAST.TopDecl.function_t = 
+      TranslatorAST.TopDecl.function_t * Logger.t = 
       match x with 
       | Predicate 
           (meta, is_ghost, attrs, id, params, fmls, specs, e) ->
@@ -776,10 +852,10 @@ module Checker = struct
 
           match meta with 
           | Moder.Definitions.Predicate -> 
-            Converter.TopDecl.convert_function x
+            Converter.TopDecl.convert_function x, []
           | Moder.Definitions.Function f_meta -> (
             match f_meta.make_stub with
-            | true -> Converter.TopDecl.convert_function x
+            | true -> Converter.TopDecl.convert_function x, []
             | false -> (
               let vars_out = NonEmptyList.as_list f_meta.vars_out in
               let vars_out = List.map (
@@ -794,16 +870,41 @@ module Checker = struct
                       ))) vars_out in
               let tracker = 
                 DataTracker.DataTracker.API.build vars_out in
-              (* init checker analysis here *)
               let qtf_booker = QuantifierHelper.init in
-              let (e', tracker', _) = Prog.check_expr e tracker qtf_booker in
-              let _ = tracker' in
 
-              (* Printf.printf "%s\n" (Tracker.show tracker') ; *)
-              assert_helper
-                (Tracker.API.saturation_check tracker')
-                ("Saturation Check for " ^ id ^ " failed") ;
+              (* the checked expr *)
+              let (e', tracker', _, ok, logger) = 
+                Prog.check_expr e tracker qtf_booker in
               
+              (* LOGGER *)
+              let ok, logger = 
+                if ok then 
+                  if Tracker.API.saturation_check tracker' then 
+                    ok, logger
+                else
+                    not ok, Logger.error_saturation_check_failed logger
+                else
+                  ok, logger
+              in
+              (* assert_helper
+                (Tracker.API.saturation_check tracker')
+                ("Saturation Check for " ^ id ^ " failed") ; *)
+
+              let meta = Moder.Definitions.Function {
+                make_stub = not ok ;
+                vars_in = f_meta.vars_in ;
+                vars_out = f_meta.vars_out ;
+              } in
+              let logger = 
+                if ok then 
+                  Logger.error_none logger 
+                else
+                  logger
+              in
+
+              let init_loger = Logger.enter_action [] id in
+              let logger = init_loger @ logger in
+
               TranslatorAST.TopDecl.Predicate (
                 meta, 
                 is_ghost, 
@@ -813,59 +914,72 @@ module Checker = struct
                 List.map Converter.TopDecl.convert_formal fmls, 
                 List.map Converter.TopDecl.convert_function_spec specs, 
                 e'
-              )
+              ), logger
             )))
 
-      | Function _ -> Converter.TopDecl.convert_function x
+      | Function _ -> Converter.TopDecl.convert_function x, []
 
     let rec check_t 
       (x : ModerAST.TopDecl.t)
       (type_table : TypeTableBuilder.t) : 
-      TranslatorAST.TopDecl.t = 
+      TranslatorAST.TopDecl.t * Logger.t = 
       let (modifiers, t') = x in
-      (modifiers, check_t' t' type_table)
+      let checked_t', logger = check_t' t' type_table in
+      (modifiers, checked_t'), logger
 
     and check_t' 
       (x : ModerAST.TopDecl.t') 
       (type_table : TypeTableBuilder.t) : 
-      TranslatorAST.TopDecl.t' = 
+      TranslatorAST.TopDecl.t' * Logger.t = 
       match x with 
       | ModuleDef module_def ->  
-        TranslatorAST.TopDecl.ModuleDef
-          (check_module_def module_def type_table)
+        let c, logger = check_module_def module_def type_table in
+        TranslatorAST.TopDecl.ModuleDef c, logger
       | PredFunDecl f ->
-        TranslatorAST.TopDecl.PredFunDecl
-          (check_function f)
-      | _ -> Converter.TopDecl.convert_t' x
+        let c, logger = check_function f in
+        TranslatorAST.TopDecl.PredFunDecl c, logger
+      | _ -> Converter.TopDecl.convert_t' x, []
 
     and check_module_def 
       (x : ModerAST.TopDecl.module_def_t)
       (type_table : TypeTableBuilder.t) :
-      TranslatorAST.TopDecl.module_def_t = 
+      TranslatorAST.TopDecl.module_def_t * Logger.t = 
       let (attrs, id, ts) = x in
       let _ = TypeTableBuilder.find_visible_decls type_table id in
+      let c, loggers = 
+        List.split 
+        (List.map (
+          fun x ->
+            check_t x type_table
+        ) ts)
+      in  
+      let logger = Logger.init in
+      let logger = Logger.enter_module logger id in
+      let logger = List.concat (logger :: loggers) in
       (
         List.map Converter.Prog.convert_attribute attrs, 
         id, 
-        List.map (
-          fun x ->
-            check_t x type_table
-        ) ts
-      )
+        c
+      ), logger
 
   end
   
   let check 
     (x : ModerAST.t)
-    (type_table : TypeTableBuilder.t) :(TranslatorAST.t) = 
+    (type_table : TypeTableBuilder.t) : (TranslatorAST.t * Logger.t) = 
     match x with ModerAST.Dafny x ->
+      let decls, loggers = 
+        List.split 
+          (List.map (
+            fun x -> 
+              TopDecl.check_t x type_table
+          ) x.decls) 
+      in 
+      let logger = List.concat loggers in
       TranslatorAST.Dafny
       {
         includes = x.includes;
-        decls = List.map (
-          fun x -> 
-            TopDecl.check_t x type_table
-        ) x.decls;
-      }
+        decls = decls;
+      }, logger
 
 end

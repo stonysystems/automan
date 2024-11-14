@@ -1,3 +1,27 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] SHT__SingleDelivery_i
+
+[Action] ReceiveAck
+Check passed
+
+[Action] SendAck
+Check passed
+
+[Action] MaybeAckPacket
+Check passed
+
+[Action] ReceiveRealPacket
+Check passed
+
+[Action] ReceiveSingleMessage
+Check passed
+
+[Action] SendSingleMessageReal
+Check passed
+**********************************************************************/
+
 include ""
 
 

@@ -4,6 +4,7 @@ open TypeTableBuilder
 
 module Tracker = DataTracker.DataTracker
 
+module Remapper = NameRemapper.NameRemapper
 module AST = AST(TranslatorMetadata.TranslationMetaData)
 module Refinement = Refinement.Refinement
 module TCommon = TranslatorCommon.TranslatorCommon
@@ -11,20 +12,17 @@ module Printer = Printer.PrettyPrinter(TranslatorMetadata.TranslationMetaData)
 
 
 module Translator = struct 
-  (* remapper : should be replaced by meta data later *)
-  let remapper = new NameRemapper.name_remapper
-
   module Type = struct 
 
-    let rec t_name_seg (x : AST.Type.name_seg_t) = 
+    let rec t_name_seg (x : AST.Type.name_seg_t) : AST.Type.name_seg_t = 
       let x_str = Printer.Type.print_name_seg x in
-      match remapper#is_tp_in_config x_str with
-      | true -> remapper#get_from_config x_str
+      match Remapper.is_tp_in_config x_str with
+      | true -> Remapper.get_from_config x_str
       | false ->
         let TpIdSeg { id = id; gen_inst = gen_inst } = x in
         let x' = 
         AST.Type.TpIdSeg {
-          id = remapper#id_remap id; (* NOTICE: what about alias ? *)
+          id = Remapper.id_remap id; 
           gen_inst = List.map translate gen_inst
         }
         in
@@ -87,11 +85,11 @@ module Translator = struct
             | true -> assert false
             | false -> (
               let t_id = (
-                match remapper#is_tp_in_config id with 
+                match Remapper.is_tp_in_config id with 
                 | true -> 
                   Printer.Type.print_name_seg 
-                    (remapper#get_from_config id)
-                | false -> remapper#id_remap id
+                    (Remapper.get_from_config id)
+                | false -> Remapper.id_remap id
               ) in
               TCommon.expr_of_str t_id
             )
@@ -203,11 +201,11 @@ module Translator = struct
               let len = String.length id in
               let id = String.sub id 0 (len - 1) in
               let t_id = (
-                match remapper#is_tp_in_config id with 
+                match Remapper.is_tp_in_config id with 
                 | true -> 
                   Printer.Type.print_name_seg 
-                    (remapper#get_from_config id)
-                | false -> remapper#id_remap id
+                    (Remapper.get_from_config id)
+                | false -> Remapper.id_remap id
               ) in
               Syntax.Common.DSId (t_id ^ "?")
             )
@@ -301,7 +299,7 @@ module Translator = struct
     let t_datatype_ctor (x : AST.TopDecl.datatype_ctor_t) = 
       match x with DataCtor (attr_lst, id, formals) ->
       let _ = attr_lst in
-      let t_id = remapper#id_remap id in
+      let t_id = Remapper.id_remap id in
       let t_formals = List.map t_formal formals in
       let x' = AST.TopDecl.DataCtor ([], t_id, t_formals) in
       (* TCommon.debug_print (Printer.TopDecl.print_datatype_ctor x 0);
@@ -312,7 +310,7 @@ module Translator = struct
       let m, attr_lst, id, generic_params, ctors = x in
       let _ = attr_lst in (* IGNORE: attr_lst *)
       let _ = generic_params in (* IGNORE: generic_params *)
-      let t_id = remapper#id_remap id in
+      let t_id = Remapper.id_remap id in
       let t_ctors = 
         NonEmptyList.coerce (
           List.map t_datatype_ctor (NonEmptyList.as_list ctors)
@@ -333,7 +331,7 @@ module Translator = struct
       ]
 
     let t_synonym_type (x : AST.TopDecl.synonym_type_t) = 
-      let t_id = remapper#id_remap x.id in
+      let t_id = Remapper.id_remap x.id in
       let m_id = "s" in
       let t_rhs, fml, t_fml = (
             match x.rhs with 
@@ -744,7 +742,7 @@ module Translator = struct
             )
           )
         in
-        let t_id = remapper#id_remap id in
+        let t_id = Remapper.id_remap id in
         let t_original_fmls = List.map t_formal origin_fmls in
         let t_fmls_input = List.map t_formal fmls_input in
         let t_fmls_rtn = List.map t_formal fmls_rtn in
@@ -804,7 +802,7 @@ module Translator = struct
         in
         let _ = attrs, params, is_method in
         let t_e = Prog.t_expr e in
-        let t_id = remapper#id_remap id in
+        let t_id = Remapper.id_remap id in
         let t_original_fmls = List.map t_formal origin_fmls in
         let t_fmls_input = List.map t_formal origin_fmls in
         let t_rtn = Type.translate origin_rtn in
@@ -855,7 +853,7 @@ module Translator = struct
       let _ = TypeTableBuilder.find_visible_decls type_table id in
       [AST.TopDecl.ModuleDef begin
         [], 
-        (remapper#module_id_remap id), 
+        (Remapper.module_id_remap id), 
         List.concat (List.map 
           (fun x -> translate x type_table) t_lst)
       end]

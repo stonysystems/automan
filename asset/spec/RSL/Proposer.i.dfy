@@ -68,7 +68,6 @@ module LiveRSL__Proposer_i {
   ///////////////////////////////////
   // HELPER FUNCTIONS
   ///////////////////////////////////
-
   predicate LIsAfterLogTruncationPoint(opn:OperationNumber, received_1b_packets:set<RslPacket>)
   {
     (forall p :: p in received_1b_packets && p.msg.RslMessage_1b? ==> p.msg.log_truncation_point <= opn)
@@ -153,7 +152,6 @@ module LiveRSL__Proposer_i {
   ///////////////////////////////////
   // INITIALIZATION
   ///////////////////////////////////
-
   predicate LProposerInit(s:LProposer, c:LReplicaConstants)
     requires WellFormedLConfiguration(c.all.config)
   {
@@ -171,7 +169,6 @@ module LiveRSL__Proposer_i {
   // ///////////////////////////////////
   // // ACTIONS
   // ///////////////////////////////////
-
   predicate LProposerProcessRequest(s:LProposer, s':LProposer, packet:RslPacket)
     requires packet.msg.RslMessage_Request?
   {
@@ -275,13 +272,13 @@ module LiveRSL__Proposer_i {
   predicate LProposerProcessHeartbeat(s:LProposer, s':LProposer, p:RslPacket, clock:int)
     requires p.msg.RslMessage_Heartbeat?
   {
-    
+
+    && ElectionStateProcessHeartbeat(s.election_state, s'.election_state, p, clock) 
     && (if BalLt(s.election_state.current_view, s'.election_state.current_view) then
          s'.current_state == 0 && s'.request_queue == []
        else
          s'.current_state == s.current_state && s'.request_queue == s.request_queue
          )
-    && ElectionStateProcessHeartbeat(s.election_state, s'.election_state, p, clock)
     && s' == s.(election_state := s'.election_state,
              current_state := s'.current_state,
              request_queue := s'.request_queue)

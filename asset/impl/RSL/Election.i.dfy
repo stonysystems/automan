@@ -1,3 +1,27 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] LiveRSL__Election_i
+
+[Action] ElectionStateInit
+Check passed
+
+[Action] ElectionStateProcessHeartbeat
+Check passed
+
+[Action] ElectionStateCheckForViewTimeout
+Check passed
+
+[Action] ElectionStateCheckForQuorumOfViewSuspicions
+Check passed
+
+[Action] ElectionStateReflectReceivedRequest
+Check passed
+
+[Action] ElectionStateReflectExecutedRequestBatch
+Check passed
+**********************************************************************/
+
 include ""
 
 

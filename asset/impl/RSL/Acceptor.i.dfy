@@ -1,3 +1,30 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] LiveRSL__Acceptor_i
+
+[Action] RemoveVotesBeforeLogTruncationPoint
+Check passed
+
+[Action] LAddVoteAndRemoveOldOnes
+Check passed
+
+[Action] LAcceptorInit
+Check passed
+
+[Action] LAcceptorProcess1a
+Check passed
+
+[Action] LAcceptorProcess2a
+Check passed
+
+[Action] LAcceptorProcessHeartbeat
+Check passed
+
+[Action] LAcceptorTruncateLog
+Check passed
+**********************************************************************/
+
 include ""
 
 
@@ -206,20 +233,16 @@ module Impl_LiveRSL__Acceptor_i
 		ensures var s' := CAcceptorTruncateLog(s, opn); CAcceptorIsValid(s') && LAcceptorTruncateLog(AbstractifyCAcceptorToLAcceptor(s), AbstractifyCAcceptorToLAcceptor(s'), AbstractifyCOperationNumberToOperationNumber(opn))
 	{
 		var t1 := 
-			var t := 
-				seq(10, (idx) => 1); 			
-			var t1 := 
-				if opn <= s.log_truncation_point then 
-					var t1 := 
-						s; 					
-					t1 
-				else 
-					var t1 := 
-						CRemoveVotesBeforeLogTruncationPoint(s.votes, opn); 					
-					var t2 := 
-						s.(log_truncation_point := opn, votes := t1); 					
-					t2; 			
-			t1; 		
+			if opn <= s.log_truncation_point then 
+				var t1 := 
+					s; 				
+				t1 
+			else 
+				var t1 := 
+					CRemoveVotesBeforeLogTruncationPoint(s.votes, opn); 				
+				var t2 := 
+					s.(log_truncation_point := opn, votes := t1); 				
+				t2; 		
 		t1
 	}
 }

@@ -1,3 +1,15 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] SHT__Network_i
+
+[Action] Network_Init
+Check passed
+
+[Action] Network_Receive
+Check passed
+**********************************************************************/
+
 include ""
 
 

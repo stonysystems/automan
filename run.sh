@@ -26,6 +26,10 @@ kv_files=(
   Host.i.dfy
 )
 
+bad_examples_files=(
+  Acceptor.i.dfy 
+)
+
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <param>"
   exit 1
@@ -35,17 +39,24 @@ if [ "$1" == "rsl" ]; then
   for file in "${rsl_files[@]}"
   do
     echo "[+] RSL/spec -> RSL/impl | "$file
-    dune exe bin/automan.exe ./asset/spec/RSL/$file asset/annotations/RSL.automan > \
+    dune exe bin/main.exe ./asset/spec/RSL/$file asset/annotations/RSL.automan asset/remapping.json > \
       ./asset/impl/RSL/$file
   done
 elif [ "$1" == "kv" ]; then
   for file in "${kv_files[@]}"
   do
     echo "[+] KV/spec -> KV/impl | "$file
-    dune exe bin/automan.exe ./asset/spec/KV/$file asset/annotations/SHT.automan > \
+    dune exe bin/main.exe ./asset/spec/KV/$file asset/annotations/SHT.automan asset/remapping.json > \
       ./asset/impl/KV/$file
   done
+elif [ "$1" == "bad" ]; then
+  for file in "${bad_examples_files[@]}"
+  do
+    echo "[+] BadExamples/spec -> BadExamples/impl | "$file
+    dune exe bin/main.exe ./asset/spec/BadExamples/$file asset/annotations/RSL.automan asset/remapping.json > \
+      ./asset/impl/BadExamples/$file
+  done
 else
-  echo "Usage: $0 [rsl | kv]"
+  echo "Usage: $0 [rsl | kv | bad]"
 fi
 

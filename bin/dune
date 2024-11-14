@@ -1,4 +1,5 @@
 (executable
- (public_name automan)
- (name automan)
- (libraries automan core core_unix.command_unix))
+ (public_name main)
+ (name main)
+ (libraries core core_unix.command_unix automan))
+

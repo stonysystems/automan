@@ -1,3 +1,42 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] LiveRSL__Proposer_i
+
+[Action] LProposerInit
+Check passed
+
+[Action] LProposerProcessRequest
+Check passed
+
+[Action] LProposerMaybeEnterNewViewAndSend1a
+Check passed
+
+[Action] LProposerProcess1b
+Check passed
+
+[Action] LProposerMaybeEnterPhase2
+Check passed
+
+[Action] LProposerNominateNewValueAndSend2a
+Check passed
+
+[Action] LProposerMaybeNominateValueAndSend2a
+Check passed
+
+[Action] LProposerProcessHeartbeat
+Check passed
+
+[Action] LProposerCheckForViewTimeout
+Check passed
+
+[Action] LProposerCheckForQuorumOfViewSuspicions
+Check passed
+
+[Action] LProposerResetViewTimerDueToExecution
+Check passed
+**********************************************************************/
+
 include ""
 
 
@@ -411,7 +450,9 @@ module Impl_LiveRSL__Proposer_i
 		ensures var s' := CProposerProcessHeartbeat(s, p, clock); CProposerIsValid(s') && LProposerProcessHeartbeat(AbstractifyCProposerToLProposer(s), AbstractifyCProposerToLProposer(s'), AbstractifyCPacketToRslPacket(p), clock)
 	{
 		var t1 := 
-			if CBalLt(s.election_state.current_view, ) then 
+			CElectionStateProcessHeartbeat(s.election_state, p, clock); 		
+		var t2 := 
+			if CBalLt(s.election_state.current_view, holder.current_view) then 
 				var t1 := 
 					0; 				
 				var t2 := 
@@ -423,10 +464,8 @@ module Impl_LiveRSL__Proposer_i
 				var t2 := 
 					s.request_queue; 				
 				(t1, t2); 		
-		var t2 := 
-			CElectionStateProcessHeartbeat(s.election_state, p, clock); 		
 		var t3 := 
-			s.(election_state := t2, current_state := t1.1, request_queue := t1.0); 		
+			s.(election_state := t1, current_state := t2.1, request_queue := t2.0); 		
 		t3
 	}
 
@@ -448,7 +487,7 @@ module Impl_LiveRSL__Proposer_i
 		var t1 := 
 			CElectionStateCheckForQuorumOfViewSuspicions(s.election_state, clock); 		
 		var t2 := 
-			if CBalLt(s.election_state.current_view, t1.current_view) then 
+			if CBalLt(s.election_state.current_view, holder.current_view) then 
 				var t1 := 
 					0; 				
 				var t2 := 

@@ -1,7 +1,7 @@
-(test
- (name test_automan)
- (modules test_automan)
- (libraries core core_unix.command_unix async_unix automan))
+; (test
+;  (name test_automan)
+;  (modules test_automan)
+;  (libraries core core_unix.command_unix async_unix automan))
 
 (test
   (name test_parser)

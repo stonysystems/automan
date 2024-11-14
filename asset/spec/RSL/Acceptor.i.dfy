@@ -35,27 +35,12 @@ module LiveRSL__Acceptor_i {
   
   predicate RemoveVotesBeforeLogTruncationPoint(votes:Votes, votes':Votes, log_truncation_point:OperationNumber)
   {
-    /*
-    && (forall opn :: opn in votes' ==> opn in votes && votes'[opn] == votes[opn])
-    && (forall opn :: opn < log_truncation_point ==> opn !in votes')
-    && (forall opn :: opn >= log_truncation_point && opn in votes ==> opn in votes')
-    */
-
-    // && (forall opn :: opn in votes' ==> opn in votes && votes'[opn] == votes[opn])
-    // && (forall opn :: opn < log_truncation_point ==> opn !in votes')
-    // && (forall opn :: opn >= log_truncation_point && opn in votes ==> opn in votes')
-
     && (forall opn :: opn in votes' <==> opn in votes && opn >= log_truncation_point)
     && (forall opn :: opn in votes' ==> votes'[opn] == votes[opn])
   }
 
   predicate LAddVoteAndRemoveOldOnes(votes:Votes, votes':Votes, new_opn:OperationNumber, new_vote:Vote, log_truncation_point:OperationNumber)
   {
-    /*
-    && (forall opn :: opn in votes' <==> opn >= log_truncation_point && (opn in votes || opn == new_opn))
-    && (forall opn :: opn in votes' ==> votes'[opn] == (if opn == new_opn then new_vote else votes[opn]))
-    */
-
     && (forall opn :: opn in votes' <==> opn in (votes.Keys + {new_opn}) && opn >= log_truncation_point)
     && (forall opn :: opn in votes' ==> votes'[opn] == (if opn == new_opn then new_vote else votes[opn]))
   }
@@ -127,7 +112,6 @@ module LiveRSL__Acceptor_i {
 
   predicate LAcceptorTruncateLog(s:LAcceptor, s':LAcceptor, opn:OperationNumber)
   {
-    var t := seq(10, idx => 1);
     if opn <= s.log_truncation_point then
       s' == s
     else

@@ -1,3 +1,69 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] LiveRSL__Replica_i
+
+[Action] LReplicaInit
+Check passed
+
+[Action] LReplicaNextProcessInvalid
+Check passed
+
+[Action] LReplicaNextProcessRequest
+Check passed
+
+[Action] LReplicaNextProcess1a
+Check passed
+
+[Action] LReplicaNextProcess1b
+Check passed
+
+[Action] LReplicaNextProcessStartingPhase2
+Check passed
+
+[Action] LReplicaNextProcess2a
+Check passed
+
+[Action] LReplicaNextProcess2b
+Check passed
+
+[Action] LReplicaNextProcessReply
+Check passed
+
+[Action] LReplicaNextProcessAppStateSupply
+Check passed
+
+[Action] LReplicaNextProcessAppStateRequest
+Check passed
+
+[Action] LReplicaNextProcessHeartbeat
+Check passed
+
+[Action] LReplicaNextSpontaneousMaybeEnterNewViewAndSend1a
+Check passed
+
+[Action] LReplicaNextSpontaneousMaybeEnterPhase2
+Check passed
+
+[Action] LReplicaNextReadClockMaybeNominateValueAndSend2a
+Check passed
+
+[Action] LReplicaNextSpontaneousMaybeMakeDecision
+Check passed
+
+[Action] LReplicaNextSpontaneousMaybeExecute
+Check passed
+
+[Action] LReplicaNextReadClockMaybeSendHeartbeat
+Check passed
+
+[Action] LReplicaNextReadClockCheckForViewTimeout
+Check passed
+
+[Action] LReplicaNextReadClockCheckForQuorumOfViewSuspicions
+Check passed
+**********************************************************************/
+
 include ""
 
 

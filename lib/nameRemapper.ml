@@ -1,62 +1,45 @@
+open Yojson.Basic.Util
+
+
 module AST = Syntax.AST(TranslatorMetadata.TranslationMetaData)
 module TCommon = TranslatorCommon.TranslatorCommon
 
+module NameRemapper = struct
 
-class name_remapper = 
-object (self)
+  let config : (string, string) Hashtbl.t = Hashtbl.create 100
 
-  val config = [
-    ("seq<RslPacket>", (AST.Type.TpIdSeg {id = "OutboundPackets"; gen_inst = []}));
-    ("NodeIdentity", (AST.Type.TpIdSeg {id = "EndPoint"; gen_inst = []}));
-    ("UpperBoundedAddition", (AST.Type.TpIdSeg {id = "UpperBoundedAdditionImpl"; gen_inst = []}));
-    ("LBroadcastToEveryone", (AST.Type.TpIdSeg {id = "BuildBroadcastToEveryone"; gen_inst = []}));
-    ("KeyPlus", (AST.Type.TpIdSeg {id = "KeyPlus"; gen_inst = []}));
-    ("KeyRange", (AST.Type.TpIdSeg {id = "KeyRange"; gen_inst = []}));
-    ("KeyPlusLt", (AST.Type.TpIdSeg {id = "KeyPlusLt"; gen_inst = []}));
-    ("KeyPlusLe", (AST.Type.TpIdSeg {id = "KeyPlusLe"; gen_inst = []}));
-    ("Key", (AST.Type.TpIdSeg {id = "Key"; gen_inst = []}));
-    ("Hashtable", (AST.Type.TpIdSeg {id = "Hashtable"; gen_inst = []}));
-    ("OptionalValue", (AST.Type.TpIdSeg {id = "OptionalValue"; gen_inst = []}));
-    ("Option", (AST.Type.TpIdSeg {id = "Option"; gen_inst = []}));
-    ("AppRequest", (AST.Type.TpIdSeg {id = "AppRequest"; gen_inst = []}));
-  ]
+  let build (config_path : string) = 
+    let json = Yojson.Basic.from_file config_path in
+    json
+    |> to_assoc  
+    |> List.iter (fun (key, value) ->
+      Hashtbl.add config key (to_string value)
+    )
 
-  method is_tp_in_config (x : string) = 
-    let rec aux lst = 
-      match lst with 
-      | [] -> false
-      | h :: rest -> let k, _ = h in (k = x) || (aux rest) 
-    in
-    aux config
+  let is_tp_in_config (x : string) = 
+    Hashtbl.mem config x
 
-  method get_from_config (x : string) = 
-    let rec aux lst = 
-      match lst with 
-      | [] -> assert false
-      | h :: rest -> let k, v = h in
-        match k = x with 
-        | true -> v
-        | false -> aux rest
-    in
-    aux config
+  let get_from_config (x : string) = 
+    let v = Hashtbl.find config x in
+    AST.Type.TpIdSeg {id = v; gen_inst = []}
 
-  method is_id_basic_type (id : string) = 
+  let is_id_basic_type (id : string) = 
     List.exists (fun x -> x = id)
     [
       "seq"; "map"; "set"; "int"; "bool"; "nat"
     ]
 
-  method id_remap (x : string) = 
+  let id_remap (x : string) = 
     if TCommon.starts_with x "Rsl" then
       TCommon.replace_prefix x "Rsl" "C"
-    else if self#is_id_basic_type x then
+    else if is_id_basic_type x then
       x
     else if not (TCommon.starts_with x "Leq") && x.[0] = 'L' then
       "C" ^ (String.sub x 1 (String.length x - 1))
     else
     "C" ^ x
 
-  method module_id_remap (x : string) = 
+  let module_id_remap (x : string) = 
     "Impl_" ^ x
 
 end

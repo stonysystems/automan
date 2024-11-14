@@ -1,3 +1,33 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] LiveRSL__Executor_i
+
+[Action] LExecutorInit
+Check passed
+
+[Action] LExecutorGetDecision
+Check passed
+
+[Action] UpdateNewCache
+Check passed
+
+[Action] LExecutorExecute
+Check passed
+
+[Action] LExecutorProcessAppStateSupply
+Check passed
+
+[Action] LExecutorProcessAppStateRequest
+Check passed
+
+[Action] LExecutorProcessStartingPhase2
+Check passed
+
+[Action] LExecutorProcessRequest
+Check passed
+**********************************************************************/
+
 include ""
 
 

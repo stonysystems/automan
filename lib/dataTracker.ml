@@ -42,6 +42,10 @@ module Convert =
 
 module DataTracker = struct 
 
+  exception HarmonyCheckFailed
+  exception SaturationCheckFailed
+  exception OutputVarUsedButNotAssigned
+
   let print_log = false
   let print_tracker_built = false
 
@@ -255,15 +259,15 @@ module DataTracker = struct
               match assigned_v with 
               | None -> h.assigned_v 
               | Some v -> (
-                assert_helper 
-                (
-                  (* This node shouldn't have been assigned before. *)
-                  (TCommon.is_expr_blank h.assigned_v) ||
-                  (* Otherwise the value to be assigned is null, meaning erase. *)
-                  (TCommon.is_expr_blank v)
-                )
-                "data tracker: harmony check failed";
-                v
+                if not (
+                    (* This node shouldn't have been assigned before. *)
+                    (TCommon.is_expr_blank h.assigned_v) ||
+                    (* Otherwise the value to be assigned is null, meaning erase. *)
+                    (TCommon.is_expr_blank v)
+                  ) then
+                  raise HarmonyCheckFailed
+                else
+                  v
               )
             ) ;
             t = (
@@ -293,7 +297,7 @@ module DataTracker = struct
       let (h, rest) = NonEmptyList.uncons exprs in
       let member_id = TCommon.str_of_expr h in
 
-      (* TCommon.debug_print ("here " ^ member_id) ; *)
+      (* TCommon.debug_print_expr k ; *)
 
       match rest with 
       | [] -> ( 
@@ -306,16 +310,14 @@ module DataTracker = struct
       | _ -> (
         let sub_tracker = query_sub_tracker_v t member_id in
         
-        assert_helper 
-          (* Unassigned before *)
-          (TCommon.is_expr_blank sub_tracker.assigned_v) 
-          "data tracker: harmony check failed";
-        
-        (* Here *)
-        let sub_t' = 
-          aux (NonEmptyList.coerce rest) sub_tracker.t
-        in
-        assign_sub_t t member_id None (Some sub_t')
+        if not (TCommon.is_expr_blank sub_tracker.assigned_v) then
+          raise HarmonyCheckFailed
+        else
+          (* Here *)
+          let sub_t' = 
+            aux (NonEmptyList.coerce rest) sub_tracker.t
+          in
+          assign_sub_t t member_id None (Some sub_t')
       )
     in
     let exprs = TCommon.dot_expr_to_expr_lst k in
@@ -508,7 +510,10 @@ module DataTracker = struct
         ("[Tracker] " ^ "query value for " ^ (TCommon.str_of_expr member)) ;
 
     let v = aux tracker member in
-    v
+    if TCommon.is_expr_blank v then
+      raise OutputVarUsedButNotAssigned
+    else
+      v
 
   let rec construct (v : tracker_v) : AST.Prog.expr_t = 
     match TCommon.is_expr_n_blank v.assigned_v with
@@ -591,8 +596,11 @@ module DataTracker = struct
           | [] -> (
             match is_it_an_obligation t id with
             | true -> 
-              Some 
-                (query_value t (TCommon.expr_of_str id))
+              let res = query_value t (TCommon.expr_of_str id) in
+              (* if TCommon.is_expr_blank res then
+                raise OutputVarUsedButNotAssigned
+              else *)
+              Some res
             | false -> None
           )
           | _ -> None
@@ -863,7 +871,7 @@ module DataTracker = struct
       (k : AST.Prog.expr_t)
       (v : AST.Prog.expr_t) : t = 
       let v' = Obligation.Prog.solve_expr t v in
-      (* Note that here we might do not need a Obligation Solver at all *)
+
       (* TCommon.debug_print 
         ("[Tracker] assign " ^ 
         (TCommon.str_of_expr k) ^ " <- " ^ (TCommon.str_of_expr v)) ; *)

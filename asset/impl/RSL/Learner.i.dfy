@@ -1,3 +1,21 @@
+/**********************************************************************
+AUTOMAN LOG
+
+[Module] LiveRSL__Learner_i
+
+[Action] LLearnerInit
+Check passed
+
+[Action] LLearnerProcess2b
+Check passed
+
+[Action] LLearnerForgetDecision
+Check passed
+
+[Action] LLearnerForgetOperationsBefore
+Check passed
+**********************************************************************/
+
 include ""
 
 

@@ -1,12 +1,9 @@
 open Internal
 
-
 module AST = Syntax.AST(TranslatorMetadata.TranslationMetaData)
 module TCommon = TranslatorCommon.TranslatorCommon
 
 module Refinement  = struct
-  let remapper = new NameRemapper.name_remapper
-
   let s_id = "s"
   let s = TCommon.expr_of_str s_id
 
