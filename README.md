@@ -12,7 +12,7 @@ opam install . --deps-only
 dune build
 ```
 
-We use Menhir to implement the parser for the Dafny language. However, due to the limitations of LL(1) parsing, it cannot fully support all features of Dafny, which results in the warning:
+We use Menhir to parse Dafny. Due to the limitations of LL(1) parsing, we do not support all Dafny language constructs. In particular, generic instantiations in Dafny's expression language will lead to a parse failure. When building the `AutoMan` parser, expect the following warnings:
 ```
 Warning: 31 states have shift/reduce conflicts.
 Warning: 61 shift/reduce conflicts were arbitrarily resolved.
@@ -34,7 +34,7 @@ The generated codes can be found in `./asset/impl`.
 
 # Usage
 
-Here, we introduce how to write specifications in Dafny 3.X that can be translated by AutoMan.
+Here, we explain how to write specifications in Dafny 3.X that can be translated by AutoMan.
 
 ## Name Remapping
 
@@ -131,7 +131,7 @@ Next, we will introduce the writing guidelines that users need to follow and the
 
 ## Annotation for input and output
 
-The signature of a specification will be split into inputs and outputs in the implementation. 
+The formal parameters of a specificational predicate will be split into inputs and outputs in the implementation. 
 AutoMan requires users to provide annotations for this.
 
 The annotation `AcceptorTruncateLog(+, -, +);` 
@@ -145,29 +145,34 @@ predicate LAcceptorTruncateLog(s:LAcceptor, s':LAcceptor, opn:OperationNumber)
 function method CAcceptorTruncateLog(s: CAcceptor, opn: COperationNumber) : CAcceptor
 ```
 .
+If more than one output-mode parameters are indicated, the generated implementation function will return a tuple.
 
-## Assignment of a member
+## Functionalization Failure
+When `AutoMan` encounters a predicate `p1` marked for functionalization (i.e., one with corresponding annotation marking one or more parameters as output moded) that it cannot translate, it will generate a signature for the implementation function with an empty body.
+`AutoMan` assumes that the user's annotations are ground truth, so if a call to `p1` occurs in another predicate `p2` marked for functionalization, `AutoMan` will ensure `p2` uses of `p1` complies with the relevant annotations, regardless of the errors encountered when translating `p1`.
 
-The assignment of a member can be done by 
-1. A member appears alone on one side of the `==` expression.
+## Assignment
+
+`AutoMan` generates an assignment of an output-moded variable (or one of its members) when it encounters:
+1. a (member-qualified) variable appearing alone on one side of an `==` expression;
 ```
 && a.max_bal == Ballot(0,0)
 ->
 var t2 := CBallot(0, 0); 	
 CAcceptor(..., t2, ...)	
 ```
-2. Calls another action to assign a value to the member.
+2. a call to another action's predicate; and
 ```
 && ElectionStateReflectReceivedRequest(s.election_state, s'.election_state, val)
 ->
 var t1 := CElectionStateReflectReceivedRequest(s.election_state, val); 
 ```
-3. Through universal quantifiers for collections, which is explained below.
+3. universal quantifications for collections, which is explained below.
 
 ## Saturation check
 
 Based on the mode annotations provided by users, AutoMan checks whether each parameter labeled as output is fully assigned.
-AutoMan will construct a symbol table to recursively obtain the structure of the DataType and analyze whether each member is fully assigned.
+AutoMan will construct a symbol table to recursively obtain the structure of the datatype and analyze whether each member is fully assigned.
 
 In this example, the member assignment for `constants` in `a:LAcceptor` is incomplete:
 
@@ -189,9 +194,9 @@ Saturation check failed: Output-mode variables are not fully assigned
 ```
 .
 
-## Then-branch and else-branch must assign the same set of variables
+## Branches of a conditional expressions must assign the same set of variables
 
-AutoMan requires that the branches of an if-else expression check the values of the same set of members.
+AutoMan requires that the branches of an if-else expression in an action predicate determine the values of the same set (member-qualified) output-mode variables.
 
 In this example
 ```
@@ -211,6 +216,7 @@ Then-branch and else-branch do not assign the same set of variables:
 	if 0 <= sender_index && sender_index < |s.last_checkpoi ... ... 
 ```
 .
+Note that this example demonstrates that the `AutoMan` considers the set of determined variables *hierarchically,* i.e., determining the value of `s` is equivalent to determining the values of all its members.
 
 ## Harmony check
 
@@ -221,7 +227,7 @@ In this example
 && s'.constants == s.constants
 && s'.constants == 10
 ```
-the assignment for sub-member `constants` is conducted twice, which will trigger a check failure:
+(where `s'` is an output-mode variable and `s` is input-mode variable), the value of `s'.constants` is determined twice, which will trigger a check failure:
 ```
 [Action] LAcceptorProcess2a
 Harmony check failed: 
@@ -232,19 +238,19 @@ Harmony check failed:
 
 ## Obligation check 
 
-AutoMan requires that a value marked as output must assign values to other variables only after it has been assigned itself.
+AutoMan requires that an output-mode variable that occurs as part of the definition of another output-mode variable is *only* allowed when it value has been previously determined.
 
-In the current checks, AutoMan verifies whether a member has been assigned based on the order of code execution.
+Currently, AutoMan verifies whether a output-mode variable has been assigned using a simple single-pass (specifically, left-to-right) analysis.
 
 In this example:
 ```
 if opn <= s.log_truncation_point then
     s' == s
 else
-    // && RemoveVotesBeforeLogTruncationPoint(s.votes, s'.votes, opn)
     && s' == s.(log_truncation_point := opn, votes := s'.votes)
+    && RemoveVotesBeforeLogTruncationPoint(s.votes, s'.votes, opn)
 ```
-`s'.votes` is used in the data update expression without being assigned, which will trigger a check failure:
+`s'.votes` is used in the data update expression before being assigned, which will trigger a check failure:
 
 ```
 [Action] LAcceptorTruncateLog
@@ -273,6 +279,6 @@ t1
 
 The details about the templates and the motivation behind it can be found at
 `./doc/universal-quantification-templates.md`.
-Failure to follow the templates may result in undetected assignments to collections.
+Universal quantifications that do not follow these templates will lead to failure to functionalize the containing predicate.
 
 
