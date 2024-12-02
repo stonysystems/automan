@@ -26,7 +26,7 @@ kv_files=(
   Host.i.dfy
 )
 
-bad_examples_files=(
+Ng_examples_files=(
   Acceptor.i.dfy 
 )
 
@@ -49,14 +49,14 @@ elif [ "$1" == "kv" ]; then
     dune exe bin/main.exe ./asset/spec/KV/$file asset/annotations/SHT.automan asset/remapping.json > \
       ./asset/impl/KV/$file
   done
-elif [ "$1" == "bad" ]; then
-  for file in "${bad_examples_files[@]}"
+elif [ "$1" == "ng" ]; then
+  for file in "${Ng_examples_files[@]}"
   do
-    echo "[+] BadExamples/spec -> BadExamples/impl | "$file
-    dune exe bin/main.exe ./asset/spec/BadExamples/$file asset/annotations/RSL.automan asset/remapping.json > \
-      ./asset/impl/BadExamples/$file
+    echo "[+] NgExamples/spec -> NgExamples/impl | "$file
+    dune exe bin/main.exe ./asset/spec/NgExamples/$file asset/annotations/RSL.automan asset/remapping.json > \
+      ./asset/impl/NgExamples/$file
   done
 else
-  echo "Usage: $0 [rsl | kv | bad]"
+  echo "Usage: $0 [rsl | kv | ng]"
 fi
 

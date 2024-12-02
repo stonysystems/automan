@@ -24,13 +24,19 @@ We provide two sets of specifications, both adapted from
 [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet):
 1. Multi-Paxos (rsl), available at  `./asset/spec/RSL`.
 2. Key-Value Store (kv), available at `./asset/spec/KV`.
-3. BadExamples (bad), available at `./asset/spec/BadExamples`, demonstrates cases that would fail AutoMan's checks.
+3. Negative Examples (ng), available at `./asset/spec/NgExamples`, demonstrates cases that would fail AutoMan's checks.
 
 The necessary annotations (explained below) are available at `./asset/annotations`.
 
-Run `bash run.sh [rsl | kv | bad]` to apply the translation.
+Run `bash run.sh [rsl | kv | ng]` to apply the translation.
 
 The generated codes can be found in `./asset/impl`.
+
+The command to translate a single file is as follows:
+`dune exe bin/main.exe [input Dafny file] [annotation file] [name remapping file] > [output file]`.
+
+This command specifies the input Dafny file, annotation file, and name remapping file, directing the output to the specified file.
+The method for writing the corresponding files is introduced below.
 
 # Usage
 
@@ -80,15 +86,15 @@ We have provided an example at `./asset/remapping.json`.
 
 ## Functionalization
 
-The core translation performed by AutoMan is to convert a specification written in Dafny TLA into a functional system implementation, also in the Dafny language.
-AutoMan supports commonly used TLA syntax:
-1. Let-Binding.
-2. Sub-statements connected by the `&&` operator.
-3. `if-else` statement.
-4. Call other actions.
-5. Member check using the `==` symbol.
-6. `forall` quantifier used to describe `maps` and `sequences`.
-7. Data update, collection member access, helper function calls, operators, etc., applied within the core expressions mentioned above.
+AutoMan's core translation process involves converting specifications written in Dafny TLA into functional system implementations, also expressed in the Dafny language. AutoMan supports commonly used TLA syntax, including:
+
+1. **Let-Binding**: Variable assignments within expressions.
+2. **Sub-expressions connected by the `&&` operator**: Logical conjunctions within expressions.
+3. **`if-else` expressions**: Conditional logic for branching.
+4. **Calls to other actions**: Invoking other defined actions within the specification.
+5. **Membership checks using the `==` symbol**: Evaluating equality or membership.
+6. **The `forall` quantifier**: Used to define properties over `maps` and `sequences`.
+7. Operations such as collection member access, helper function calls, and the application of operators within the aforementioned core expressions.
 
 Here's an example of translation:
 ```
@@ -125,7 +131,7 @@ function method CAcceptorTruncateLog(s: CAcceptor, opn: COperationNumber) : CAcc
 To define the scope of translation and ensure accurate translation, AutoMan imposes certain requirements on the specification's writing, which must pass AutoMan's checks before translation can proceed.
 
 For specifications that do not pass the checks, AutoMan will print the errors as comments in the generated code.
-Please refer to `./asset/BadExamples` to find specific examples.
+Please refer to `./asset/NgExamples` to find specific examples.
 
 Next, we will introduce the writing guidelines that users need to follow and the corresponding checks implemented by AutoMan.
 
