@@ -386,7 +386,7 @@ module PrettyPrinter (M : MetaData) = struct
         Printf.sprintf "%s%s"
         (
           match op with 
-          | Neg -> "[I don't know what is this]"
+          | Neg -> "-"
           | Not -> "!"
         )
         (print_expr_in_one_line e)
