@@ -89,7 +89,7 @@ module Impl_SHT__Delegations_i
 		requires HashtableIsValid(u)
 		ensures var lr := BulkUpdateDomain(AbstractifyHashtableToHashtable(h), AbstractifyKeyRangeToKeyRange(kr), AbstractifyHashtableToHashtable(u)); var cr := CBulkUpdateDomain(h, kr, u); (forall i :: i in cr ==> KeyIsValid(i)) && (AbstractifySet(cr, AbstractifyKeyToKey)) == (lr)
 	{
-		[Printer for . hasn't been implemented.]
+		(set k | k in Cmapdomain(h) + Cmapdomain(u) && (CKeyRangeContains(kr, KeyPlus(k)) ==> k in u))
 	}
 
 	function method CBulkUpdateHashtable(h: Hashtable, kr: KeyRange, u: Hashtable) : Hashtable 

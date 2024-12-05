@@ -298,7 +298,7 @@ module Impl_SHT__SingleDelivery_i
 		requires EndPointIsValid(src)
 		ensures var lr := UnAckedMessages(AbstractifyCSingleDeliveryAcctToSingleDeliveryAcct(s), AbstractifyEndPointToNodeIdentity(src)); var cr := CUnAckedMessages(s, src); (forall i :: i in cr ==> CPacketIsValid(i)) && (AbstractifySet(cr, AbstractifyCPacketToPacket)) == (lr)
 	{
-		[Printer for . hasn't been implemented.]
+		(set dst, i | dst in s.sendState && 0 <= i && i < |s.sendState[dst].unAcked| && s.sendState[dst].unAcked[i].CSingleMessage? :: var sm := s.sendState[dst].unAcked[i]; CPacket(sm.dst, src, sm))
 	}
 
 	function method CReceiveSingleMessage(s: CSingleDeliveryAcct, pkt: CPacket) : (CSingleDeliveryAcct, CPacket, set<CPacket>) 

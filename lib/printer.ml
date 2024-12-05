@@ -262,7 +262,7 @@ module PrettyPrinter (M : MetaData) = struct
         let x_lst' = List.map (
           fun h ->
             let (e1, e2) = h in
-            ((print_expr_in_one_line e1) ^ ": " ^ (print_expr_in_one_line e2))
+            ((print_expr_in_one_line e1) ^ " := " ^ (print_expr_in_one_line e2))
         ) x_lst in
         Printf.sprintf "map[%s]" (String.concat ", " x_lst')
       )
@@ -400,6 +400,16 @@ module PrettyPrinter (M : MetaData) = struct
                 cases
             in
             String.concat "" strs
+          )
+      | SetComp set_comp ->
+        Printf.sprintf "(%s %s%s)"
+          "set"
+          (print_qdom set_comp.qdom)
+          (
+            match set_comp.body with 
+            | None -> ""
+            | Some body -> 
+              Printf.sprintf " :: %s" (print_expr_in_one_line body)
           )
       | _ -> holder "."
 

@@ -618,18 +618,22 @@ module Checker = struct
               We need to apply the old tracker here *)
           (* let expr' = Tracker.Obligation.Prog.solve_expr tracker expr' in *)
           let req_cls = 
-            TranslatorAST.Prog.Let {
-              ghost = l.ghost ;
-              pats = NonEmptyList.map 
-                        Converter.Prog.convert_pattern l.pats ; 
-              defs = NonEmptyList.map 
-                        Converter.Prog.convert_expr l.defs ;
-              body = TCommon.expr_lst_to_and req_cls
-            } in
-
-          (expr', tracker', qtf_booker, ok, logger, [req_cls])
+            (
+              match List.length req_cls with 
+              | 0 -> []
+              | _ ->
+                [TranslatorAST.Prog.Let {
+                  ghost = l.ghost ;
+                  pats = NonEmptyList.map 
+                            Converter.Prog.convert_pattern l.pats ; 
+                  defs = NonEmptyList.map 
+                            Converter.Prog.convert_expr l.defs ;
+                  body = TCommon.expr_lst_to_and req_cls
+                }]
+            ) in
+          (expr', tracker', qtf_booker, ok, logger, req_cls)
         ) 
-      | Binary (meta, bop, e1, e2) ->        
+      | Binary (meta, bop, e1, e2) -> 
         (
           match meta with 
           | None -> 
@@ -803,25 +807,29 @@ module Checker = struct
             (
               let t = TCommon.expr_lst_to_and then_rcls in
               let e = TCommon.expr_lst_to_and else_rcls in
-              let aux e = 
+
+              match (TCommon.is_expr_blank t) && (TCommon.is_expr_blank e) with
+              | true -> []
+              | false -> 
+              let aux x = 
                 (
-                  match TCommon.is_expr_blank e with
+                  match TCommon.is_expr_blank x with
                   | true -> TCommon.expr_of_str "true"
-                  | false -> e
+                  | false -> x
                 ) in
               match is_obligation_occurred e_cond with 
               | true -> assert false 
               | false ->
                 let e_cond' = Converter.Prog.convert_expr e_cond in
-                TranslatorAST.Prog.If (
+                [TranslatorAST.Prog.If (
                   None, 
                   e_cond', 
                   aux t,
                   aux e
-                )
+                )]
             ) in
           
-          (expr', tracker', qtf_booker, true, [], [req_cls])
+          (expr', tracker', qtf_booker, true, [], req_cls)
         ) 
       
       (* TODO: requirements clause for Quantifier *)

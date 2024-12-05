@@ -92,7 +92,7 @@ module Impl_LiveRSL__Learner_i
 									var tup' := 
 										CearnerTuple({packet.src}, m.val_2b); 									
 									var t1 := 
-										s.(max_ballot_seen := m.bal_2b, unexecuted_learner_state := map[opn: tup']); 									
+										s.(max_ballot_seen := m.bal_2b, unexecuted_learner_state := map[opn := tup']); 									
 									t1; 								
 								t1 
 							else 

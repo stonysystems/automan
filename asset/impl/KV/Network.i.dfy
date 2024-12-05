@@ -100,7 +100,7 @@ module Impl_SHT__Network_i
 		requires EndPointIsValid(dst)
 		ensures var lr := PacketsTo(AbstractifySet(ps, AbstractifyCPacketToPacket), AbstractifyEndPointToNodeIdentity(dst)); var cr := CPacketsTo(ps, dst); (forall i :: i in cr ==> CPacketIsValid(i)) && (AbstractifySet(cr, AbstractifyCPacketToPacket)) == (lr)
 	{
-		[Printer for . hasn't been implemented.]
+		(set p | p in ps && p.dst == dst)
 	}
 
 	function method CNetwork_Receive(n: CNetwork, dst: EndPoint) : set<CPacket> 
