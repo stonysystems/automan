@@ -30,6 +30,10 @@ Ng_examples_files=(
   Acceptor.i.dfy 
 )
 
+Add_examples_files=(
+  Acceptor.i.dfy 
+)
+
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <param>"
   exit 1
@@ -56,7 +60,14 @@ elif [ "$1" == "ng" ]; then
     dune exe bin/main.exe ./asset/spec/NgExamples/$file asset/annotations/RSL.automan asset/remapping.json > \
       ./asset/impl/NgExamples/$file
   done
+elif [ "$1" == "add" ]; then
+  for file in "${Add_examples_files[@]}"
+  do
+    echo "[+] AddExamples/spec -> AddExamples/impl | "$file
+    dune exe bin/main.exe ./asset/spec/AddExamples/$file asset/annotations/RSL.automan asset/remapping.json > \
+      ./asset/impl/AddExamples/$file
+  done
 else
-  echo "Usage: $0 [rsl | kv | ng]"
+  echo "Usage: $0 [rsl | kv | ng | add]"
 fi
 
