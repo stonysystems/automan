@@ -2087,15 +2087,27 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
            , p_id, tp_ps, ps'
            , specs', p_body ))
     in
-    let fallback_result() =
-      generate_result Definitions.Predicate (Convert.expr body)
+    let fallback_result p_ann =
+      let body' = Convert.expr body in
+      match p_ann with
+      | None
+      | Some Definitions.Predicate ->
+        generate_result Definitions.Predicate body'
+      | Some (Definitions.Function {make_stub = _; vars_in = vars_in; vars_out = vars_out}) ->
+        generate_result
+          Definitions.(
+            Function
+              { make_stub = true
+              ; vars_in = vars_in
+              ; vars_out = vars_out })
+          body'
     in
 
     begin
       match p_ann' with
       | None
       | Some Definitions.Predicate ->
-        return (Some (fallback_result ()))
+        return (Some (fallback_result p_ann'))
       | Some
           (Definitions.Function
              { make_stub = _      (* TODO: This field has no semantic meaning when
@@ -2118,7 +2130,7 @@ let rec mode_topdecl (d: AnnotationPass.TopDecl.t')
           ~ok:(fun res -> return (Some res))
           ~error:begin fun err ->
             let< () = log_error (report_offending_predicate p_id err) in
-            return (Some (fallback_result ())) (* HERE *)
+            return (Some (fallback_result p_ann')) (* HERE *)
           end
     end
   | MethLemDecl methlem -> begin
