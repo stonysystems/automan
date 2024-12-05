@@ -386,18 +386,14 @@ module Impl_LiveRSL__Proposer_i
 		(t1.1, t1.0)
 	}
 
-	function method CProposerNominateOldValueAndSend2a(s: CProposer, s': CProposer, log_truncation_point: COperationNumber, broadcast_sent_packets: OutboundPackets) : bool 
+	function method CProposerNominateOldValueAndSend2a(s: CProposer, log_truncation_point: COperationNumber) : (CProposer, OutboundPackets) 
 		requires CProposerIsValid(s)
-		requires CProposerIsValid(s')
 		requires COperationNumberIsValid(log_truncation_point)
-		requires OutboundPacketsIsValid(broadcast_sent_packets)
 		requires CProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose)
 		requires !CAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose)
-		ensures var lr := LProposerNominateOldValueAndSend2a(AbstractifyCProposerToLProposer(s), AbstractifyCProposerToLProposer(s'), AbstractifyCOperationNumberToOperationNumber(log_truncation_point), AbstractifyOutboundCPacketsToSeqOfRslPackets(broadcast_sent_packets)); var cr := CProposerNominateOldValueAndSend2a(s, s', log_truncation_point, broadcast_sent_packets); (cr) == (lr)
+		ensures var (s', broadcast_sent_packets) := CProposerNominateOldValueAndSend2a(s, log_truncation_point); CProposerIsValid(s') && OutboundPacketsIsValid(broadcast_sent_packets) && LProposerNominateOldValueAndSend2a(AbstractifyCProposerToLProposer(s), AbstractifyCProposerToLProposer(s'), AbstractifyCOperationNumberToOperationNumber(log_truncation_point), AbstractifyOutboundCPacketsToSeqOfRslPackets(broadcast_sent_packets))
 	{
-		var opn := 
-			s.next_operation_number_to_propose; 		
-		(exists v :: CValIsHighestNumberedProposal(v, s.received_1b_packets, opn) && s' == s.(next_operation_number_to_propose := s.next_operation_number_to_propose + 1) && BuildBroadcastToEveryone(s.constants.all.config, s.constants.my_index, CMessage_2a(s.max_ballot_i_sent_1a, opn, v), broadcast_sent_packets))
+		
 	}
 
 	function method CProposerMaybeNominateValueAndSend2a(s: CProposer, clock: int, log_truncation_point: int) : (CProposer, OutboundPackets) 
