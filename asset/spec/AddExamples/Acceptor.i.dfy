@@ -48,6 +48,7 @@ module LiveRSL__Acceptor_i {
     && |a.last_checkpointed_operation| == |c.all.config.replica_ids|
     && (forall idx :: 0 <= idx < |a.last_checkpointed_operation| ==> a.last_checkpointed_operation[idx] == 0)
     && a.log_truncation_point == 0
+    && |c.all.config.replica_ids| == a.max_bal.seqno + x /* NEW */
   }
   
   predicate LAcceptorProcessHeartbeat(s:LAcceptor, s':LAcceptor, inp:RslPacket)
@@ -62,10 +63,28 @@ module LiveRSL__Acceptor_i {
         && s'.votes == s.votes
         && s'.log_truncation_point == s.log_truncation_point
         && s.max_bal == 1 /* NEW */
+        && s'.log_truncation_point + 10 == 12 /* NEW */
       else
         s' == s
         && s.max_bal == 2 /* NEW */
     else
       s' == s
+  }
+
+  // NEW
+  // LAcceptorTruncateLogHelper(-, +, +, +);
+  predicate LAcceptorTruncateLogHelper(s': LAcceptor, s: LAcceptor, opn: OperationNumber, new_votes: Votes)
+  {
+    s' == s.(log_truncation_point := opn, votes := new_votes)
+  }
+
+  // LAcceptorTruncateLog(+, -, +);
+  predicate LAcceptorTruncateLog(s:LAcceptor, s':LAcceptor, opn:OperationNumber)
+  {
+    if opn <= s.log_truncation_point then
+      s' == s
+    else
+      && RemoveVotesBeforeLogTruncationPoint(s.votes, s'.votes, opn)
+      && LAcceptorTruncateLogHelper(s', s, opn, s'.votes) // NEW
   }
 }

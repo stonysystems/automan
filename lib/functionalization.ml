@@ -79,6 +79,10 @@ module Functionalization = struct
                   arglist_functionalize.out_vars in
               let in_exprs = 
                 aux arglist.positional ou_exprs in 
+              let in_exprs = 
+                List.map
+                (fun x -> Tracker.Obligation.Prog.solve_expr tracker x)
+                 in_exprs in
               let cnter = cnter + 1 in
               let var_id = local_var cnter in
               let func_call = 
