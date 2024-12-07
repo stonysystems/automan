@@ -517,6 +517,20 @@ module Translator = struct
         t_fmls_input
         metadata
         = 
+      let original_specs_ensures = 
+        List.filter 
+          (fun x -> match x with 
+            | AST.TopDecl.Ensures _ -> true 
+            | _  -> false ) original_specs in
+      let original_specs_pre = 
+        List.filter 
+          (fun x -> match x with 
+            | AST.TopDecl.Ensures _ -> false 
+            | _  -> true ) original_specs in
+      let ensures_exprs = List.map 
+        (fun x -> match x with | AST.TopDecl.Ensures e -> e | _ -> assert false)
+        original_specs_ensures in
+      let ensure_expr = TCommon.expr_lst_to_and ensures_exprs in
       (
         let valids = 
           Refinement.generate_checker_4_fmls 
@@ -528,7 +542,7 @@ module Translator = struct
           fun x -> AST.TopDecl.Requires x
         ) valids
       ) @
-      (List.map t_function_spec original_specs) @ (
+      (List.map t_function_spec original_specs_pre) @ (
         let t_args = get_args_from_fmls t_fmls_input in
         let modes = (
           match metadata with 
@@ -659,7 +673,8 @@ module Translator = struct
             defs = NonEmptyList.coerce [self_call];
             body = TCommon.expr_lst_to_and [
               TCommon.expr_lst_to_and rtn_valids;
-              get_self_call_from_func_id_and_args id args_for_l_call
+              get_self_call_from_func_id_and_args id args_for_l_call;
+              ensure_expr
             ]
           } in
           [AST.TopDecl.Ensures binding]

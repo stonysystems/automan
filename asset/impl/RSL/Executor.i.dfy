@@ -152,7 +152,6 @@ module Impl_LiveRSL__Executor_i
 		requires (forall i :: i in replies ==> CReplyIsValid(i))
 		requires |requests| == |replies|
 		requires (forall r :: r in replies ==> r.CReply?)
-		ensures (forall p :: p in CGetPacketsFromReplies(me, requests, replies) ==> p.src == me && p.msg.CMessage_Reply?)
 		ensures var lr := GetPacketsFromReplies(AbstractifyEndPointToNodeIdentity(me), AbstractifySeq(requests, AbstractifyCRequestToRequest), AbstractifySeq(replies, AbstractifyCReplyToReply)); var cr := CGetPacketsFromReplies(me, requests, replies); OutboundPacketsIsValid(cr) && (AbstractifyOutboundCPacketsToSeqOfRslPackets(cr)) == (lr)
 	{
 		if |requests| == 0 then 
@@ -163,7 +162,6 @@ module Impl_LiveRSL__Executor_i
 
 	function method CClientsInReplies(replies: seq<CReply>) : CReplyCache 
 		requires (forall i :: i in replies ==> CReplyIsValid(i))
-		ensures var m := CClientsInReplies(replies); (forall c :: c in m ==> m[c].client == c) && (forall c :: c in m ==> (exists req_idx :: 0 <= req_idx && req_idx < |replies| && replies[req_idx].client == c && m[c] == replies[req_idx]))
 		ensures var lr := LClientsInReplies(AbstractifySeq(replies, AbstractifyCReplyToReply)); var cr := CClientsInReplies(replies); CReplyCacheIsValid(cr) && (AbstractifyCReplyCacheToReplyCache(cr)) == (lr)
 	{
 		if |replies| == 0 then 

@@ -23,7 +23,6 @@ module Impl_LiveRSL__StateMachine_i
 	function method CHandleRequestBatchHidden(state: CAppState, batch: CRequestBatch) : (seq<CAppState>, seq<CReply>) 
 		requires CAppStateIsValid(state)
 		requires CRequestBatchIsValid(batch)
-		ensures var (states, replies) := CHandleRequestBatchHidden(state, batch); |states| == |batch| + 1 && |replies| == |batch| && (forall i :: 0 <= i && i < |batch| ==> replies[i].CReply?)
 		decreases |batch|
 		ensures var (lr0, lr1) := HandleRequestBatchHidden(AbstractifyCAppStateToAppState(state), AbstractifyCRequestBatchToRequestBatch(batch)); var (cr0, cr1) := CHandleRequestBatchHidden(state, batch); (forall i :: i in cr0 ==> CAppStateIsValid(i)) && (forall i :: i in cr1 ==> CReplyIsValid(i)) && (AbstractifySeq(cr0, AbstractifyCAppStateToAppState), AbstractifySeq(cr1, AbstractifyCReplyToReply)) == (lr0, lr1)
 	{
@@ -40,7 +39,6 @@ module Impl_LiveRSL__StateMachine_i
 	function method CHandleRequestBatch(state: CAppState, batch: CRequestBatch) : (seq<CAppState>, seq<CReply>) 
 		requires CAppStateIsValid(state)
 		requires CRequestBatchIsValid(batch)
-		ensures var (states, replies) := CHandleRequestBatch(state, batch); states[0] == state && |states| == |batch| + 1 && |replies| == |batch| && (forall i :: 0 <= i && i < |batch| ==> replies[i].CReply? && (states[i + 1], replies[i].reply) == CAppHandleRequest(states[i], batch[i].request) && replies[i].client == batch[i].client && replies[i].seqno == batch[i].seqno)
 		ensures var (lr0, lr1) := HandleRequestBatch(AbstractifyCAppStateToAppState(state), AbstractifyCRequestBatchToRequestBatch(batch)); var (cr0, cr1) := CHandleRequestBatch(state, batch); (forall i :: i in cr0 ==> CAppStateIsValid(i)) && (forall i :: i in cr1 ==> CReplyIsValid(i)) && (AbstractifySeq(cr0, AbstractifyCAppStateToAppState), AbstractifySeq(cr1, AbstractifyCReplyToReply)) == (lr0, lr1)
 	{
 		var (states, replies) := 
