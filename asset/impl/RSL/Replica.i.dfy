@@ -384,13 +384,11 @@ module Impl_LiveRSL__Replica_i
 		(t2, t1.1)
 	}
 
-	function method CReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s: CReplica, s': CReplica, sent_packets: OutboundPackets) : bool 
+	function method CReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s: CReplica) : (CReplica, OutboundPackets) 
 		requires CReplicaIsValid(s)
-		requires CReplicaIsValid(s')
-		requires OutboundPacketsIsValid(sent_packets)
-		ensures var lr := LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(AbstractifyCReplicaToLReplica(s), AbstractifyCReplicaToLReplica(s'), AbstractifyOutboundCPacketsToSeqOfRslPackets(sent_packets)); var cr := CReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s, s', sent_packets); (cr) == (lr)
+		ensures var (s', sent_packets) := CReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(s); CReplicaIsValid(s') && OutboundPacketsIsValid(sent_packets) && LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(AbstractifyCReplicaToLReplica(s), AbstractifyCReplicaToLReplica(s'), AbstractifyOutboundCPacketsToSeqOfRslPackets(sent_packets))
 	{
-		(exists opn :: opn in s.acceptor.last_checkpointed_operation && CIsLogTruncationPointValid(opn, s.acceptor.last_checkpointed_operation, s.constants.all.config) && if opn > s.acceptor.log_truncation_point then CAcceptorTruncateLog(s.acceptor, s'.acceptor, opn) && s' == s.(acceptor := s'.acceptor) && sent_packets == [] else s' == s && sent_packets == [])
+		
 	}
 
 	function method CReplicaNextSpontaneousMaybeMakeDecision(s: CReplica) : (CReplica, OutboundPackets) 
