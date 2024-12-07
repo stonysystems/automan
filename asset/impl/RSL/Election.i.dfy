@@ -227,7 +227,7 @@ module Impl_LiveRSL__Election_i
 		ensures var es' := CElectionStateCheckForQuorumOfViewSuspicions(es, clock); CElectionStateIsValid(es') && ElectionStateCheckForQuorumOfViewSuspicions(AbstractifyCElectionStateToElectionState(es), AbstractifyCElectionStateToElectionState(es'), clock)
 	{
 		var t1 := 
-			if (|es.current_view_suspectors| < CMinQuorumSize(es.constants.all.config)) || (!CtUpperBound(es.current_view.seqno, es.constants.all.params.max_integer_val)) then 
+			if (|es.current_view_suspectors| < CMinQuorumSize(es.constants.all.config)) || (!(CtUpperBound(es.current_view.seqno, es.constants.all.params.max_integer_val))) then 
 				var t1 := 
 					es; 				
 				t1 

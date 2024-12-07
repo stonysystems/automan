@@ -70,6 +70,7 @@ module Impl_LiveRSL__Configuration_i
 		requires EndPointIsValid(id)
 		requires CConfigurationIsValid(c)
 		requires id in c.replica_ids
+		ensures var idx := CGetReplicaIndex(id, c); 0 <= idx && idx < |c.replica_ids| && c.replica_ids[idx] == id
 		ensures var lr := GetReplicaIndex(AbstractifyEndPointToNodeIdentity(id), AbstractifyCConfigurationToLConfiguration(c)); var cr := CGetReplicaIndex(id, c); (cr) == (lr)
 	{
 		CFindIndexInSeq(c.replica_ids, id)

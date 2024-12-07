@@ -106,7 +106,7 @@ module Impl_SHT__Delegations_i
 		requires KeyRangeIsValid(kr)
 		ensures var lr := BulkRemoveHashtable(AbstractifyHashtableToHashtable(h), AbstractifyKeyRangeToKeyRange(kr)); var cr := CBulkRemoveHashtable(h, kr); HashtableIsValid(cr) && (AbstractifyHashtableToHashtable(cr)) == (lr)
 	{
-		(map k | k in h && !CKeyRangeContains(kr, KeyPlus(k)) :: h[k])
+		(map k | k in h && !(CKeyRangeContains(kr, KeyPlus(k))) :: h[k])
 	}
 
 	function method CExtractRange(h: Hashtable, kr: KeyRange) : Hashtable 

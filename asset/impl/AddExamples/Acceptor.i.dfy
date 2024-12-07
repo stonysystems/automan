@@ -68,7 +68,8 @@ module Impl_LiveRSL__Acceptor_i
 	function method CAcceptorInit(c: CReplicaConstants) : CAcceptor 
 		requires CReplicaConstantsIsValid(c)
 		requires var x := 1; |c.all.config.replica_ids| >= 0 && |c.all.config.replica_ids| == x
-		ensures var a := CAcceptorInit(c); CAcceptorIsValid(a) && LAcceptorInit(AbstractifyCAcceptorToLAcceptor(a), AbstractifyCReplicaConstantsToLReplicaConstants(c)) && var x := 1; |c.all.config.replica_ids| == a.max_bal.seqno + x
+		ensures var a := CAcceptorInit(c); var x := 1; |c.all.config.replica_ids| == a.max_bal.seqno + x
+		ensures var a := CAcceptorInit(c); CAcceptorIsValid(a) && LAcceptorInit(AbstractifyCAcceptorToLAcceptor(a), AbstractifyCReplicaConstantsToLReplicaConstants(c))
 	{
 		var t1 := 
 			var x := 
@@ -92,7 +93,8 @@ module Impl_LiveRSL__Acceptor_i
 		requires CPacketIsValid(inp)
 		requires inp.msg.CMessage_Heartbeat?
 		requires if inp.src in s.constants.all.config.replica_ids then var sender_index := CGetReplicaIndex(inp.src, s.constants.all.config); if 0 <= sender_index && sender_index < |s.last_checkpointed_operation| && inp.msg.opn_ckpt > s.last_checkpointed_operation[sender_index] then s.max_bal == 1 else s.max_bal == 2 else true
-		ensures var s' := CAcceptorProcessHeartbeat(s, inp); CAcceptorIsValid(s') && LAcceptorProcessHeartbeat(AbstractifyCAcceptorToLAcceptor(s), AbstractifyCAcceptorToLAcceptor(s'), AbstractifyCPacketToRslPacket(inp)) && if inp.src in s.constants.all.config.replica_ids then var sender_index := GetReplicaIndex(inp.src, s.constants.all.config); if 0 <= sender_index && sender_index < |s.last_checkpointed_operation| && inp.msg.opn_ckpt > s.last_checkpointed_operation[sender_index] then s'.log_truncation_point + 10 == 12 else true else true
+		ensures var s' := CAcceptorProcessHeartbeat(s, inp); if inp.src in s.constants.all.config.replica_ids then var sender_index := GetReplicaIndex(inp.src, s.constants.all.config); if 0 <= sender_index && sender_index < |s.last_checkpointed_operation| && inp.msg.opn_ckpt > s.last_checkpointed_operation[sender_index] then s'.log_truncation_point + 10 == 12 else true else true
+		ensures var s' := CAcceptorProcessHeartbeat(s, inp); CAcceptorIsValid(s') && LAcceptorProcessHeartbeat(AbstractifyCAcceptorToLAcceptor(s), AbstractifyCAcceptorToLAcceptor(s'), AbstractifyCPacketToRslPacket(inp))
 	{
 		var t1 := 
 			if inp.src in s.constants.all.config.replica_ids then 
@@ -153,5 +155,15 @@ module Impl_LiveRSL__Acceptor_i
 					CAcceptorTruncateLogHelper(s, opn, t1); 				
 				t2; 		
 		t1
+	}
+
+	function method CGetReplicaIndex(id: EndPoint, c: CConfiguration) : int 
+		requires EndPointIsValid(id)
+		requires CConfigurationIsValid(c)
+		requires id in c.replica_ids
+		ensures var idx := CGetReplicaIndex(id, c); 0 <= idx && idx < |c.replica_ids| && c.replica_ids[idx] == id
+		ensures var lr := GetReplicaIndex(AbstractifyEndPointToNodeIdentity(id), AbstractifyCConfigurationToLConfiguration(c)); var cr := CGetReplicaIndex(id, c); (cr) == (lr)
+	{
+		CFindIndexInSeq(c.replica_ids, id)
 	}
 }

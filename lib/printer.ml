@@ -383,7 +383,7 @@ module PrettyPrinter (M : MetaData) = struct
           )
           (print_expr_in_one_line map_comp.valu)
       | Unary (op, e) ->
-        Printf.sprintf "%s%s"
+        Printf.sprintf "%s(%s)"
         (
           match op with 
           | Neg -> "-"

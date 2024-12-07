@@ -319,7 +319,7 @@ module Impl_SHT__SingleDelivery_i
 						var t1 := 
 							CReceiveRealPacket(s, pkt); 						
 						var t2 := 
-							CMaybeAckPacket(s', pkt); 						
+							CMaybeAckPacket(t1, pkt); 						
 						(t1, t2.0, t2.1) 
 					else 
 						var t1 := 

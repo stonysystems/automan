@@ -1008,6 +1008,8 @@ module Checker = struct
 
               let init_loger = Logger.enter_action [] id in
               let logger = init_loger @ logger in
+              let ens_cls = 
+                List.map (fun x -> TCommon.mark_expr x) ens_cls in
               let specs' = 
                 (List.map Converter.TopDecl.convert_function_spec specs) @ 
                 (List.map (fun x -> TranslatorAST.TopDecl.Requires x) req_cls) @

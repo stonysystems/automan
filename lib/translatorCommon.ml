@@ -279,4 +279,20 @@ module TranslatorCommon = struct
   (x : Moder.Definitions.outvar_lhs_t) : AST.Prog.expr_t = 
   expr_of_str (str_of_outvar_lhs x)
 
+  let mark_expr (x : AST.Prog.expr_t) : AST.Prog.expr_t = 
+    expr_lst_to_and 
+      [(expr_of_str "AUTOMAN_TTT") ; x]
+    
+  let is_expr_marked (x : AST.Prog.expr_t) : bool = 
+    match x with 
+    | AST.Prog.Binary (_, _, e, _) -> 
+      is_expr_eq (expr_of_str "AUTOMAN_TTT") e
+    | _ -> false
+      
+  let unmark_expr (x : AST.Prog.expr_t) : AST.Prog.expr_t = 
+    assert (is_expr_marked x);
+    match x with 
+    | AST.Prog.Binary (_, _, _, e) -> e 
+    | _ -> assert false
+
 end

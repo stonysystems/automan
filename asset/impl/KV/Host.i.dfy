@@ -526,7 +526,7 @@ module Impl_SHT__Host_i
 	{
 		pkt.msg.m.CShard? 
 		&& 
-		if (pkt.msg.m.recipient == s.me) || ((!CValidKeyRange(pkt.msg.m.kr)) || ((CEmptyKeyRange(pkt.msg.m.kr)) || ((pkt.msg.m.recipient !in s.constants.hostIds) || ((!CDelegateForKeyRangeIsHost(s.delegationMap, pkt.msg.m.kr, s.me)) || (|CExtractRange(s.h, pkt.msg.m.kr)| >= Cmax_hashtable_size()))))) then 
+		if (pkt.msg.m.recipient == s.me) || ((!(CValidKeyRange(pkt.msg.m.kr))) || ((CEmptyKeyRange(pkt.msg.m.kr)) || ((pkt.msg.m.recipient !in s.constants.hostIds) || ((!(CDelegateForKeyRangeIsHost(s.delegationMap, pkt.msg.m.kr, s.me))) || (|CExtractRange(s.h, pkt.msg.m.kr)| >= Cmax_hashtable_size()))))) then 
 			s' == s.(receivedPacket := None) 
 			&& 
 			out == {} 
@@ -542,7 +542,7 @@ module Impl_SHT__Host_i
 		requires CDelegateForKeyRangeIsHost(s.delegationMap, pkt.msg.m.kr, s.me)
 		requires pkt.msg.m.recipient != s.me
 		requires pkt.msg.m.recipient in s.constants.hostIds
-		ensures CNextShardReal(s, s', pkt, out, sm, shouldSend) && !(pkt.msg.m.recipient == s.me) || ((!CValidKeyRange(pkt.msg.m.kr)) || ((CEmptyKeyRange(pkt.msg.m.kr)) || ((pkt.msg.m.recipient !in s.constants.hostIds) || ((!CDelegateForKeyRangeIsHost(s.delegationMap, pkt.msg.m.kr, s.me)) || (|CExtractRange(s.h, pkt.msg.m.kr)| >= Cmax_hashtable_size()))))) ==> CNextShard(s, s', out, pkt.msg.m.kr, pkt.msg.m.recipient, sm, shouldSend) ==> CNextShard_Wrapper(s, s', pkt, out)
+		ensures CNextShardReal(s, s', pkt, out, sm, shouldSend) && !((pkt.msg.m.recipient == s.me) || ((!(CValidKeyRange(pkt.msg.m.kr))) || ((CEmptyKeyRange(pkt.msg.m.kr)) || ((pkt.msg.m.recipient !in s.constants.hostIds) || ((!(CDelegateForKeyRangeIsHost(s.delegationMap, pkt.msg.m.kr, s.me))) || (|CExtractRange(s.h, pkt.msg.m.kr)| >= Cmax_hashtable_size())))))) ==> CNextShard(s, s', out, pkt.msg.m.kr, pkt.msg.m.recipient, sm, shouldSend) ==> CNextShard_Wrapper(s, s', pkt, out)
 		ensures CNextShardReal(s, s', pkt, out, sm, shouldSend) ==> CNextShard_Wrapper(s, s', pkt, out)
 		ensures var (s', out, sm, shouldSend) := CNextShardReal(s, pkt); CHostIsValid(s') && (forall i :: i in out ==> CPacketIsValid(i)) && CSingleMessageIsValid(sm) && NextShardReal(AbstractifyCHostToHost(s), AbstractifyCHostToHost(s'), AbstractifyCPacketToPacket(pkt), AbstractifySet(out, AbstractifyCPacketToPacket), AbstractifyCSingleMessageToSingleMessage(sm), shouldSend)
 	{
@@ -553,7 +553,7 @@ module Impl_SHT__Host_i
 				var recipient := 
 					pkt.msg.m.recipient; 				
 				var t1 := 
-					if (pkt.msg.m.recipient == s.me) || ((!CValidKeyRange(pkt.msg.m.kr)) || ((CEmptyKeyRange(pkt.msg.m.kr)) || ((pkt.msg.m.recipient !in s.constants.hostIds) || ((!CDelegateForKeyRangeIsHost(s.delegationMap, pkt.msg.m.kr, s.me)) || (|CExtractRange(s.h, pkt.msg.m.kr)| >= Cmax_hashtable_size()))))) then 
+					if (pkt.msg.m.recipient == s.me) || ((!(CValidKeyRange(pkt.msg.m.kr))) || ((CEmptyKeyRange(pkt.msg.m.kr)) || ((pkt.msg.m.recipient !in s.constants.hostIds) || ((!(CDelegateForKeyRangeIsHost(s.delegationMap, pkt.msg.m.kr, s.me))) || (|CExtractRange(s.h, pkt.msg.m.kr)| >= Cmax_hashtable_size()))))) then 
 						var t1 := 
 							CCInvalidMessage(); 						
 						var t2 := 

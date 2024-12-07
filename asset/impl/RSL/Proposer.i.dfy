@@ -163,7 +163,7 @@ module Impl_LiveRSL__Proposer_i
 		requires CSetOfMessage1b(S)
 		ensures var lr := LAllAcceptorsHadNoProposal(AbstractifySet(S, AbstractifyCPacketToRslPacket), AbstractifyCOperationNumberToOperationNumber(opn)); var cr := CAllAcceptorsHadNoProposal(S, opn); (cr) == (lr)
 	{
-		(forall p :: p in S ==> !opn in p.msg.votes)
+		(forall p :: p in S ==> !(opn in p.msg.votes))
 	}
 
 	function method CExistVotesHasProposalLargeThanOpn(p: CPacket, op: COperationNumber) : bool 
@@ -390,7 +390,7 @@ module Impl_LiveRSL__Proposer_i
 		requires CProposerIsValid(s)
 		requires COperationNumberIsValid(log_truncation_point)
 		requires CProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose)
-		requires !CAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose)
+		requires !(CAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose))
 		ensures var (s', broadcast_sent_packets) := CProposerNominateOldValueAndSend2a(s, log_truncation_point); CProposerIsValid(s') && OutboundPacketsIsValid(broadcast_sent_packets) && LProposerNominateOldValueAndSend2a(AbstractifyCProposerToLProposer(s), AbstractifyCProposerToLProposer(s'), AbstractifyCOperationNumberToOperationNumber(log_truncation_point), AbstractifyOutboundCPacketsToSeqOfRslPackets(broadcast_sent_packets))
 	{
 		
@@ -401,7 +401,7 @@ module Impl_LiveRSL__Proposer_i
 		ensures var (s', broadcast_sent_packets) := CProposerMaybeNominateValueAndSend2a(s, clock, log_truncation_point); CProposerIsValid(s') && OutboundPacketsIsValid(broadcast_sent_packets) && LProposerMaybeNominateValueAndSend2a(AbstractifyCProposerToLProposer(s), AbstractifyCProposerToLProposer(s'), clock, log_truncation_point, AbstractifyOutboundCPacketsToSeqOfRslPackets(broadcast_sent_packets))
 	{
 		var t1 := 
-			if !CProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose) then 
+			if !(CProposerCanNominateUsingOperationNumber(s, log_truncation_point, s.next_operation_number_to_propose)) then 
 				var t1 := 
 					s; 				
 				var t2 := 
@@ -409,7 +409,7 @@ module Impl_LiveRSL__Proposer_i
 				(t1, t2) 
 			else 
 				var t1 := 
-					if !CAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose) then 
+					if !(CAllAcceptorsHadNoProposal(s.received_1b_packets, s.next_operation_number_to_propose)) then 
 						var t1 := 
 							CProposerNominateOldValueAndSend2a(s, log_truncation_point); 						
 						(t1.0, t1.1) 

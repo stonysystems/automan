@@ -87,4 +87,12 @@ module LiveRSL__Acceptor_i {
       && RemoveVotesBeforeLogTruncationPoint(s.votes, s'.votes, opn)
       && LAcceptorTruncateLogHelper(s', s, opn, s'.votes) // NEW
   }
+
+  function GetReplicaIndex(id:NodeIdentity, c:LConfiguration) : int
+    requires id in c.replica_ids
+    ensures  var idx := GetReplicaIndex(id, c);
+             0 <= idx < |c.replica_ids| && c.replica_ids[idx] == id
+  {
+    FindIndexInSeq(c.replica_ids, id)
+  }
 }
