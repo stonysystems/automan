@@ -690,9 +690,9 @@ module Translator = struct
                   body = x
                 }
             ) add_ensures in
-          let add_ensures = List.map 
+          let _add_ensures = List.map 
               (fun x -> AST.TopDecl.Ensures x) add_ensures in
-          add_ensures @  [AST.TopDecl.Ensures binding]
+          [AST.TopDecl.Ensures binding]
         )
       )
       in
