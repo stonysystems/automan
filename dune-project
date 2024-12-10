@@ -5,12 +5,6 @@
 
 (generate_opam_files true)
 
-(source
- (github cwjnkins/automan))
-
-(authors "Christa Jenkins" "Ti Zhou" "Omar Chowdhurry")
-(maintainers "Christa Jenkins" "Ti Zhou")
-
 (license LICENSE)
 
 (documentation https://url/to/documentation)
