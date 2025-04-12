@@ -12,7 +12,6 @@
 (package
  (name automan)
  (synopsis "Tool for generating distributed system implementations from Dafny protocol specifications.")
- ;; (description "A longer description")
  (depends ocaml dune core core_unix async_unix)
  (tags
   ("distributed systems" "formal verification")))

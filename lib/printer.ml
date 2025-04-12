@@ -19,7 +19,7 @@ module CommonPrinter = struct
     | Null      -> "null"
     | Nat d     -> string_of_int d
     | Char d    -> String.make 1 d
-    | String d  -> d
+    | String d  -> "\"" ^ d ^ "\""
 
   let print_dotsuffix (x : Common.dotsuffix_t) = 
     match x with

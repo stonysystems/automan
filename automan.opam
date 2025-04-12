@@ -2,13 +2,9 @@
 opam-version: "2.0"
 synopsis:
   "Tool for generating distributed system implementations from Dafny protocol specifications."
-maintainer: ["Christa Jenkins" "Ti Zhou"]
-authors: ["Christa Jenkins" "Ti Zhou" "Omar Chowdhurry"]
 license: "LICENSE"
 tags: ["distributed systems" "formal verification"]
-homepage: "https://github.com/cwjnkins/automan"
 doc: "https://url/to/documentation"
-bug-reports: "https://github.com/cwjnkins/automan/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.14"}
@@ -31,4 +27,3 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/cwjnkins/automan.git"

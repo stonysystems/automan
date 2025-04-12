@@ -51,30 +51,4 @@
 %token EOF
 %token NOLEM
 
-/* %left  QUANTIFY_SEP */
-/* %right IMPLIES EQUIV */
-/* %left  EXPLIES */
-
-/* %left  SEMI */
-/* %left  ELSE */
-
-/* %left  PIPE */
-
-/* %left  AND OR */
-
-/* %left  LSQBRAC */
-
-/* %left  LBRACE */
-/* %left  LANGLE */
-/* %left  RANGLE */
-
-/* %left  ADD  SUB */
-/* %left  MULT DIV */
-/* %left  MOD */
-
-/* %left  SLICE */
-
-/* %left  NOT */
-/* %left  DOT */
-
 %%

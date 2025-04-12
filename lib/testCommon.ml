@@ -38,4 +38,3 @@ let parse_annotations_with_error lexbuf =
   | AnnotationParser.Error ->
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
     exit (-1)
-

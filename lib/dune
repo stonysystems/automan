@@ -23,3 +23,19 @@
   (merge_into annotationParser)
   (flags
     :standard --external-tokens Tokens --unused-tokens))
+
+
+(ocamllex tlaLexer)
+
+(menhir
+ (modules tlaTokens)
+ (flags --only-tokens --unused-tokens)
+(explain false))
+
+(menhir
+ (modules tlaTokens tlaParser)
+ (merge_into tlaParser)
+  (flags
+    :standard
+    --external-tokens TlaTokens
+    --dump))

@@ -3,3 +3,7 @@
  (name main)
  (libraries core core_unix.command_unix automan))
 
+(executable
+ (public_name main_tla)
+ (name main_tla)
+ (libraries core core_unix.command_unix automan))
