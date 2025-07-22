@@ -4,6 +4,6 @@
  (libraries core core_unix.command_unix automan))
 
 (executable
- (public_name main_tla)
- (name main_tla)
+ (public_name main_tla_to_dafny)
+ (name main_tla_to_dafny)
  (libraries core core_unix.command_unix automan))

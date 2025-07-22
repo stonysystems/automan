@@ -4,6 +4,8 @@ AutoMan is a tool for generating distributed system implementations from Dafny p
 
 # Building
 
+First, install `opam` and initialize it using `opam init`.
+
 ``` shell
 opam switch create ./ 4.14.0
 eval $(opam env)
@@ -37,6 +39,15 @@ The command to translate a single file is as follows:
 
 This command specifies the input Dafny file, annotation file, and name remapping file, directing the output to the specified file.
 The method for writing the corresponding files is introduced below.
+
+## A Demo Tool for Adapting TLA+ Code to TLA in Dafny
+
+To validate that the TLA+ protocol can indeed be written in a way that translates easily into TLA-like expressions in Dafny, we provide a demo tool to apply such a translation to the Paxos protocol.
+
+To run the demo, execute `bash tla_to_dafny_demo.sh`.
+Both the original TLA+ specification of the Paxos protocol and its Dafny translation are located in `assert/tla/`.
+
+This demo is a lightweight prototype designed to demonstrate the idea, implemented in roughly one person-week.
 
 # Usage
 
