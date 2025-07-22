@@ -1,1 +1,0 @@
-dune exe bin/main_tla.exe asset/tla/paxos.tla > asset/tla/paxos.dfy
