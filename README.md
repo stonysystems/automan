@@ -2,6 +2,13 @@
 
 AutoMan is a tool for generating distributed system implementations from Dafny protocol specifications.
 
+# Produce the experiment results
+
+The experimental artifact is located in the [`artifact/`](./artifact) directory.
+
+Please enter the `artifact/` folder and follow the instructions in [`artifact/README.md`](./artifact/README.md) to reproduce the results.
+
+
 # Building
 
 First, install `opam` and initialize it using `opam init`.
