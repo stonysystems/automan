@@ -8,9 +8,9 @@ SCRIPTS=(
   # "Figure11-IronKV.sh"
 
   # Figure 12
-  "Figure12-PaxosKV-I0.sh"
-  "Figure12-PaxosKV-I1.sh"
-  "Figure12-RaftKV.sh"
+  # "Figure12-PaxosKV-I0.sh"
+  # "Figure12-PaxosKV-I1.sh"
+  # "Figure12-RaftKV.sh"
 
   # Figure 9
   "Figure9-AutoManRSL-I0.sh"

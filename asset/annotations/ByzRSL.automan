@@ -1,0 +1,132 @@
+module Collections__CountMatches_i {
+    IsNthHighestValueInSequence(+,+,+);
+}
+module LiveByzRSL__Acceptor_i {
+    HasReceivedSame2avFromByzQuorum(+,+);
+    IsByzQuorumSendSame2av(+,+);
+    HasReceived2avOfOpn(+,+);
+    Received2avSetCorrect(+,+,+,+);
+    AcceptorStateCorrect(+,+,+);
+    IsLogTruncationPointValid(+,+,+);
+    RemoveVotesBeforeLogTruncationPoint(+,-,+);
+    LAddVoteAndRemoveOldOnes(+,-,+,+,+);
+    LAcceptorInit(-,+);
+    LAcceptorMaybeEnterNewView(+,-);
+    LAcceptorProcess1a(+,-,+,-);
+    LAcceptorProcess1b(+,-,+);
+    LAcceptorProcess1c(+, -, +, -);
+    LAcceptorProcess2av(+,-,+);
+    LAcceptorDecide2bVal(+,-,+,+,+);
+    LAcceptorSent2b(+,-,-);
+    LAcceptorForgetReceived2avs(+,-,+);
+    LAcceptorProcessHeartbeat(+, -, +);
+    LAcceptorTruncateLog(+, -, +);
+}
+module LiveByzRSL__Broadcast_i {
+    LBroadcastToEveryone(+,+,+,-);
+}
+module LiveByzRSL__CheckValSafety_i {
+    LSeqOfMessage1b(+);
+    LSetOfMessage1bAboutBallot(+,+);
+    LAllAcceptorsHadNoProposal(+,+);
+    LSetOfMessage1b(+);
+    Lmax_balInS(+,+,+);
+    LValIsHighestNumberedProposalAtBallot(+,+,+,+);
+    AllVotesWithLargerBalHasSameValue(+,+,+,+);
+    LValIsSafeAt(+,+,+,+,+);
+}
+module LiveByzRSL__Configuration_i {
+  ReplicasDistinct(+,+,+);
+  IsReplicaIndex(+,+,+);
+}
+module LiveByzRSL__Constants_i {
+    LReplicaConstantsValid(+);
+}
+module LiveByzRSL__DistributedSystem_i {
+
+}
+module LiveByzRSL__Message_i {
+
+}
+module LiveByzRSL__Parameters_i {
+
+}
+module LiveByzRSL__Types_i {
+
+}
+module LiveByzRSL__StateMachine_i {
+}
+module LiveByzRSL__Election_i {
+  ElectionStateInit(-,+);
+  ElectionStateProcessHeartbeat(+,-,+,+);
+  ElectionStateCheckForViewTimeout(+,-,+);
+  ElectionStateCheckForQuorumOfViewSuspicions(+,-,+);
+  ElectionStateReflectReceivedRequest(+,-,+);
+  ElectionStateReflectExecutedRequestBatch(+,-,+);
+}
+module LiveByzRSL__Environment_i {
+  type CPacket = RslPacket;
+  type OutboundPackets = seq<RslPacket>;
+}
+module LiveByzRSL__Executor_i {
+  LExecutorInit(-,+);
+  LExecutorGetDecision(+,-,+,+,+);
+  UpdateNewCache(+,-,+);
+  LExecutorExecute(+,-,-);
+  LExecutorProcessAppStateSupply(+,-,+);
+  LExecutorProcessAppStateRequest(+,-,+,-);
+  LExecutorProcessStartingPhase2(+,-,+,-);
+  LExecutorProcessRequest(+,+,-);
+}
+module LiveByzRSL__Learner_i {
+  LLearnerInit(-,+);
+  LLearnerProcess2b(+,-,+);
+  LLearnerForgetDecision(+,-,+);
+  LLearnerForgetOperationsBefore(+,-,+);
+}
+module LiveByzRSL__Proposer_i {
+  LProposerInit(-,+);
+  LProposerProcessRequest(+,-,+);
+  LProposerMaybeEnterNewViewAndSend1a(+,-,-);
+  LProposerProcess1b(+,-,+);
+  LProposerMaybeEnterPhase2(+,-,+,-);
+  LProposerNominateNewValueAndSend1c(+,-,+,+,-);
+  LProposerNominateOldValueAndSend1c(+,-,+,-);
+  LProposerMaybeNominateValueAndSend1c(+,-,+,+,-);
+  LProposerProcessHeartbeat(+,-,+,+);
+  LProposerCheckForViewTimeout(+,-,+);
+  LProposerCheckForQuorumOfViewSuspicions(+,-,+);
+  LProposerResetViewTimerDueToExecution(+,-,+);
+}
+module LiveByzRSL__Replica_i {
+  LReplicaInit(-,+);
+  LReplicaNextProcessInvalid(+,-,+,-);
+  LReplicaNextProcessRequest(+,-,+,-);
+  LReplicaNextProcess1a(+,-,+,-);
+  LReplicaNextProcess1b(+,-,+,-);
+  LReplicaNextProcessStartingPhase2(+,-,+,-);
+  LReplicaNextProcess1c(+,-,+,-);
+  LReplicaNextProcess2av(+,-,+,-);
+  LReplicaNextProcess2b(+,-,+,-);
+  LReplicaNextProcessReply(+,-,+,-);
+  LReplicaNextProcessAppStateSupply(+,-,+,-);
+  LReplicaNextProcessAppStateRequest(+,-,+,-);
+  LReplicaNextProcessHeartbeat(+,-,+,+,-);
+  LReplicaNextSpontaneousMaybeEnterNewViewAndSend1a(+,-,-);
+  LReplicaNextSpontaneousMaybeEnterPhase2(+,-,-);
+  LReplicaNextReadClockMaybeNominateValueAndSend1c(+,-,+,-);
+  LReplicaNextSpontaneousMaybeDecide2bVal(+,-,-);
+  LReplicaNextSpontaneousMaybeSend2b(+,-,-);
+  LReplicaNextSpontaneousTruncateLogBasedOnCheckpoints(+,-,-);
+  LReplicaNextSpontaneousMaybeMakeDecision(+,-,-);
+  LReplicaNextSpontaneousMaybeExecute(+,-,-);
+  LReplicaNextReadClockMaybeSendHeartbeat(+,-,+,-);
+  LReplicaNextReadClockCheckForViewTimeout(+,-,+,-);
+  LReplicaNextReadClockCheckForQuorumOfViewSuspicions(+,-,+,-);
+  LReplicaNextReadClockAndProcessPacket(+,-,-);
+  LReplicaNextProcessPacketWithoutReadingClock(+,-,-);
+  LReplicaNextProcessPacket(+,-,-);
+
+  LSchedulerInit(-,+);
+  LSchedulerNext(+,-,-);
+}
