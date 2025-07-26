@@ -1,0 +1,132 @@
+
+
+# AutoMan Artifact
+
+This repository contains the artifact to reproduce the results presented in our paper.
+
+## Server Requirements
+
+To ensure reliable reproduction of results, we recommend:
+
+- At least **64 logical CPUs** per server.
+
+> Note: Due to hardware differences (especially CPU count and frequency), your results may differ slightly from those in the paper.
+
+## Environment Setup
+
+Install Python virtual environment and SCons:
+
+```bash
+sudo apt install python3-venv
+python3 -m venv .venv
+source .venv/bin/activate
+pip install scons
+```
+
+## Running the Experiments
+
+You can choose to run all experiments together or run individual scripts.
+
+### Run All Experiments (Takes ~8 Hours)
+
+To run all experiments and reproduce all figures:
+
+```bash
+./run.sh
+```
+
+This will sequentially run all scripts and generate result files under directories like `Figure8/`, `Figure9/`, etc.
+
+### Run Individual Scripts
+
+You can also run each script independently to reproduce one line in a figure, for example:
+
+```bash
+bash Figure8-AutoManRSL-I1.sh
+```
+
+## Output Format
+
+Each script generates a `.txt` file in a directory named after the figure:
+
+```
+Figure8/
+├── AutoManRSL-I0.txt
+├── AutoManRSL-I1.txt
+├── IronRSL.txt
+```
+
+## Experimental Figures and Scripts
+
+We will introduce you to the key results in each figure to help you interpret the results.
+
+### Figure 8: 
+
+**Scripts:**
+
+- Figure8-AutoManRSL-I0.sh
+- Figure8-AutoManRSL-I1.sh
+- Figure8-IronRSL.sh
+- Figure8-AutoManPBFT-I0.sh
+- Figure8-AutoManPBFT-I1.sh
+
+**Observations:**
+
+- AutoManRSL-I1 achieves more than 2× the throughput of AutoManRSL-I0.
+- AutoManPBFT-I1 achieves about 2× the throughput of AutoManPBFT-I0.
+- AutoManRSL-I1 performs on par with IronRSL.
+
+### Figure 9: Leader Failure Recovery
+
+This experiment will kill the leader while running, then the throughput will drop to 0, but will soon recover.
+In the result file under Figure9/, we keep monitoring the throughput.
+
+**Scripts:**
+
+- Figure9-AutoManRSL-I0.sh
+- Figure9-AutoManRSL-I1.sh
+- Figure9-IronRSL-I1.sh
+
+**Observations:**
+
+- Throughput temporarily drops to 0 (around line 700-800 in the result logs), then recovers within 8–10 samples.
+- Recovery time is similar across all three implementations.
+
+> Note: If the leader is not successfully killed, which means no 0 in the log, you can rerun that line.
+
+### Figure 11:
+
+**Scripts:**
+
+- Figure11-AutoManKV-I0.sh
+- Figure11-AutoManKV-I1.sh
+- Figure11-IronKV.sh
+
+**Observations:**
+
+- AutoManKV-I0 achieves 80%–90% of IronKV’s throughput.
+- AutoManKV-I1 achieves nearly identical throughput as IronKV.
+
+### Figure 12:
+
+**Scripts:**
+
+- Figure12-PaxosKV-I0.sh
+- Figure12-PaxosKV-I1.sh
+- Figure12-RaftKV.sh
+
+**Observations:**
+
+- PGo-RaftKV outperforms PaxosKV-I0.
+- PaxosKV-I1 significantly outperforms PGo-RaftKV.
+
+### Figure 10: Effort vs. Performance (Not Reproducible)
+
+This figure shows each incremental optimization step's performance improvement vs. effort during our development. It is not intended to be reproduced. However, the performance of AutoManRSL-I0 and IronRSL is reproduced in Figure 8.
+
+
+## Notes
+
+- Absolute performance may vary across hardware.
+- Focus on **relative performance** trends (e.g., I1 vs. I0, AutoMan vs. IronFleet).
+- If you encounter unexpected results, feel free to contact us for clarification.
