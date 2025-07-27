@@ -20,6 +20,10 @@ To ensure reliable reproduction of results, we recommend:
 
 ## Environment Setup
 
+**Platform:** Our experiments were conducted on Ubuntu 22.04. Similar Linux environments should work as well.
+
+**Dependencies:** Required tools like .NET and Dafny are already provided in the `env/` folder - no additional installation needed.
+
 Install Python virtual environment and SCons:
 
 ```bash
@@ -44,6 +48,23 @@ To run all experiments and reproduce all figures:
 
 This will sequentially run all scripts and generate result files under directories like `Figure8/`, `Figure9/`, etc.
 
+### Visualization
+
+After running the experiments, generate the performance comparison charts that correspond to the figures in the paper (requires matplotlib):
+
+```bash
+bash draw.sh
+```
+
+This script processes the experimental data and creates PDF visualizations that exactly match the figures presented in our paper:
+- `fig8.pdf` - **Figure 8** in the paper: Throughput comparison across RSL and PBFT implementations
+- `fig9.pdf` - **Figure 9** in the paper: Leader failure recovery analysis  
+- `fig11.pdf` - **Figure 11** in the paper: Key-value store performance comparison
+- `fig12.pdf` - **Figure 12** in the paper: PaxosKV vs RaftKV throughput analysis
+
+These generated PDFs provide the same visual representations as shown in the paper, allowing you to verify that the reproduced results match our published findings.
+
+
 ### Run Individual Scripts
 
 You can also run each script independently to reproduce one line in a figure, for example:
@@ -65,7 +86,7 @@ Figure8/
 
 ## Experimental Figures and Scripts
 
-We will introduce you to the key results in each figure to help you interpret the results.
+We will introduce the key results in each figure to help you interpret the results.
 
 ### Figure 8: 
 
