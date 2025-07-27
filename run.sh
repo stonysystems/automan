@@ -26,6 +26,22 @@ kv_files=(
   Host.i.dfy
 )
 
+byz_rsl_files=(
+  Acceptor.i.dfy
+  CheckValSafety.i.dfy
+  Configuration.i.dfy
+  Constants.i.dfy
+  Election.i.dfy
+  Executor.i.dfy
+  Learner.i.dfy
+  Message.i.dfy
+  Parameters.i.dfy
+  Proposer.i.dfy
+  Replica.i.dfy
+  StateMachine.i.dfy
+  Types.i.dfy
+)
+
 Ng_examples_files=(
   Acceptor.i.dfy 
 )
@@ -52,6 +68,13 @@ elif [ "$1" == "kv" ]; then
     echo "[+] KV/spec -> KV/impl | "$file
     dune exe bin/main.exe ./asset/spec/KV/$file asset/annotations/SHT.automan asset/remapping.json > \
       ./asset/impl/KV/$file
+  done
+elif [ "$1" == "byz" ]; then
+  for file in "${byz_rsl_files[@]}"
+  do
+    echo "[+] ByzRSL/spec -> ByzRSL/impl | "$file
+    dune exe bin/main.exe ./asset/spec/ByzRSL/$file asset/annotations/ByzRSL.automan asset/remapping.json > \
+      ./asset/impl/ByzRSL/$file
   done
 elif [ "$1" == "ng" ]; then
   for file in "${Ng_examples_files[@]}"

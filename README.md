@@ -2,12 +2,11 @@
 
 AutoMan is a tool for generating distributed system implementations from Dafny protocol specifications.
 
-# Produce the experiment results
+# Produce the experiment results for the AutoMan paper (SOSP '25)
 
 The experimental artifact is located in the [`artifact/`](./artifact) directory.
 
 Please enter the `artifact/` folder and follow the instructions in [`artifact/README.md`](./artifact/README.md) to reproduce the results.
-
 
 # Building
 
@@ -32,11 +31,13 @@ We provide two sets of specifications, both adapted from
 [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet):
 1. Multi-Paxos (rsl), available at  `./asset/spec/RSL`.
 2. Key-Value Store (kv), available at `./asset/spec/KV`.
-3. Negative Examples (ng), available at `./asset/spec/NgExamples`, demonstrates cases that would fail AutoMan's checks.
+3. Byzantine Multi-Paxos (byz), available at `./asset/spec/ByzRSL`.
+4. Negative Examples (ng), available at `./asset/spec/NgExamples`, demonstrates cases that would fail AutoMan's checks.
+5. Additional Examples to help you better understand the behavior of AutoMan, avilable at `./asset/spec/AddExamples`.
 
 The necessary annotations (explained below) are available at `./asset/annotations`.
 
-Run `bash run.sh [rsl | kv | ng]` to apply the translation.
+Run `bash run.sh [rsl | kv | byz | ng | add]` to apply the translation.
 
 The generated codes can be found in `./asset/impl`.
 

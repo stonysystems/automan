@@ -1,0 +1,1566 @@
+nohup: ignoring input
+======================================
+>>> Running script: Figure9-AutoManRSL-I0.sh
+======================================
+scons: Reading SConscript files ...
+[+] DOTNET_PATH: /home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet
+scons: done reading SConscript files.
+scons: Building targets ...
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Collections/CountMatches.i.dfy > src/Dafny/Distributed/Common/Collections/CountMatches.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy > src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/Heuristics.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Heuristics.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/Induction.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Induction.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/LeadsTo.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/LeadsTo.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/Monotonicity.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Monotonicity.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/Rules.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Rules.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Time.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Logic/Temporal/Time.s.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Time.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Temporal/WF1.i.dfy > src/Dafny/Distributed/Common/Logic/Temporal/WF1.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Native/Io.s.dfy > src/Dafny/Distributed/Common/Native/Io.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Native/NativeTypes.i.dfy > src/Dafny/Distributed/Common/Native/NativeTypes.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Native/NativeTypes.s.dfy > src/Dafny/Distributed/Common/Native/NativeTypes.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/CmdLineParser.i.dfy > src/Dafny/Distributed/Impl/Common/CmdLineParser.i.tmp
+Checking src/Dafny/Distributed/Common/Native/NativeTypes.s.tmp
+Dafny program verifier finished with 12 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Native/NativeTypes.s.vdfy", "src/Dafny/Distributed/Common/Native/NativeTypes.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy > src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.tmp
+Checking src/Dafny/Distributed/Common/Native/NativeTypes.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Native/NativeTypes.i.vdfy", "src/Dafny/Distributed/Common/Native/NativeTypes.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/GenericRefinement.i.dfy > src/Dafny/Distributed/Impl/Common/GenericRefinement.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.tmp
+Dafny program verifier finished with 8 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/MarshallInt.i.dfy > src/Dafny/Distributed/Impl/Common/MarshallInt.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Heuristics.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Heuristics.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Heuristics.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/NodeIdentity.i.dfy > src/Dafny/Distributed/Impl/Common/NodeIdentity.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Time.s.tmp
+Dafny program verifier finished with 9 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.s.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Time.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy > src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Induction.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Induction.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Induction.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.dfy > src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Monotonicity.i.tmp
+Dafny program verifier finished with 14 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Monotonicity.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Monotonicity.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/UdpClient.i.dfy > src/Dafny/Distributed/Impl/Common/UdpClient.i.tmp
+Checking src/Dafny/Distributed/Common/Native/Io.s.tmp
+Dafny program verifier finished with 20 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Native/Io.s.vdfy", "src/Dafny/Distributed/Common/Native/Io.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/UpperBound.i.dfy > src/Dafny/Distributed/Impl/Common/UpperBound.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Rules.i.tmp
+Dafny program verifier finished with 22 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Rules.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Rules.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/Util.i.dfy > src/Dafny/Distributed/Impl/Common/Util.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/CmdLineParser.i.tmp
+Dafny program verifier finished with 15 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/CmdLineParser.i.vdfy", "src/Dafny/Distributed/Impl/Common/CmdLineParser.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/CMessageRefinements.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/CMessageRefinements.i.tmp
+Checking src/Dafny/Distributed/Common/Collections/CountMatches.i.tmp
+Dafny program verifier finished with 22 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Collections/CountMatches.i.vdfy", "src/Dafny/Distributed/Common/Collections/CountMatches.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/CmdLineParser.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/CmdLineParser.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.vdfy", "src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/Host.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/Host.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/UpperBound.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/UpperBound.i.vdfy", "src/Dafny/Distributed/Impl/Common/UpperBound.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/PacketParsing.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/PacketParsing.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/LeadsTo.i.tmp
+Dafny program verifier finished with 31 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/LeadsTo.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/LeadsTo.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/QRelations.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/QRelations.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/MarshallInt.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/MarshallInt.i.vdfy", "src/Dafny/Distributed/Impl/Common/MarshallInt.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplClass.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplClass.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/UdpClient.i.tmp
+Dafny program verifier finished with 7 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/UdpClient.i.vdfy", "src/Dafny/Distributed/Impl/Common/UdpClient.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplDelivery.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplDelivery.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.tmp
+Dafny program verifier finished with 11 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplLemmas.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplLemmas.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.tmp
+Dafny program verifier finished with 17 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.vdfy", "src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplMain.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplMain.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/WF1.i.tmp
+Dafny program verifier finished with 10 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/WF1.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/WF1.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveClock.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveClock.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/GenericRefinement.i.tmp
+Dafny program verifier finished with 29 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericRefinement.i.vdfy", "src/Dafny/Distributed/Impl/Common/GenericRefinement.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveNoClock.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveNoClock.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/Util.i.tmp
+Dafny program verifier finished with 25 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/Util.i.vdfy", "src/Dafny/Distributed/Impl/Common/Util.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketNoClock.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketNoClock.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Time.i.tmp
+Dafny program verifier finished with 62 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Time.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketX.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketX.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/NodeIdentity.i.tmp
+Dafny program verifier finished with 36 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/NodeIdentity.i.vdfy", "src/Dafny/Distributed/Impl/Common/NodeIdentity.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplReadClock.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplReadClock.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/CmdLineParser.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/CmdLineParser.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/CmdLineParser.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/UdpRSL.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/UdpRSL.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/CMessageRefinements.i.tmp
+Dafny program verifier finished with 17 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/CMessageRefinements.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/CMessageRefinements.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveRSL/Unsendable.i.dfy > src/Dafny/Distributed/Impl/LiveRSL/Unsendable.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/QRelations.i.tmp
+Dafny program verifier finished with 24 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/QRelations.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/QRelations.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/AcceptorImpl.i.dfy > src/Dafny/Distributed/Impl/RSL/AcceptorImpl.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/Unsendable.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/Unsendable.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/Unsendable.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/AppInterface.i.dfy > src/Dafny/Distributed/Impl/RSL/AppInterface.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplClass.i.tmp
+Dafny program verifier finished with 11 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplClass.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplClass.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/Broadcast.i.dfy > src/Dafny/Distributed/Impl/RSL/Broadcast.i.tmp
+Checking src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.tmp
+Dafny program verifier finished with 49 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.vdfy", "src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/CClockReading.i.dfy > src/Dafny/Distributed/Impl/RSL/CClockReading.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplDelivery.i.tmp
+Dafny program verifier finished with 8 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplDelivery.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplDelivery.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/CConfiguration.i.dfy > src/Dafny/Distributed/Impl/RSL/CConfiguration.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/CClockReading.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/CClockReading.i.vdfy", "src/Dafny/Distributed/Impl/RSL/CClockReading.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/CConstants.i.dfy > src/Dafny/Distributed/Impl/RSL/CConstants.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/AppInterface.i.tmp
+Dafny program verifier finished with 14 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/AppInterface.i.vdfy", "src/Dafny/Distributed/Impl/RSL/AppInterface.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/CMessage.i.dfy > src/Dafny/Distributed/Impl/RSL/CMessage.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/Broadcast.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/Broadcast.i.vdfy", "src/Dafny/Distributed/Impl/RSL/Broadcast.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/CParameters.i.dfy > src/Dafny/Distributed/Impl/RSL/CParameters.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.tmp
+Dafny program verifier finished with 93 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.vdfy", "src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/CStateMachine.i.dfy > src/Dafny/Distributed/Impl/RSL/CStateMachine.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplLemmas.i.tmp
+Dafny program verifier finished with 26 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplLemmas.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplLemmas.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/CTypes.i.dfy > src/Dafny/Distributed/Impl/RSL/CTypes.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/CParameters.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/CParameters.i.vdfy", "src/Dafny/Distributed/Impl/RSL/CParameters.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/ElectionImpl.i.dfy > src/Dafny/Distributed/Impl/RSL/ElectionImpl.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/AcceptorImpl.i.tmp
+Dafny program verifier finished with 9 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/AcceptorImpl.i.vdfy", "src/Dafny/Distributed/Impl/RSL/AcceptorImpl.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/ExecutorImpl.i.dfy > src/Dafny/Distributed/Impl/RSL/ExecutorImpl.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/CConfiguration.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/CConfiguration.i.vdfy", "src/Dafny/Distributed/Impl/RSL/CConfiguration.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/LearnerImpl.i.dfy > src/Dafny/Distributed/Impl/RSL/LearnerImpl.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/CConstants.i.tmp
+Dafny program verifier finished with 5 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/CConstants.i.vdfy", "src/Dafny/Distributed/Impl/RSL/CConstants.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.dfy > src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/CMessage.i.tmp
+Dafny program verifier finished with 12 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/CMessage.i.vdfy", "src/Dafny/Distributed/Impl/RSL/CMessage.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/RSL/ReplicaImpl.i.dfy > src/Dafny/Distributed/Impl/RSL/ReplicaImpl.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketX.i.tmp
+Dafny program verifier finished with 10 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketX.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketX.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy > src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/UdpRSL.i.tmp
+Dafny program verifier finished with 27 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/UdpRSL.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/UdpRSL.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.dfy > src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/CTypes.i.tmp
+Dafny program verifier finished with 17 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/CTypes.i.vdfy", "src/Dafny/Distributed/Impl/RSL/CTypes.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.dfy > src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.tmp
+Checking src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.vdfy", "src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Protocol/Common/UpperBound.s.dfy > src/Dafny/Distributed/Protocol/Common/UpperBound.s.tmp
+Checking src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.vdfy", "src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Acceptor.i.dfy > src/Dafny/Distributed/Protocol/RSL/Acceptor.i.tmp
+Checking src/Dafny/Distributed/Protocol/Common/UpperBound.s.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/UpperBound.s.vdfy", "src/Dafny/Distributed/Protocol/Common/UpperBound.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Broadcast.i.dfy > src/Dafny/Distributed/Protocol/RSL/Broadcast.i.tmp
+Checking src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.tmp
+Dafny program verifier finished with 11 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.vdfy", "src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/ClockReading.i.dfy > src/Dafny/Distributed/Protocol/RSL/ClockReading.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveClock.i.tmp
+Dafny program verifier finished with 19 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveClock.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveClock.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Actions.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Actions.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/PacketParsing.i.tmp
+Dafny program verifier finished with 136 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/PacketParsing.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/PacketParsing.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Assumptions.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Assumptions.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/ClockReading.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/ClockReading.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/ClockReading.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/CanonicalizeBallot.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/CanonicalizeBallot.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Acceptor.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Acceptor.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Acceptor.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Chosen.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Chosen.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Broadcast.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Broadcast.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Broadcast.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Constants.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Constants.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/ElectionImpl.i.tmp
+Dafny program verifier finished with 13 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/ElectionImpl.i.vdfy", "src/Dafny/Distributed/Impl/RSL/ElectionImpl.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Environment.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Environment.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Assumptions.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Assumptions.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Assumptions.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/LearnerState.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/LearnerState.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/CanonicalizeBallot.i.tmp
+Dafny program verifier finished with 12 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/CanonicalizeBallot.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/CanonicalizeBallot.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/LogTruncationPoint.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/LogTruncationPoint.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/CStateMachine.i.tmp
+Dafny program verifier finished with 5 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/CStateMachine.i.vdfy", "src/Dafny/Distributed/Impl/RSL/CStateMachine.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallot.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallot.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Actions.i.tmp
+Dafny program verifier finished with 10 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Actions.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Actions.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallotISent1a.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallotISent1a.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Environment.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Environment.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Environment.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Message1b.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Message1b.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Constants.i.tmp
+Dafny program verifier finished with 11 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Constants.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Constants.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2a.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2a.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/LearnerState.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/LearnerState.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/LearnerState.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2b.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2b.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallot.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallot.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallot.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/PacketSending.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/PacketSending.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Chosen.i.tmp
+Dafny program verifier finished with 13 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Chosen.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Chosen.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Quorum.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Quorum.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Quorum.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Quorum.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Quorum.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Received1b.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Received1b.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Message1b.i.tmp
+Dafny program verifier finished with 10 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Message1b.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Message1b.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/ReplyCache.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/ReplyCache.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketNoClock.i.tmp
+Dafny program verifier finished with 40 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketNoClock.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplProcessPacketNoClock.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/CommonProof/Requests.i.dfy > src/Dafny/Distributed/Protocol/RSL/CommonProof/Requests.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplReadClock.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplReadClock.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplReadClock.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Configuration.i.dfy > src/Dafny/Distributed/Protocol/RSL/Configuration.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Received1b.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Received1b.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Received1b.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Constants.i.dfy > src/Dafny/Distributed/Protocol/RSL/Constants.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2a.i.tmp
+Dafny program verifier finished with 12 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2a.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2a.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/DistributedSystem.i.dfy > src/Dafny/Distributed/Protocol/RSL/DistributedSystem.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Requests.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Requests.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Requests.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Election.i.dfy > src/Dafny/Distributed/Protocol/RSL/Election.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Constants.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Constants.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Constants.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Environment.i.dfy > src/Dafny/Distributed/Protocol/RSL/Environment.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Configuration.i.tmp
+Dafny program verifier finished with 7 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Configuration.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Configuration.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Executor.i.dfy > src/Dafny/Distributed/Protocol/RSL/Executor.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2b.i.tmp
+Dafny program verifier finished with 10 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2b.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/Message2b.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/Learner.i.dfy > src/Dafny/Distributed/Protocol/RSL/Learner.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/ReplyCache.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/ReplyCache.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/ReplyCache.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Assumptions.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Assumptions.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/LearnerImpl.i.tmp
+Dafny program verifier finished with 5 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/LearnerImpl.i.vdfy", "src/Dafny/Distributed/Impl/RSL/LearnerImpl.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Catchup.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Catchup.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Environment.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Environment.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Environment.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Environment.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Environment.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Election.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Election.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Election.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/EpochLength.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/EpochLength.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/DistributedSystem.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/DistributedSystem.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/DistributedSystem.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Execution.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Execution.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Learner.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Learner.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Learner.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/GenericInvariants.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/GenericInvariants.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/Executor.i.tmp
+Dafny program verifier finished with 12 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/Executor.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/Executor.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Invariants.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Invariants.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallotISent1a.i.tmp
+Dafny program verifier finished with 25 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallotISent1a.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/MaxBallotISent1a.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/LivenessProof.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/LivenessProof.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/PacketSending.i.tmp
+Dafny program verifier finished with 18 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/PacketSending.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/PacketSending.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBalReflected.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBalReflected.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/CommonProof/LogTruncationPoint.i.tmp
+Dafny program verifier finished with 35 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/CommonProof/LogTruncationPoint.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/CommonProof/LogTruncationPoint.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallot.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallot.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/Assumptions.i.tmp
+Dafny program verifier finished with 16 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/Assumptions.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/Assumptions.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallotISent1a.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallotISent1a.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/Execution.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/Execution.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/Execution.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/NextOp.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/NextOp.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/Environment.i.tmp
+Dafny program verifier finished with 10 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/Environment.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/Environment.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/Invariants.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/Invariants.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/Invariants.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1a.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1a.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/GenericInvariants.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/GenericInvariants.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/GenericInvariants.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1b.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1b.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallot.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallot.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallot.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1bCont.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1bCont.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/ReplicaImpl.i.tmp
+Dafny program verifier finished with 73 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/ReplicaImpl.i.vdfy", "src/Dafny/Distributed/Impl/RSL/ReplicaImpl.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Conclusion.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Conclusion.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/LivenessProof.i.tmp
+Dafny program verifier finished with 9 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/LivenessProof.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/LivenessProof.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Invariants.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Invariants.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBalReflected.i.tmp
+Dafny program verifier finished with 7 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBalReflected.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBalReflected.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Start.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Start.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallotISent1a.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallotISent1a.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/MaxBallotISent1a.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2a.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2a.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/Catchup.i.tmp
+Dafny program verifier finished with 8 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/Catchup.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/Catchup.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2b.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2b.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveNoClock.i.tmp
+Dafny program verifier finished with 22 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveNoClock.i.vdfy", "src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplNoReceiveNoClock.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2c.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2c.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/EpochLength.i.tmp
+Dafny program verifier finished with 18 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/EpochLength.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/EpochLength.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/RealTime.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/RealTime.i.tmp
+Checking src/Dafny/Distributed/Impl/RSL/ExecutorImpl.i.tmp
+Dafny program verifier finished with 14 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/ExecutorImpl.i.vdfy", "src/Dafny/Distributed/Impl/RSL/ExecutorImpl.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestQueue.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestQueue.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Start.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Start.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Start.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.tmp
+Checking src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.tmp
+Dafny program verifier finished with 21 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.vdfy", "src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/RSL/LivenessProof/RoundRobin.i.dfy > src/Dafny/Distributed/Protocol/RSL/LivenessProof/RoundRobin.i.tmp
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestQueue.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/RoundRobin.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Invariants.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Conclusion.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/RealTime.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2c.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2b.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2a.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/NextOp.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplMain.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1a.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1b.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/LiveRSL/Host.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1bCont.i.vdfy] Build interrupted.
+scons: Build interrupted.
+scons: building terminated because of errors.
+scons: writing .sconsign file.
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestQueue.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestQueue.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/RoundRobin.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/RoundRobin.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Invariants.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Invariants.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Invariants.i.dfy(97,13): Warning: unusual indentation in body of forall (which ends at line 99, column 70); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.1030898 s]
+
+Verifying LivenessProof__Phase2Invariants_i.ReplicaCaughtUp (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.474 s, solver resource count: 233808, 1 proof obligation]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.ReplicaCaughtUpTemporal (well-formedness) ...
+  [0.219 s, solver resource count: 273491, 7 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.AllReplicasCaughtUpTemporalSet (well-formedness) ...
+  [0.151 s, solver resource count: 286726, 11 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.AllLiveReplicasReadyForNextOperation (well-formedness) ...
+  [0.262 s, solver resource count: 241183, 1 proof obligation]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.AllLiveReplicasReadyForNextOperationTemporal (well-formedness) ...
+  [0.209 s, solver resource count: 284376, 6 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.lemma_IfNoReplicaBeyondViewNowThenNoReplicaBeyondViewEarlier (well-formedness) ...
+  [1.016 s, solver resource count: 1285125, 2 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.lemma_IfNoReplicaBeyondViewNowThenNoReplicaBeyondViewEarlier (correctness) ...
+  [1.335 s, solver resource count: 1905358, 46 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.lemma_ProposerStaysInState2InPhase2 (well-formedness) ...
+  [1.067 s, solver resource count: 1405300, 4 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.lemma_ProposerStaysInState2InPhase2 (correctness) ...
+  [4.253 s, solver resource count: 8883945, 145 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.lemma_NextOperationNumberToProposeIncreasesInPhase2OneStep (well-formedness) ...
+  [1.047 s, solver resource count: 1407162, 7 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.lemma_NextOperationNumberToProposeIncreasesInPhase2OneStep (correctness) ...
+  [2.762 s, solver resource count: 4712058, 76 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Invariants_i.lemma_NextOperationNumberToProposeIncreasesInPhase2 (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Conclusion.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2Conclusion.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(113,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(204,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/ViewPropagation.i.dfy(39,4): Warning: unusual indentation in left-hand operand of ==> (which starts at line 38, column 3); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0937128 s]
+
+Verifying LivenessProof__Phase2Conclusion_i.A2aPacketWithThePersistentClientRequestWasSentInThisViewAndAssignedAnEarlierOperationNumber (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.683 s, solver resource count: 394257, 17 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Conclusion_i.ProposerReachedCertainNextOp (well-formedness) ...
+  [0.132 s, solver resource count: 242312, 1 proof obligation]  verified
+
+Verifying LivenessProof__Phase2Conclusion_i.ProposerReachedCertainNextOpTemporal (well-formedness) ...
+  [0.262 s, solver resource count: 282881, 7 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Conclusion_i.lemma_Phase2EventuallyReadyForOperationBeyondClientRequest (well-formedness) ...
+  [1.118 s, solver resource count: 1359447, 3 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Conclusion_i.lemma_Phase2EventuallyReadyForOperationBeyondClientRequest (correctness) ...
+  [1.597 s, solver resource count: 2588780, 119 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Conclusion_i.lemma_RequestMovesUpInPrimaryRequestQueueAsNextOpToProposeIncreases (well-formedness) ...
+  [1.024 s, solver resource count: 1428650, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Conclusion_i.lemma_RequestMovesUpInPrimaryRequestQueueAsNextOpToProposeIncreases (correctness) ...
+  [6.387 s, solver resource count: 14396940, 255 proof obligations]  verified
+
+Verifying LivenessProof__Phase2Conclusion_i.lemma_RequestGetsProposedOnceNextOpIsHighEnough (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/RealTime.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/RealTime.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0749251 s]
+
+Verifying LivenessProof__RealTime_i.lemma_TimeAdvancesBetween (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [1.488 s, solver resource count: 1215031, 4 proof obligations]  verified
+
+Verifying LivenessProof__RealTime_i.lemma_TimeAdvancesBetween (correctness) ...
+  [1.237 s, solver resource count: 1974618, 35 proof obligations]  verified
+
+Verifying LivenessProof__RealTime_i.TimeMonotonicFromInvariant (well-formedness) ...
+  [0.202 s, solver resource count: 133939, 2 proof obligations]  verified
+
+Verifying LivenessProof__RealTime_i.lemma_TimeMonotonicFromInvariantHolds (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2c.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2c.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(113,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(204,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.1018312 s]
+
+Verifying LivenessProof__Phase2c_i.ReplicaSentHeartbeatToPrimaryReflectingOpn (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.742 s, solver resource count: 350943, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.ReplicaSentHeartbeatToPrimaryReflectingOpnTemporal (well-formedness) ...
+  [0.314 s, solver resource count: 417857, 8 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.NextHeartbeatTimeOfReplicaIsParticularValueTemporal (well-formedness) ...
+  [0.158 s, solver resource count: 297411, 11 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.PrimaryKnowsReplicaHasOpsComplete (well-formedness) ...
+  [0.146 s, solver resource count: 242867, 4 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.PrimaryKnowsReplicaHasOpsCompleteTemporal (well-formedness) ...
+  [0.236 s, solver resource count: 281770, 8 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.PrimaryKnowsEveryReplicaHasOpsCompleteTemporalSet (well-formedness) ...
+  [0.158 s, solver resource count: 292002, 13 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.PrimaryHasAdvancedLogTruncationPoint (well-formedness) ...
+  [0.186 s, solver resource count: 245379, 1 proof obligation]  verified
+
+Verifying LivenessProof__Phase2c_i.PrimaryHasAdvancedLogTruncationPointTemporal (well-formedness) ...
+  [0.153 s, solver resource count: 285726, 6 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.lemma_IfExecutorCaughtUpThenExecutorEventuallyExecutesItAndTellsPrimary (well-formedness) ...
+  [1.205 s, solver resource count: 1467552, 8 proof obligations]  verified
+
+Verifying LivenessProof__Phase2c_i.lemma_IfExecutorCaughtUpThenExecutorEventuallyExecutesItAndTellsPrimary (correctness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2b.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2b.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(113,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(204,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0928729 s]
+
+Verifying LivenessProof__Phase2b_i.lemma_IfLiveReplicasReadyForAnOperationAndLearnerHas2bsFromAllLiveReplicasThenExecutorEventuallyHasDecisionWF1Req2 (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [1.640 s, solver resource count: 1602318, 10 proof obligations]  verified
+
+Verifying LivenessProof__Phase2b_i.lemma_IfLiveReplicasReadyForAnOperationAndLearnerHas2bsFromAllLiveReplicasThenExecutorEventuallyHasDecisionWF1Req2 (correctness) ...
+    checking split 1/3, 0.00%, (cost:17829/48) ...
+      --> split #1 done,  [2.7153865 s] Valid
+    checking split 2/3, 65.52%, (cost:5634/21) ...
+      --> split #2 done,  [1.2860298 s] Valid
+    checking split 3/3, 86.22%, (cost:3749/16) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2a.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase2a.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(113,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(204,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0995381 s]
+
+Verifying LivenessProof__Phase2a_i.ProposerSends2asForOperation (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [1.225 s, solver resource count: 937647, 9 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.ProposerSends2asForOperationTemporal (well-formedness) ...
+  [0.798 s, solver resource count: 1016190, 9 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.LearnerHas2bFromAcceptorInView (well-formedness) ...
+  [0.136 s, solver resource count: 248773, 3 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.LearnerHas2bFromAcceptorInViewTemporal (well-formedness) ...
+  [0.261 s, solver resource count: 288454, 8 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.ExecutorHasLearnedDecisionAboutOp (well-formedness) ...
+  [0.158 s, solver resource count: 243162, 1 proof obligation]  verified
+
+Verifying LivenessProof__Phase2a_i.ExecutorHasLearnedDecisionAboutOpTemporal (well-formedness) ...
+  [0.225 s, solver resource count: 282803, 7 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.LearnerHas2bFromEveryAcceptorInViewTemporalSet (well-formedness) ...
+  [0.201 s, solver resource count: 377208, 19 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.lemma_IfNextOperationBeyondThenProposerSent2as (well-formedness) ...
+  [1.009 s, solver resource count: 1423377, 6 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.lemma_IfNextOperationBeyondThenProposerSent2as (correctness) ...
+  [2.944 s, solver resource count: 6604702, 131 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.lemma_IfLiveReplicasReadyForAnOperationThenLearnerEventuallyLearnsItLastStep (well-formedness) ...
+  [1.074 s, solver resource count: 1480665, 15 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.lemma_IfLiveReplicasReadyForAnOperationThenLearnerEventuallyLearnsItLastStep (correctness) ...
+  [1.933 s, solver resource count: 3013211, 146 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.lemma_IfLiveReplicasReadyForAnOperationThenLearnerEventuallyLearnsItSecondStep (well-formedness) ...
+  [1.084 s, solver resource count: 1483323, 15 proof obligations]  verified
+
+Verifying LivenessProof__Phase2a_i.lemma_IfLiveReplicasReadyForAnOperationThenLearnerEventuallyLearnsItSecondStep (correctness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/NextOp.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/NextOp.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(113,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(204,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.1760059 s]
+
+Verifying LivenessProof__NextOp_i.AllLiveReplicasCaughtUpWithEarlierOperationWithRequestQueueEmpty (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.501 s, solver resource count: 244156, 1 proof obligation]  verified
+
+Verifying LivenessProof__NextOp_i.AllLiveReplicasCaughtUpWithEarlierOperationWithRequestQueueEmptyTemporal (well-formedness) ...
+  [0.241 s, solver resource count: 287735, 6 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerStartsBatchTimer (well-formedness) ...
+  [0.132 s, solver resource count: 238332, 1 proof obligation]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerStartsBatchTimerTemporal (well-formedness) ...
+  [0.157 s, solver resource count: 278590, 6 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerExceedsCertainNextOp (well-formedness) ...
+  [0.279 s, solver resource count: 235346, 1 proof obligation]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerExceedsCertainNextOpTemporal (well-formedness) ...
+  [0.167 s, solver resource count: 275713, 7 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerHasCertainNextOpAndNonemptyRequestQueue (well-formedness) ...
+  [0.186 s, solver resource count: 236211, 1 proof obligation]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerHasCertainNextOpAndNonemptyRequestQueueTemporal (well-formedness) ...
+  [0.150 s, solver resource count: 277380, 7 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerHasCertainNextOpAndNonemptyRequestQueueAndBatchTimer (well-formedness) ...
+  [0.149 s, solver resource count: 239909, 1 proof obligation]  verified
+
+Verifying LivenessProof__NextOp_i.ProposerHasCertainNextOpAndNonemptyRequestQueueAndBatchTimerTemporal (well-formedness) ...
+  [0.189 s, solver resource count: 281560, 8 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueThenProposerEventuallyStartsBatchTimerHelper (well-formedness) ...
+  [1.154 s, solver resource count: 1446579, 16 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueThenProposerEventuallyStartsBatchTimerHelper (correctness) ...
+  [2.810 s, solver resource count: 4642505, 110 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueThenProposerEventuallyStartsBatchTimer (well-formedness) ...
+  [1.118 s, solver resource count: 1461864, 12 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueThenProposerEventuallyStartsBatchTimer (correctness) ...
+  [3.115 s, solver resource count: 4987187, 285 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfLiveReplicasReadyForAnOperationThenProposerEventuallyStartsBatchTimer (well-formedness) ...
+  [1.112 s, solver resource count: 1458763, 11 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfLiveReplicasReadyForAnOperationThenProposerEventuallyStartsBatchTimer (correctness) ...
+  [1.635 s, solver resource count: 2201356, 54 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueAndBatchTimerThenProposerEventuallyAdvancesNextOpHelper (well-formedness) ...
+  [1.114 s, solver resource count: 1437664, 10 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueAndBatchTimerThenProposerEventuallyAdvancesNextOpHelper (correctness) ...
+  [5.160 s, solver resource count: 10937346, 114 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueAndBatchTimerThenProposerEventuallyAdvancesNextOp (well-formedness) ...
+  [1.156 s, solver resource count: 1442815, 9 proof obligations]  verified
+
+Verifying LivenessProof__NextOp_i.lemma_IfProposerHasCertainNextOpAndNonemptyRequestQueueAndBatchTimerThenProposerEventuallyAdvancesNextOp (correctness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplMain.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/LiveRSL/ReplicaImplMain.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/AppInterface.i.dfy(165,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0807071 s]
+
+Verifying LiveRSL__ReplicaImplMain_i.rollActionIndex (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.374 s, solver resource count: 26817, 1 proof obligation]  verified
+
+Verifying LiveRSL__ReplicaImplMain_i.rollActionIndex (correctness) ...
+  [0.035 s, solver resource count: 43618, 6 proof obligations]  verified
+
+Verifying LiveRSL__ReplicaImplMain_i.ReplicaNextMainProcessPacketX (well-formedness) ...
+  [1.500 s, solver resource count: 1807763, 82 proof obligations]  verified
+
+Verifying LiveRSL__ReplicaImplMain_i.ReplicaNextMainProcessPacketX (correctness) ...
+  [9.992 s, solver resource count: 13247137, 265 proof obligations]  verified
+
+Verifying LiveRSL__ReplicaImplMain_i.ReplicaNextMainNoClock (well-formedness) ...
+  [1.299 s, solver resource count: 1801791, 65 proof obligations]  verified
+
+Verifying LiveRSL__ReplicaImplMain_i.ReplicaNextMainNoClock (correctness) ...
+  [39.175 s, solver resource count: 48106819, 177 proof obligations]  verified
+
+Verifying LiveRSL__ReplicaImplMain_i.ReplicaNextMainReadClock (well-formedness) ...
+  [1.290 s, solver resource count: 1801118, 63 proof obligations]  verified
+
+Verifying LiveRSL__ReplicaImplMain_i.ReplicaNextMainReadClock (correctness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1a.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1a.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/ViewPropagation.i.dfy(39,4): Warning: unusual indentation in left-hand operand of ==> (which starts at line 38, column 3); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0924175 s]
+
+Verifying LivenessProof__Phase1a_i.PrimaryInView (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.564 s, solver resource count: 240222, 2 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.PrimaryInViewTemporal (well-formedness) ...
+  [0.152 s, solver resource count: 280799, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.Primarymax_balISent1aInView (well-formedness) ...
+  [0.129 s, solver resource count: 236290, 1 proof obligation]  verified
+
+Verifying LivenessProof__Phase1a_i.Primarymax_balISent1aInViewTemporal (well-formedness) ...
+  [0.219 s, solver resource count: 277524, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.PrimarySent1aInView (well-formedness) ...
+  [0.749 s, solver resource count: 918739, 2 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.PrimarySent1aInViewTemporal (well-formedness) ...
+  [0.700 s, solver resource count: 989157, 7 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_StablePeriodStartedLeadsToPrimaryInView (well-formedness) ...
+  [0.933 s, solver resource count: 1373522, 35 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_StablePeriodStartedLeadsToPrimaryInView (correctness) ...
+  [1.223 s, solver resource count: 1697218, 111 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_StablePeriodStartedLeadsToPrimaryInViewAlt (well-formedness) ...
+  [1.208 s, solver resource count: 1364867, 35 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_StablePeriodStartedLeadsToPrimaryInViewAlt (correctness) ...
+  [1.002 s, solver resource count: 1517526, 55 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_PrimaryInViewLeadsToPrimarymax_balISent1aInViewWF1Req1 (well-formedness) ...
+  [0.960 s, solver resource count: 1281076, 3 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_PrimaryInViewLeadsToPrimarymax_balISent1aInViewWF1Req1 (correctness) ...
+  [1.088 s, solver resource count: 1676042, 52 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_PrimaryInViewLeadsToPrimarymax_balISent1aInViewWF1Req2 (well-formedness) ...
+  [0.938 s, solver resource count: 1317709, 6 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_PrimaryInViewLeadsToPrimarymax_balISent1aInViewWF1Req2 (correctness) ...
+  [1.465 s, solver resource count: 2475947, 65 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_PrimaryInViewLeadsToPrimarymax_balISent1aInView (well-formedness) ...
+  [0.959 s, solver resource count: 1307096, 6 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_PrimaryInViewLeadsToPrimarymax_balISent1aInView (correctness) ...
+  [1.268 s, solver resource count: 1676899, 130 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_StablePeriodStartedLeadsToPrimarymax_balISent1aInView (well-formedness) ...
+  [1.008 s, solver resource count: 1374349, 36 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_StablePeriodStartedLeadsToPrimarymax_balISent1aInView (correctness) ...
+  [1.014 s, solver resource count: 1419093, 80 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_IfPrimaryTransitionsTomax_balISent1aInViewThenPrimarySent1a (well-formedness) ...
+  [0.991 s, solver resource count: 1270006, 3 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_IfPrimaryTransitionsTomax_balISent1aInViewThenPrimarySent1a (correctness) ...
+  [2.201 s, solver resource count: 4513915, 22 proof obligations]  verified
+
+Verifying LivenessProof__Phase1a_i.lemma_StablePeriodStartedLeadsToPrimarySending1a (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/AppInterface.i.dfy(165,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.dfy(337,2): Warning: unusual indentation in body of let-expression (which ends at line 353, column 3); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.dfy(361,2): Warning: unusual indentation in body of let-expression (which ends at line 375, column 14); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/ProposerImpl.i.dfy(429,2): Warning: unusual indentation in body of let-expression (which ends at line 452, column 14); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.1081202 s]
+
+Verifying LiveRSL__ProposerModel_i.AbstractifyCIncompleteBatchTimerToIncompleteBatchTimer (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.392 s, solver resource count: 77226, 1 proof obligation]  verified
+
+Verifying LiveRSL__ProposerModel_i.CProposerIsValid (well-formedness) ...
+  [0.446 s, solver resource count: 682117, 5 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.AbstractifyCProposerToLProposer (well-formedness) ...
+  [0.506 s, solver resource count: 835765, 22 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CIsAfterLogTruncationPoint (well-formedness) ...
+  [0.080 s, solver resource count: 138607, 1 proof obligation]  verified
+
+Verifying LiveRSL__ProposerModel_i.CSetOfMessage1bAboutBallot (well-formedness) ...
+  [0.101 s, solver resource count: 147611, 1 proof obligation]  verified
+
+Verifying LiveRSL__ProposerModel_i.CAllAcceptorsHadNoProposal (well-formedness) ...
+  [0.781 s, solver resource count: 1573273, 16 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CExistVotesHasProposalLargeThanOpn (well-formedness) ...
+  [0.411 s, solver resource count: 549229, 335 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CExistsAcceptorHasProposalLargeThanOpn (well-formedness) ...
+  [0.691 s, solver resource count: 1185876, 319 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.Cmax_balInS (well-formedness) ...
+  [0.731 s, solver resource count: 1413413, 22 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CExistsBallotInS (well-formedness) ...
+  [7.733 s, solver resource count: 13482192, 26 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CValIsHighestNumberedProposalAtBallot (well-formedness) ...
+  [0.594 s, solver resource count: 1102891, 34 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CValIsHighestNumberedProposal (well-formedness) ...
+  [1.108 s, solver resource count: 2337657, 30 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CProposerCanNominateUsingOperationNumber (well-formedness) ...
+  [1.055 s, solver resource count: 1960261, 81 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CProposerInit (well-formedness) ...
+  [0.592 s, solver resource count: 1166195, 102 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CProposerProcessRequest (well-formedness) ...
+  [13.398 s, solver resource count: 25142241, 477 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CProposerMaybeEnterNewViewAndSend1a (well-formedness) ...
+  [2.394 s, solver resource count: 4779087, 353 proof obligations]  verified
+
+Verifying LiveRSL__ProposerModel_i.CProposerProcess1b (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1b.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1b.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/ViewPropagation.i.dfy(39,4): Warning: unusual indentation in left-hand operand of ==> (which starts at line 38, column 3); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0958726 s]
+
+Verifying LivenessProof__Phase1b_i.PrimaryInState1or2 (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.478 s, solver resource count: 239555, 3 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.PrimaryInState1or2Temporal (well-formedness) ...
+  [0.152 s, solver resource count: 279056, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.PrimaryInState2 (well-formedness) ...
+  [0.250 s, solver resource count: 239269, 2 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.PrimaryInState2Temporal (well-formedness) ...
+  [0.170 s, solver resource count: 278774, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.AcceptorHasMaxBalInView (well-formedness) ...
+  [0.158 s, solver resource count: 236929, 1 proof obligation]  verified
+
+Verifying LivenessProof__Phase1b_i.AcceptorHasMaxBalInViewTemporal (well-formedness) ...
+  [0.143 s, solver resource count: 277620, 6 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.PrimaryHasSpecific1bFromAcceptorInView (well-formedness) ...
+  [0.229 s, solver resource count: 311355, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.PrimaryHas1bFromAcceptorInView (well-formedness) ...
+  [0.165 s, solver resource count: 308897, 4 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.PrimaryHas1bFromAcceptorInViewTemporal (well-formedness) ...
+  [0.231 s, solver resource count: 356410, 6 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_PrimarySending1aLeadsToAcceptorSettingMaxBal (well-formedness) ...
+  [1.052 s, solver resource count: 1340871, 31 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_PrimarySending1aLeadsToAcceptorSettingMaxBal (correctness) ...
+  [2.382 s, solver resource count: 4637607, 145 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_StablePeriodStartedLeadsToAcceptorSettingMaxBal (well-formedness) ...
+  [0.975 s, solver resource count: 1371129, 39 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_StablePeriodStartedLeadsToAcceptorSettingMaxBal (correctness) ...
+  [1.108 s, solver resource count: 1533648, 140 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_IfPrimaryInState2ItsAlwaysAtLeastThere (well-formedness) ...
+  [0.890 s, solver resource count: 1272554, 4 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_IfPrimaryInState2ItsAlwaysAtLeastThere (correctness) ...
+  [3.639 s, solver resource count: 7241786, 193 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_If2aMessageSentThenPrimaryInState2 (well-formedness) ...
+  [0.938 s, solver resource count: 1302408, 5 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_If2aMessageSentThenPrimaryInState2 (correctness) ...
+  [1.894 s, solver resource count: 3626376, 106 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_IfPrimaryInState1or2ItsAlwaysAtLeastThere (well-formedness) ...
+  [0.957 s, solver resource count: 1272793, 4 proof obligations]  verified
+
+Verifying LivenessProof__Phase1b_i.lemma_IfPrimaryInState1or2ItsAlwaysAtLeastThere (correctness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/LiveRSL/Host.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/LiveRSL/Host.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Impl/RSL/AppInterface.i.dfy(165,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0816378 s]
+
+Verifying Host_i.ConcreteConfigInit (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.493 s, solver resource count: 251462, 3 proof obligations]  verified
+
+Verifying Host_i.ConcreteConfigToServers (well-formedness) ...
+  [0.096 s, solver resource count: 152189, 3 proof obligations]  verified
+
+Verifying Host_i.HostStateInvariants (well-formedness) ...
+  [0.803 s, solver resource count: 1174031, 18 proof obligations]  verified
+
+Verifying Host_i.HostInit (well-formedness) ...
+  [1.118 s, solver resource count: 1849994, 14 proof obligations]  verified
+
+Verifying Host_i.HostNext (well-formedness) ...
+  [1.089 s, solver resource count: 1201454, 1 proof obligation]  verified
+
+Verifying Host_i.HostInitImpl (well-formedness) ...
+  [0.860 s, solver resource count: 1517721, 13 proof obligations]  verified
+
+Verifying Host_i.HostInitImpl (correctness) ...
+  [3.264 s, solver resource count: 5287508, 127 proof obligations]  verified
+
+Verifying Host_i.RemoveRecvs (well-formedness) ...
+  [0.138 s, solver resource count: 112180, 1 proof obligation]  verified
+
+Verifying Host_i.RemoveRecvs (correctness) ...
+  [0.082 s, solver resource count: 166288, 19 proof obligations]  verified
+
+Verifying Host_i.NetEventsReductionCompatible (well-formedness) ...
+  [0.053 s, solver resource count: 102203, 2 proof obligations]  verified
+
+Verifying Host_i.lemma_RemainingEventsAreSends (well-formedness) ...
+  [0.058 s, solver resource count: 105880, 2 proof obligations]  verified
+
+Verifying Host_i.lemma_RemainingEventsAreSends (correctness) ...
+  [0.097 s, solver resource count: 127974, 8 proof obligations]  verified
+
+Verifying Host_i.PartitionEvents (correctness) ...
+  [0.079 s, solver resource count: 165519, 14 proof obligations]  verified
+
+Verifying Host_i.lemma_ProtocolIosRespectReduction (correctness) ...
+  [0.597 s, solver resource count: 830233, 1 proof obligation]  verified
+
+Verifying Host_i.lemma_NetEventsRespectReduction (correctness) ...
+  [0.594 s, solver resource count: 951323, 22 proof obligations]  verified
+
+Verifying Host_i.HostNextImpl (well-formedness) ...
+  [1.384 s, solver resource count: 1962140, 9 proof obligations]  verified
+
+Verifying Host_i.HostNextImpl (correctness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1bCont.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/RSL/LivenessProof/Phase1bCont.i.dfy
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/PacketHandling.i.dfy(255,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(535,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(547,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(563,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Time.i.dfy(595,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(468,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(471,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(477,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(505,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(873,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(874,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(875,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(876,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(895,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(902,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(993,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1007,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1030,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1032,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1040,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1046,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1050,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Framework/EnvironmentSynchronyLemmas.i.dfy(1066,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(83,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(102,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(114,10): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/Liveness/RTSchedule.i.dfy(116,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/RequestsReceived.i.dfy(166,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(113,6): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Sets.i.dfy(204,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/RSL-I0/ironfleet/src/Dafny/Distributed/Protocol/RSL/LivenessProof/ViewPropagation.i.dfy(39,4): Warning: unusual indentation in left-hand operand of ==> (which starts at line 38, column 3); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.1083992 s]
+
+Verifying LivenessProof__Phase1bCont_i.AcceptorSent1bInView (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [1.264 s, solver resource count: 952826, 12 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.AcceptorSent1bInViewTemporal (well-formedness) ...
+  [0.807 s, solver resource count: 987645, 8 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.PrimaryHas1bFromAcceptorOrIsPastPhase1Temporal (well-formedness) ...
+  [0.202 s, solver resource count: 338091, 3 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_StablePeriodStartedLeadsToAcceptorSending1b (well-formedness) ...
+  [1.048 s, solver resource count: 1386143, 38 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_StablePeriodStartedLeadsToAcceptorSending1b (correctness) ...
+  [3.186 s, solver resource count: 5262310, 231 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_StablePeriodStartedLeadsToPrimaryGetting1bFromAcceptorHelper (well-formedness) ...
+  [1.175 s, solver resource count: 1386342, 32 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_StablePeriodStartedLeadsToPrimaryGetting1bFromAcceptorHelper (correctness) ...
+  [2.044 s, solver resource count: 3370925, 271 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_StablePeriodStartedLeadsToPrimaryGetting1bFromAcceptor (well-formedness) ...
+  [0.988 s, solver resource count: 1389214, 35 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_StablePeriodStartedLeadsToPrimaryGetting1bFromAcceptor (correctness) ...
+  [1.332 s, solver resource count: 1960733, 119 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_PrimaryHas1bFromAcceptorOrIsPastPhase1Stable (well-formedness) ...
+  [0.968 s, solver resource count: 1293764, 2 proof obligations]  verified
+
+Verifying LivenessProof__Phase1bCont_i.lemma_PrimaryHas1bFromAcceptorOrIsPastPhase1Stable (correctness) ...
+Command exited with non-zero status 2
+854.68user 33.19system 2:05.67elapsed 706%CPU (0avgtext+0avgdata 1088112maxresident)k
+1288inputs+5464outputs (19major+10893979minor)pagefaults 0swaps
+[+] Running build command:
+    cd /home/users/tzhou/automan/artifact/RSL-I0/ironfleet && time scons -j 16 --dafny-path=/home/users/tzhou/automan/artifact/env/dafny3.13
+Figure9-AutoManRSL-I0.sh: line 69: dotnet: command not found
+[!] No leader detected.
