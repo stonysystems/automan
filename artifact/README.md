@@ -17,6 +17,7 @@ To ensure reliable reproduction of results, we recommend:
 Install Python virtual environment and SCons:
 
 ```bash
+source env.sh
 sudo apt install python3-venv
 python3 -m venv .venv
 source .venv/bin/activate
