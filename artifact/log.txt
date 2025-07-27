@@ -1,0 +1,1305 @@
+nohup: ignoring input
+======================================
+>>> Running script: Figure11-AutoManKV-I0.sh
+======================================
+scons: Reading SConscript files ...
+[+] DOTNET_PATH: /home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet
+scons: done reading SConscript files.
+scons: Building targets ...
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Collections/Maps.i.dfy > src/Dafny/Distributed/Common/Collections/Maps.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Collections/Maps2.i.dfy > src/Dafny/Distributed/Common/Collections/Maps2.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Collections/Maps2.s.dfy > src/Dafny/Distributed/Common/Collections/Maps2.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Collections/Multisets.s.dfy > src/Dafny/Distributed/Common/Collections/Multisets.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Collections/Seqs.i.dfy > src/Dafny/Distributed/Common/Collections/Seqs.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Collections/Seqs.s.dfy > src/Dafny/Distributed/Common/Collections/Seqs.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Collections/Sets.i.dfy > src/Dafny/Distributed/Common/Collections/Sets.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Framework/AbstractService.s.dfy > src/Dafny/Distributed/Common/Framework/AbstractService.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Framework/DistributedSystem.s.dfy > src/Dafny/Distributed/Common/Framework/DistributedSystem.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Framework/Environment.s.dfy > src/Dafny/Distributed/Common/Framework/Environment.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Framework/Host.s.dfy > src/Dafny/Distributed/Common/Framework/Host.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Framework/Main.s.dfy > src/Dafny/Distributed/Common/Framework/Main.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Logic/Option.i.dfy > src/Dafny/Distributed/Common/Logic/Option.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.dfy > src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Native/Io.s.dfy > src/Dafny/Distributed/Common/Native/Io.s.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Common/Native/NativeTypes.i.dfy > src/Dafny/Distributed/Common/Native/NativeTypes.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Option.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Option.i.vdfy", "src/Dafny/Distributed/Common/Logic/Option.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Common/Native/NativeTypes.s.dfy > src/Dafny/Distributed/Common/Native/NativeTypes.s.tmp
+Checking src/Dafny/Distributed/Common/Framework/AbstractService.s.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Framework/AbstractService.s.vdfy", "src/Dafny/Distributed/Common/Framework/AbstractService.s.tmp")
+Checking src/Dafny/Distributed/Common/Collections/Maps2.s.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Collections/Maps2.s.vdfy", "src/Dafny/Distributed/Common/Collections/Maps2.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/CmdLineParser.i.dfy > src/Dafny/Distributed/Impl/Common/CmdLineParser.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy > src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.tmp
+Checking src/Dafny/Distributed/Common/Collections/Seqs.s.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Collections/Seqs.s.vdfy", "src/Dafny/Distributed/Common/Collections/Seqs.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/GenericRefinement.i.dfy > src/Dafny/Distributed/Impl/Common/GenericRefinement.i.tmp
+Checking src/Dafny/Distributed/Common/Native/NativeTypes.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Native/NativeTypes.i.vdfy", "src/Dafny/Distributed/Common/Native/NativeTypes.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/MarshallInt.i.dfy > src/Dafny/Distributed/Impl/Common/MarshallInt.i.tmp
+Checking src/Dafny/Distributed/Common/Collections/Multisets.s.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Collections/Multisets.s.vdfy", "src/Dafny/Distributed/Common/Collections/Multisets.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/NodeIdentity.i.dfy > src/Dafny/Distributed/Impl/Common/NodeIdentity.i.tmp
+Checking src/Dafny/Distributed/Common/Framework/Host.s.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Framework/Host.s.vdfy", "src/Dafny/Distributed/Common/Framework/Host.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy > src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.tmp
+Checking src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.tmp
+Dafny program verifier finished with 8 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.vdfy", "src/Dafny/Distributed/Common/Logic/Temporal/Temporal.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.dfy > src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.tmp
+Checking src/Dafny/Distributed/Common/Framework/Environment.s.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Framework/Environment.s.vdfy", "src/Dafny/Distributed/Common/Framework/Environment.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/UdpClient.i.dfy > src/Dafny/Distributed/Impl/Common/UdpClient.i.tmp
+Checking src/Dafny/Distributed/Common/Framework/Main.s.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Framework/Main.s.vdfy", "src/Dafny/Distributed/Common/Framework/Main.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/Common/Util.i.dfy > src/Dafny/Distributed/Impl/Common/Util.i.tmp
+Checking src/Dafny/Distributed/Common/Framework/DistributedSystem.s.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Framework/DistributedSystem.s.vdfy", "src/Dafny/Distributed/Common/Framework/DistributedSystem.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveSHT/CmdLineParser.i.dfy > src/Dafny/Distributed/Impl/LiveSHT/CmdLineParser.i.tmp
+Checking src/Dafny/Distributed/Common/Collections/Maps2.i.tmp
+Dafny program verifier finished with 11 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Collections/Maps2.i.vdfy", "src/Dafny/Distributed/Common/Collections/Maps2.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveSHT/Host.i.dfy > src/Dafny/Distributed/Impl/LiveSHT/Host.i.tmp
+Checking src/Dafny/Distributed/Common/Collections/Maps.i.tmp
+Dafny program verifier finished with 10 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Collections/Maps.i.vdfy", "src/Dafny/Distributed/Common/Collections/Maps.i.tmp")
+Checking src/Dafny/Distributed/Common/Native/NativeTypes.s.tmp
+Dafny program verifier finished with 12 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Native/NativeTypes.s.vdfy", "src/Dafny/Distributed/Common/Native/NativeTypes.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.dfy > src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveSHT/SchedulerModel.i.dfy > src/Dafny/Distributed/Impl/LiveSHT/SchedulerModel.i.tmp
+Checking src/Dafny/Distributed/Common/Collections/Seqs.i.tmp
+Dafny program verifier finished with 17 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Collections/Seqs.i.vdfy", "src/Dafny/Distributed/Common/Collections/Seqs.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveSHT/UdpSHT.i.dfy > src/Dafny/Distributed/Impl/LiveSHT/UdpSHT.i.tmp
+Checking src/Dafny/Distributed/Common/Native/Io.s.tmp
+Dafny program verifier finished with 20 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Native/Io.s.vdfy", "src/Dafny/Distributed/Common/Native/Io.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/LiveSHT/Unsendable.i.dfy > src/Dafny/Distributed/Impl/LiveSHT/Unsendable.i.tmp
+Checking src/Dafny/Distributed/Common/Collections/Sets.i.tmp
+Dafny program verifier finished with 25 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Common/Collections/Sets.i.vdfy", "src/Dafny/Distributed/Common/Collections/Sets.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/AppInterface.i.dfy > src/Dafny/Distributed/Impl/SHT/AppInterface.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.vdfy", "src/Dafny/Distributed/Impl/Common/SeqIsUniqueDef.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/AppInterfaceConcrete.i.dfy > src/Dafny/Distributed/Impl/SHT/AppInterfaceConcrete.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/MarshallInt.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/MarshallInt.i.vdfy", "src/Dafny/Distributed/Impl/Common/MarshallInt.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/CConfiguration.i.dfy > src/Dafny/Distributed/Impl/SHT/CConfiguration.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/UdpClient.i.tmp
+Dafny program verifier finished with 7 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/UdpClient.i.vdfy", "src/Dafny/Distributed/Impl/Common/UdpClient.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/CDelegations.i.dfy > src/Dafny/Distributed/Impl/SHT/CDelegations.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/CmdLineParser.i.tmp
+Dafny program verifier finished with 15 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/CmdLineParser.i.vdfy", "src/Dafny/Distributed/Impl/Common/CmdLineParser.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/CHost.i.dfy > src/Dafny/Distributed/Impl/SHT/CHost.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.tmp
+Dafny program verifier finished with 17 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.vdfy", "src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/CMessage.i.dfy > src/Dafny/Distributed/Impl/SHT/CMessage.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/Util.i.tmp
+Dafny program verifier finished with 25 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/Util.i.vdfy", "src/Dafny/Distributed/Impl/Common/Util.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/CNetwork.i.dfy > src/Dafny/Distributed/Impl/SHT/CNetwork.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/AppInterface.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/AppInterface.i.vdfy", "src/Dafny/Distributed/Impl/SHT/AppInterface.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/CSingleDelivery.i.dfy > src/Dafny/Distributed/Impl/SHT/CSingleDelivery.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/GenericRefinement.i.tmp
+Dafny program verifier finished with 29 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericRefinement.i.vdfy", "src/Dafny/Distributed/Impl/Common/GenericRefinement.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/CSingleMessage.i.dfy > src/Dafny/Distributed/Impl/SHT/CSingleMessage.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveSHT/Unsendable.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/Unsendable.i.vdfy", "src/Dafny/Distributed/Impl/LiveSHT/Unsendable.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/PacketParsing.i.dfy > src/Dafny/Distributed/Impl/SHT/PacketParsing.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/AppInterfaceConcrete.i.tmp
+Dafny program verifier finished with 11 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/AppInterfaceConcrete.i.vdfy", "src/Dafny/Distributed/Impl/SHT/AppInterfaceConcrete.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/Parameters.i.dfy > src/Dafny/Distributed/Impl/SHT/Parameters.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveSHT/CmdLineParser.i.tmp
+Dafny program verifier finished with 7 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/CmdLineParser.i.vdfy", "src/Dafny/Distributed/Impl/LiveSHT/CmdLineParser.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Impl/SHT/SHTConcreteConfiguration.i.dfy > src/Dafny/Distributed/Impl/SHT/SHTConcreteConfiguration.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/CConfiguration.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CConfiguration.i.vdfy", "src/Dafny/Distributed/Impl/SHT/CConfiguration.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.dfy > src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.tmp
+Checking src/Dafny/Distributed/Impl/Common/NodeIdentity.i.tmp
+Dafny program verifier finished with 36 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/NodeIdentity.i.vdfy", "src/Dafny/Distributed/Impl/Common/NodeIdentity.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.dfy > src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.tmp
+Checking src/Dafny/Distributed/Impl/LiveSHT/SchedulerModel.i.tmp
+Dafny program verifier finished with 7 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/SchedulerModel.i.vdfy", "src/Dafny/Distributed/Impl/LiveSHT/SchedulerModel.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/Environment.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/Environment.i.tmp
+Checking src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.vdfy", "src/Dafny/Distributed/Protocol/Common/NodeIdentity.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentLemmas.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentLemmas.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/CDelegations.i.tmp
+Dafny program verifier finished with 12 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CDelegations.i.vdfy", "src/Dafny/Distributed/Impl/SHT/CDelegations.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentRefinement.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentRefinement.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/Parameters.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/Parameters.i.vdfy", "src/Dafny/Distributed/Impl/SHT/Parameters.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHT.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHT.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/CMessage.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CMessage.i.vdfy", "src/Dafny/Distributed/Impl/SHT/CMessage.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTLemmas.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTLemmas.i.tmp
+Checking src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.vdfy", "src/Dafny/Distributed/Protocol/Common/NodeIdentity.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTRefinement.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTRefinement.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/CNetwork.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CNetwork.i.vdfy", "src/Dafny/Distributed/Impl/SHT/CNetwork.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerLemmas.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerLemmas.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/CSingleMessage.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CSingleMessage.i.vdfy", "src/Dafny/Distributed/Impl/SHT/CSingleMessage.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerRefinement.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerRefinement.i.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/Environment.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/Environment.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/Environment.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/LiveSHT/Scheduler.i.dfy > src/Dafny/Distributed/Protocol/LiveSHT/Scheduler.i.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentRefinement.i.tmp
+Dafny program verifier finished with 2 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentRefinement.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentRefinement.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/Configuration.i.dfy > src/Dafny/Distributed/Protocol/SHT/Configuration.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveSHT/UdpSHT.i.tmp
+Dafny program verifier finished with 15 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/UdpSHT.i.vdfy", "src/Dafny/Distributed/Impl/LiveSHT/UdpSHT.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/Delegations.i.dfy > src/Dafny/Distributed/Protocol/SHT/Delegations.i.tmp
+Checking src/Dafny/Distributed/Impl/LiveSHT/Host.i.tmp
+Dafny program verifier finished with 15 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/Host.i.vdfy", "src/Dafny/Distributed/Impl/LiveSHT/Host.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/Host.i.dfy > src/Dafny/Distributed/Protocol/SHT/Host.i.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentLemmas.i.tmp
+Dafny program verifier finished with 9 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentLemmas.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/EnvironmentLemmas.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/Keys.i.dfy > src/Dafny/Distributed/Protocol/SHT/Keys.i.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHT.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHT.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHT.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/Message.i.dfy > src/Dafny/Distributed/Protocol/SHT/Message.i.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTRefinement.i.tmp
+Dafny program verifier finished with 5 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTRefinement.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTRefinement.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/Network.i.dfy > src/Dafny/Distributed/Protocol/SHT/Network.i.tmp
+Checking src/Dafny/Distributed/Impl/SHT/SHTConcreteConfiguration.i.tmp
+Dafny program verifier finished with 8 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/SHTConcreteConfiguration.i.vdfy", "src/Dafny/Distributed/Impl/SHT/SHTConcreteConfiguration.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/Parameters.i.dfy > src/Dafny/Distributed/Protocol/SHT/Parameters.i.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerRefinement.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerRefinement.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerRefinement.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvDefs.i.dfy > src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvDefs.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/Parameters.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Parameters.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/Parameters.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy > src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/Configuration.i.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Configuration.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/Configuration.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/RefinementProof/Refinement.i.dfy > src/Dafny/Distributed/Protocol/SHT/RefinementProof/Refinement.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/Delegations.i.tmp
+Dafny program verifier finished with 7 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Delegations.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/Delegations.i.tmp")
+Checking src/Dafny/Distributed/Protocol/LiveSHT/Scheduler.i.tmp
+Dafny program verifier finished with 6 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/Scheduler.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/Scheduler.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy > src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.tmp
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/RefinementProof/SHT.i.dfy > src/Dafny/Distributed/Protocol/SHT/RefinementProof/SHT.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/Keys.i.tmp
+Dafny program verifier finished with 8 verified, 0 errors
+Full check of Dafny output succeeded
+Checking src/Dafny/Distributed/Protocol/SHT/Message.i.tmp
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Keys.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/Keys.i.tmp")
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Message.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/Message.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/SingleDelivery.i.dfy > src/Dafny/Distributed/Protocol/SHT/SingleDelivery.i.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerLemmas.i.tmp
+Dafny program verifier finished with 4 verified, 0 errors
+Full check of Dafny output succeeded
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Protocol/SHT/SingleMessage.i.dfy > src/Dafny/Distributed/Protocol/SHT/SingleMessage.i.tmp
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerLemmas.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SchedulerLemmas.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Services/SHT/AbstractService.s.dfy > src/Dafny/Distributed/Services/SHT/AbstractService.s.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/Network.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Network.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/Network.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Services/SHT/AppInterface.i.dfy > src/Dafny/Distributed/Services/SHT/AppInterface.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/SingleMessage.i.tmp
+Dafny program verifier finished with 0 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/SingleMessage.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/SingleMessage.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Services/SHT/AppInterface.s.dfy > src/Dafny/Distributed/Services/SHT/AppInterface.s.tmp
+Checking src/Dafny/Distributed/Services/SHT/AppInterface.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AppInterface.i.vdfy", "src/Dafny/Distributed/Services/SHT/AppInterface.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Services/SHT/Bytes.s.dfy > src/Dafny/Distributed/Services/SHT/Bytes.s.tmp
+Checking src/Dafny/Distributed/Services/SHT/AbstractService.s.tmp
+Dafny program verifier finished with 5 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AbstractService.s.vdfy", "src/Dafny/Distributed/Services/SHT/AbstractService.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace src/Dafny/Distributed/Services/SHT/HT.s.dfy > src/Dafny/Distributed/Services/SHT/HT.s.tmp
+Checking src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTLemmas.i.tmp
+Dafny program verifier finished with 17 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTLemmas.i.vdfy", "src/Dafny/Distributed/Protocol/LiveSHT/RefinementProof/SHTLemmas.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Services/SHT/Main.i.dfy > src/Dafny/Distributed/Services/SHT/Main.i.tmp
+Checking src/Dafny/Distributed/Services/SHT/AppInterface.s.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AppInterface.s.vdfy", "src/Dafny/Distributed/Services/SHT/AppInterface.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Services/SHT/Marshall.i.dfy > src/Dafny/Distributed/Services/SHT/Marshall.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/RefinementProof/SHT.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/SHT.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/RefinementProof/SHT.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Distributed/Services/SHT/SHTDistributedSystem.i.dfy > src/Dafny/Distributed/Services/SHT/SHTDistributedSystem.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/RefinementProof/Refinement.i.tmp
+Dafny program verifier finished with 3 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/Refinement.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/RefinementProof/Refinement.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Libraries/Math/div.i.dfy > src/Dafny/Libraries/Math/div.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/Host.i.tmp
+Dafny program verifier finished with 23 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/Host.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Libraries/Math/div_auto.i.dfy > src/Dafny/Libraries/Math/div_auto.i.tmp
+Checking src/Dafny/Distributed/Protocol/SHT/SingleDelivery.i.tmp
+Dafny program verifier finished with 16 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/SingleDelivery.i.vdfy", "src/Dafny/Distributed/Protocol/SHT/SingleDelivery.i.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Libraries/Math/div_auto_proofs.i.dfy > src/Dafny/Libraries/Math/div_auto_proofs.i.tmp
+Checking src/Dafny/Distributed/Services/SHT/Bytes.s.tmp
+Dafny program verifier finished with 1 verified, 0 errors
+Full check of Dafny output succeeded
+Move("/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/Bytes.s.vdfy", "src/Dafny/Distributed/Services/SHT/Bytes.s.tmp")
+/home/users/tzhou/automan/artifact/env/dotnet-sdk-6.0.319-linux-x64/dotnet /home/users/tzhou/automan/artifact/env/dafny3.13/Dafny.dll /compile:0 /timeLimit:270 /trace /arith:5 /noCheating:1 src/Dafny/Libraries/Math/div_def.i.dfy > src/Dafny/Libraries/Math/div_def.i.tmp
+scons: *** [src/Dafny/Libraries/Math/div_def.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Libraries/Math/div.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Libraries/Math/div_auto_proofs.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Libraries/Math/div_auto.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Services/SHT/Main.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Services/SHT/Marshall.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/SHT/CHost.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/SHT/PacketParsing.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvDefs.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Services/SHT/HT.s.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/SHT/CSingleDelivery.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Services/SHT/SHTDistributedSystem.i.vdfy] Build interrupted.
+scons: *** [src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.vdfy] Build interrupted.
+scons: Build interrupted.
+scons: building terminated because of errors.
+scons: writing .sconsign file.
+
+##### Verification error.  Printing contents of src/Dafny/Libraries/Math/div_def.i.tmp #####
+
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(519,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(542,32): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1420,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1488,16): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1559,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(71,4): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AbstractService.s.dfy(114,20): Warning: unusual indentation in left-hand operand of ==> (which starts at line 109, column 21); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(470,73): Warning: unusual indentation in left-hand operand of ==> (which starts at line 464, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(92,4): Warning: unusual indentation in body of forall (which ends at line 97, column 17); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(154,4): Warning: unusual indentation in body of forall (which ends at line 156, column 73); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(801,13): Warning: unusual indentation in body of forall (which ends at line 802, column 60); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(841,14): Warning: unusual indentation in right-hand operand of ==> (which ends at line 843, column 82); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(846,13): Warning: unusual indentation in body of forall (which ends at line 847, column 55); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(897,41): Warning: unusual indentation in right-hand operand of ==> (which ends at line 899, column 63); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(988,51): Warning: unusual indentation in left-hand operand of ==> (which starts at line 987, column 27); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1035,13): Warning: unusual indentation in body of forall (which ends at line 1036, column 55); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1310,11): Warning: unusual indentation in body of forall (which ends at line 1313, column 17); do you perhaps need parentheses?
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(245,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(276,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(312,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(408,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(471,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(475,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(486,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(492,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(523,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(534,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(613,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(679,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(706,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(712,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(720,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(728,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(733,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(740,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1038,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1101,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1126,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1130,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1150,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1156,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1188,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1212,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1217,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1240,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1265,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1271,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1276,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1290,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1308,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1419,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1421,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1426,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1552,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1556,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1634,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(519,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(542,32): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1420,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1488,16): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1559,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(71,4): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AbstractService.s.dfy(114,20): Warning: unusual indentation in left-hand operand of ==> (which starts at line 109, column 21); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(470,73): Warning: unusual indentation in left-hand operand of ==> (which starts at line 464, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(988,51): Warning: unusual indentation in left-hand operand of ==> (which starts at line 987, column 27); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(293,53): Warning: unusual indentation in right-hand operand of ==> (which ends at line 295, column 52); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(318,23): Warning: unusual indentation in body of forall (which ends at line 321, column 29); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(400,53): Warning: unusual indentation in right-hand operand of ==> (which ends at line 402, column 52); do you perhaps need parentheses?
+
+##### Verification error.  Printing contents of src/Dafny/Libraries/Math/div.i.tmp #####
+
+Parsing src/Dafny/Libraries/Math/div.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/UdpSHT.i.dfy(136,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(71,4): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CHost.i.dfy(180,16): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AbstractService.s.dfy(114,20): Warning: unusual indentation in left-hand operand of ==> (which starts at line 109, column 21); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(470,73): Warning: unusual indentation in left-hand operand of ==> (which starts at line 464, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.dfy(104,19): Warning: unusual indentation in right-hand operand of ==> (which ends at line 106, column 38); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.dfy(132,19): Warning: unusual indentation in right-hand operand of ==> (which ends at line 136, column 34); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.dfy(335,17): Warning: unusual indentation in body of forall (which ends at line 336, column 110); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/SchedulerImpl.i.dfy(338,17): Warning: unusual indentation in body of forall (which ends at line 339, column 110); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0752784 s]
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Valid (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.623 s, solver resource count: 462700, 25 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Env (well-formedness) ...
+  [0.143 s, solver resource count: 179578, 8 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.AbstractifyToHost (well-formedness) ...
+  [0.287 s, solver resource count: 443268, 11 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.AbstractifyToLScheduler (well-formedness) ...
+  [0.310 s, solver resource count: 464238, 13 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.ConstructUdpClient (well-formedness) ...
+  [0.107 s, solver resource count: 199218, 6 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.ConstructUdpClient (correctness) ...
+  [0.192 s, solver resource count: 287240, 27 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Host_Init_Impl (well-formedness) ...
+  [0.334 s, solver resource count: 622295, 15 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Host_Init_Impl (correctness) ...
+  [1.290 s, solver resource count: 3262848, 43 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.rollActionIndex (well-formedness) ...
+  [0.029 s, solver resource count: 20007, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.rollActionIndex (correctness) ...
+  [0.026 s, solver resource count: 36742, 6 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.rollResendCount (well-formedness) ...
+  [0.029 s, solver resource count: 20162, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.rollResendCount (correctness) ...
+  [0.033 s, solver resource count: 35882, 8 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.lemma_ExtractSentPacketsFromIos (well-formedness) ...
+  [0.160 s, solver resource count: 109068, 3 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.lemma_ExtractSentPacketsFromIos (correctness) ...
+  [0.093 s, solver resource count: 170414, 2 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.DeliverPacketSeq (well-formedness) ...
+  [0.403 s, solver resource count: 794915, 13 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.DeliverPacketSeq (correctness) ...
+  [0.573 s, solver resource count: 1303482, 41 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.DeliverOutboundPackets (well-formedness) ...
+  [0.399 s, solver resource count: 794915, 13 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.DeliverOutboundPackets (correctness) ...
+  [0.344 s, solver resource count: 771414, 39 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.ReceivedPacketProperties (well-formedness) ...
+  [0.302 s, solver resource count: 587036, 11 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.ExtractSentPacketsFromIos_DoesNotMindSomeClutter (well-formedness) ...
+  [0.053 s, solver resource count: 107044, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.ExtractSentPacketsFromIos_DoesNotMindSomeClutter (correctness) ...
+  [0.110 s, solver resource count: 171008, 25 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Host_NoReceive_NoClock_Next (well-formedness) ...
+  [0.500 s, solver resource count: 916902, 31 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Host_NoReceive_NoClock_Next (correctness) ...
+  [1.486 s, solver resource count: 3692574, 149 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.SingletonSeqPrependSilly (well-formedness) ...
+  [0.109 s, solver resource count: 74385, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.SingletonSeqPrependSilly (correctness) ...
+  [0.057 s, solver resource count: 74546, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Combine_AbstractifyUdpEventToLSHTIo (well-formedness) ...
+  [0.279 s, solver resource count: 478371, 20 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.Combine_AbstractifyUdpEventToLSHTIo (correctness) ...
+  [0.274 s, solver resource count: 466537, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.UdpEventLogIsAbstractable_Extend (correctness) ...
+  [0.047 s, solver resource count: 115763, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.EstablishCombineIos (well-formedness) ...
+  [0.060 s, solver resource count: 102998, 2 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.EstablishCombineIos (correctness) ...
+  [0.114 s, solver resource count: 104380, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.SingletonSeqSilly (correctness) ...
+  [0.079 s, solver resource count: 88476, 1 proof obligation]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.HostNextReceivePacket (well-formedness) ...
+  [0.509 s, solver resource count: 975392, 41 proof obligations]  verified
+
+Verifying LiveSHT__SchedulerImpl_i.SchedulerImpl.HostNextReceivePacket (correctness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Libraries/Math/div_auto_proofs.i.tmp #####
+
+
+##### Verification error.  Printing contents of src/Dafny/Libraries/Math/div_auto.i.tmp #####
+
+Parsing src/Dafny/Libraries/Math/div_auto.i.dfy
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Services/SHT/Main.i.tmp #####
+
+Parsing src/Dafny/Distributed/Services/SHT/Main.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/LiveSHT/UdpSHT.i.dfy(136,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(245,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(276,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(312,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(408,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(471,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(475,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(486,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(492,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(523,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(534,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(613,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(679,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(706,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(712,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(720,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(728,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(733,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(740,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1038,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1101,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1126,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1130,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1150,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1156,12): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1188,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1212,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1217,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1240,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1265,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1271,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1276,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1290,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1308,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1419,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1421,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1426,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1552,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1556,8): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/RefinementProof.i.dfy(1634,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(519,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(542,32): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1420,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1488,16): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvProof.i.dfy(1559,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Services/SHT/Marshall.i.tmp #####
+
+Parsing src/Dafny/Distributed/Services/SHT/Marshall.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/SHT/CHost.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/SHT/CHost.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(71,4): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CHost.i.dfy(180,16): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AbstractService.s.dfy(114,20): Warning: unusual indentation in left-hand operand of ==> (which starts at line 109, column 21); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(470,73): Warning: unusual indentation in left-hand operand of ==> (which starts at line 464, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CHost.i.dfy(175,2): Warning: unusual indentation in body of let-expression (which ends at line 187, column 3); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CHost.i.dfy(196,16): Warning: unusual indentation in body of let-expression (which ends at line 215, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CHost.i.dfy(278,16): Warning: unusual indentation in body of let-expression (which ends at line 297, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CHost.i.dfy(374,16): Warning: unusual indentation in body of let-expression (which ends at line 388, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/SHT/CHost.i.dfy(424,16): Warning: unusual indentation in body of let-expression (which ends at line 441, column 13); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0685005 s]
+
+Verifying SHT__CHost_i.AbstractifyCConstantsToConstants (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.523 s, solver resource count: 151338, 4 proof obligations]  verified
+
+Verifying SHT__CHost_i.CHostIsValid (well-formedness) ...
+  [0.229 s, solver resource count: 318310, 5 proof obligations]  verified
+
+Verifying SHT__CHost_i.AbstractifyCHostToHost (well-formedness) ...
+  [0.284 s, solver resource count: 456739, 21 proof obligations]  verified
+
+Verifying SHT__CHost_i.CValidKeyPlus (well-formedness) ...
+  [0.051 s, solver resource count: 82004, 9 proof obligations]  verified
+
+Verifying SHT__CHost_i.CValidOptionalValue (well-formedness) ...
+  [0.062 s, solver resource count: 75445, 1 proof obligation]  verified
+
+Verifying SHT__CHost_i.CValidKeyRange (well-formedness) ...
+  [0.103 s, solver resource count: 97377, 32 proof obligations]  verified
+
+Verifying SHT__CHost_i.CHost_Init (well-formedness) ...
+  [0.389 s, solver resource count: 565270, 57 proof obligations]  verified
+
+Verifying SHT__CHost_i.CNextGetRequestReal (well-formedness) ...
+  [3.353 s, solver resource count: 8031071, 325 proof obligations]  verified
+
+Verifying SHT__CHost_i.CNextSetRequestReal (well-formedness) ...
+  [4.067 s, solver resource count: 11032879, 327 proof obligations]  verified
+
+Verifying SHT__CHost_i.CNextDelegateReal (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/SHT/PacketParsing.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/SHT/PacketParsing.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(71,4): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AbstractService.s.dfy(114,20): Warning: unusual indentation in left-hand operand of ==> (which starts at line 109, column 21); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(470,73): Warning: unusual indentation in left-hand operand of ==> (which starts at line 464, column 13); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.077813 s]
+
+Verifying SHT__PacketParsing_i.lemma_CMessageGrammarValid (correctness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.547 s, solver resource count: 609316, 51 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_OptionalValue (well-formedness) ...
+  [0.119 s, solver resource count: 138699, 13 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_KeyPlus (well-formedness) ...
+  [0.127 s, solver resource count: 147086, 19 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_KeyRange (well-formedness) ...
+  [0.155 s, solver resource count: 173951, 24 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Hashtable (well-formedness) ...
+  [0.168 s, solver resource count: 261843, 80 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_EndPoint (well-formedness) ...
+  [0.112 s, solver resource count: 176196, 21 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Message_GetRequest (well-formedness) ...
+  [0.164 s, solver resource count: 208218, 34 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Message_SetRequest (well-formedness) ...
+  [0.196 s, solver resource count: 257274, 58 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Message_Reply (well-formedness) ...
+  [0.182 s, solver resource count: 258344, 58 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Message_Redirect (well-formedness) ...
+  [0.224 s, solver resource count: 291359, 58 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Message_Shard (well-formedness) ...
+  [0.152 s, solver resource count: 333794, 136 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Message_Delegate (well-formedness) ...
+  [0.256 s, solver resource count: 323485, 161 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_Message (well-formedness) ...
+  [0.275 s, solver resource count: 491962, 214 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.parse_CSingleMessage (well-formedness) ...
+  [0.257 s, solver resource count: 406752, 78 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.SHTDemarshallData (well-formedness) ...
+  [0.208 s, solver resource count: 390383, 27 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.SHTDemarshallDataMethod (well-formedness) ...
+  [0.277 s, solver resource count: 367523, 3 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.SHTDemarshallDataMethod (correctness) ...
+  [0.292 s, solver resource count: 433295, 36 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.CMessageIs64Bit (well-formedness) ...
+  [0.049 s, solver resource count: 102314, 1 proof obligation]  verified
+
+Verifying SHT__PacketParsing_i.CSingleMessageIs64Bit (well-formedness) ...
+  [0.074 s, solver resource count: 113957, 1 proof obligation]  verified
+
+Verifying SHT__PacketParsing_i.ValidHashtable (well-formedness) ...
+  [0.061 s, solver resource count: 66773, 1 proof obligation]  verified
+
+Verifying SHT__PacketParsing_i.MessageMarshallable (well-formedness) ...
+  [0.066 s, solver resource count: 148585, 2 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.CSingleMessageMarshallable (well-formedness) ...
+  [0.136 s, solver resource count: 147143, 2 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.IsValidKeyPlus (correctness) ...
+  [0.105 s, solver resource count: 77000, 2 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.IsValidKeyRange (correctness) ...
+  [0.074 s, solver resource count: 84550, 1 proof obligation]  verified
+
+Verifying SHT__PacketParsing_i.IsEmptyKeyRange (correctness) ...
+  [0.068 s, solver resource count: 95406, 1 proof obligation]  verified
+
+Verifying SHT__PacketParsing_i.IsValidHashtable (correctness) ...
+  [0.126 s, solver resource count: 226151, 17 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.IsMessageMarshallable (correctness) ...
+  [0.153 s, solver resource count: 222908, 12 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.IsCSingleMessageMarshallable (correctness) ...
+  [0.106 s, solver resource count: 187546, 22 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.CPacketIsMarshallable (well-formedness) ...
+  [0.127 s, solver resource count: 166529, 3 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallOptionalValue (well-formedness) ...
+  [0.089 s, solver resource count: 141410, 10 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallOptionalValue (correctness) ...
+  [0.156 s, solver resource count: 293421, 24 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallKeyPlus (well-formedness) ...
+  [0.074 s, solver resource count: 141207, 10 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallKeyPlus (correctness) ...
+  [0.161 s, solver resource count: 368325, 27 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallKeyRange (well-formedness) ...
+  [0.090 s, solver resource count: 150394, 10 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallKeyRange (correctness) ...
+  [0.184 s, solver resource count: 309426, 24 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.lemma_SeqSum_2 (well-formedness) ...
+  [0.040 s, solver resource count: 95888, 5 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.lemma_SeqSum_2 (correctness) ...
+  [0.051 s, solver resource count: 122386, 27 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.lemma_SeqSum_3 (well-formedness) ...
+  [0.043 s, solver resource count: 96615, 7 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.lemma_SeqSum_3 (correctness) ...
+  [0.056 s, solver resource count: 147486, 40 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallHashtable (well-formedness) ...
+  [0.110 s, solver resource count: 169697, 12 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallHashtable (correctness) ...
+  [0.507 s, solver resource count: 1499458, 113 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallEndPoint (well-formedness) ...
+  [0.075 s, solver resource count: 160457, 10 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallEndPoint (correctness) ...
+  [0.110 s, solver resource count: 183892, 21 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallMessage_GetRequest (well-formedness) ...
+  [0.212 s, solver resource count: 236473, 10 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallMessage_GetRequest (correctness) ...
+  [0.134 s, solver resource count: 268713, 22 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallMessage_SetRequest (well-formedness) ...
+  [0.175 s, solver resource count: 242544, 10 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallMessage_SetRequest (correctness) ...
+  [0.176 s, solver resource count: 451857, 26 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallMessage_Reply (well-formedness) ...
+  [0.153 s, solver resource count: 242544, 10 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallMessage_Reply (correctness) ...
+  [0.276 s, solver resource count: 452500, 26 proof obligations]  verified
+
+Verifying SHT__PacketParsing_i.MarshallMessage_Redirect (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvDefs.i.tmp #####
+
+Parsing src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvDefs.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(71,4): Warning: /!\ No terms found to trigger on.
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/AbstractService.s.dfy(114,20): Warning: unusual indentation in left-hand operand of ==> (which starts at line 109, column 21); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/Host.i.dfy(470,73): Warning: unusual indentation in left-hand operand of ==> (which starts at line 464, column 13); do you perhaps need parentheses?
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Protocol/SHT/RefinementProof/InvDefs.i.dfy(78,4): Warning: unusual indentation in body of forall (which ends at line 83, column 52); do you perhaps need parentheses?
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0456884 s]
+
+Verifying SHT__InvDefs_i.AllHostIdentities (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.384 s, solver resource count: 104821, 3 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.MapComplete (well-formedness) ...
+  [0.153 s, solver resource count: 149407, 2 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.AllDelegationsToKnownHosts (well-formedness) ...
+  [0.223 s, solver resource count: 160287, 4 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.NoAcksInUnAckedLists (well-formedness) ...
+  [0.116 s, solver resource count: 101687, 1 proof obligation]  verified
+
+Verifying SHT__InvDefs_i.UnAckedListsSequential (well-formedness) ...
+  [0.116 s, solver resource count: 112943, 4 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.UnAckedDstsConsistent (well-formedness) ...
+  [0.114 s, solver resource count: 107940, 2 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.UnAckedListExceedsNumPacketsAcked (well-formedness) ...
+  [0.105 s, solver resource count: 109539, 2 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.UnAckedListInNetwork (well-formedness) ...
+  [0.221 s, solver resource count: 202376, 6 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.UnAckedListProperties (well-formedness) ...
+  [0.114 s, solver resource count: 113270, 3 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.AckListsInv (well-formedness) ...
+  [0.167 s, solver resource count: 203844, 4 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.DelegationPacket (well-formedness) ...
+  [0.114 s, solver resource count: 128031, 3 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.BufferedPacketClaimsKey (well-formedness) ...
+  [0.185 s, solver resource count: 190188, 5 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.HostClaimsKey (well-formedness) ...
+  [0.158 s, solver resource count: 191687, 1 proof obligation]  verified
+
+Verifying SHT__InvDefs_i.PacketInFlight (well-formedness) ...
+  [0.152 s, solver resource count: 178583, 3 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.InFlightPacketClaimsKey (well-formedness) ...
+  [0.177 s, solver resource count: 219898, 5 proof obligations]  verified
+
+Verifying SHT__InvDefs_i.ThePacketThatClaimsKey (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Services/SHT/HT.s.tmp #####
+
+Parsing src/Dafny/Distributed/Services/SHT/HT.s.dfy
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/SHT/CSingleDelivery.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/SHT/CSingleDelivery.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/SeqIsUnique.i.dfy(73,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.0618195 s]
+
+Verifying SHT__CSingleDelivery_i.AbstractifyCTombstoneTableToTombstoneTable (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.408 s, solver resource count: 153331, 6 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.AbstractifyCAckStateToAckState (well-formedness) ...
+  [0.310 s, solver resource count: 241498, 3 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.AbstractifyCSingleDeliveryAcctToSingleDeliveryAcct (well-formedness) ...
+  [0.231 s, solver resource count: 287800, 2 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CSendStateIsAbstractable (well-formedness) ...
+  [0.170 s, solver resource count: 150165, 1 proof obligation]  verified
+
+Verifying SHT__CSingleDelivery_i.CSendStateIsValid (well-formedness) ...
+  [0.157 s, solver resource count: 176972, 1 proof obligation]  verified
+
+Verifying SHT__CSingleDelivery_i.AbstractifyCSendStateToSendState (well-formedness) ...
+  [0.217 s, solver resource count: 302790, 6 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CTombstoneTableLookup (well-formedness) ...
+  [0.071 s, solver resource count: 146996, 8 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CAckStateLookup (well-formedness) ...
+  [0.262 s, solver resource count: 334981, 11 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CSingleDelivery_Init (well-formedness) ...
+  [0.241 s, solver resource count: 399956, 10 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CMessageNotReceived (well-formedness) ...
+  [0.294 s, solver resource count: 373620, 23 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CNewSingleMessage (well-formedness) ...
+  [0.288 s, solver resource count: 398429, 27 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CTruncateUnAckList (well-formedness) ...
+  [0.227 s, solver resource count: 505644, 21 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CReceiveAck (well-formedness) ...
+  [1.113 s, solver resource count: 3281150, 45 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CShouldAckSingleMessage (well-formedness) ...
+  [0.208 s, solver resource count: 401550, 27 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CSendAck (well-formedness) ...
+  [0.233 s, solver resource count: 490834, 61 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CMaybeAckPacket (well-formedness) ...
+  [0.267 s, solver resource count: 457561, 77 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CReceiveRealPacket (well-formedness) ...
+  [0.945 s, solver resource count: 2815519, 54 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CUnAckedMsgForDst (well-formedness) ...
+  [1.334 s, solver resource count: 5842935, 20 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CReceiveSingleMessage (well-formedness) ...
+  [0.299 s, solver resource count: 645917, 108 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CHighestSeqnoSent (well-formedness) ...
+  [0.179 s, solver resource count: 350489, 15 proof obligations]  verified
+
+Verifying SHT__CSingleDelivery_i.CSendSingleMessageReal (well-formedness) ...
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Services/SHT/SHTDistributedSystem.i.tmp #####
+
+Parsing src/Dafny/Distributed/Services/SHT/SHTDistributedSystem.i.dfy
+
+##### Verification error.  Printing contents of src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.tmp #####
+
+Parsing src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1336,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Distributed/Impl/Common/GenericMarshalling.i.dfy(1563,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/div.i.dfy(309,2): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(94,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+/home/users/tzhou/automan/artifact/KV-I0/ironfleet/src/Dafny/Libraries/Math/mod_auto_proofs.i.dfy(95,4): Warning: a forall statement with no bound variables is deprecated; use an 'assert by' statement instead
+Coalescing blocks...
+Inlining...
+
+Running abstract interpretation...
+  [0.1066585 s]
+
+Verifying Common__GenericMarshalling_i.ValInGrammar (well-formedness) ...
+[TRACE] Using prover: /home/users/tzhou/automan/artifact/env/dafny3.13/z3/bin/z3-4.8.5
+  [0.402 s, solver resource count: 115586, 11 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ValidGrammar (well-formedness) ...
+  [0.068 s, solver resource count: 89428, 3 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ValidVal (well-formedness) ...
+  [0.207 s, solver resource count: 97172, 3 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.SeqSum (well-formedness) ...
+  [0.103 s, solver resource count: 95949, 6 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.SizeOfV (well-formedness) ...
+  [0.083 s, solver resource count: 105187, 5 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_Uint64 (well-formedness) ...
+  [0.106 s, solver resource count: 104454, 4 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseUint64 (well-formedness) ...
+  [0.131 s, solver resource count: 121662, 8 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseUint64 (correctness) ...
+  [0.187 s, solver resource count: 471631, 58 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_Array_contents (well-formedness) ...
+  [0.168 s, solver resource count: 226094, 42 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_ArrayContents_helper (well-formedness) ...
+  [0.125 s, solver resource count: 215838, 35 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_ArrayContents_helper (correctness) ...
+  [0.175 s, solver resource count: 355445, 76 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_ArrayContents_helper_bailout (well-formedness) ...
+  [0.156 s, solver resource count: 209044, 32 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_ArrayContents_helper_bailout (correctness) ...
+  [0.196 s, solver resource count: 424836, 42 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseArrayContents (well-formedness) ...
+  [0.096 s, solver resource count: 215327, 15 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseArrayContents (correctness) ...
+  [0.560 s, solver resource count: 1700278, 157 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_Array (well-formedness) ...
+  [0.137 s, solver resource count: 230468, 34 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseArray (well-formedness) ...
+  [0.115 s, solver resource count: 214324, 15 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseArray (correctness) ...
+  [0.152 s, solver resource count: 452943, 27 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_Tuple_contents (well-formedness) ...
+  [0.142 s, solver resource count: 278919, 33 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_TupleContents_helper (well-formedness) ...
+  [0.161 s, solver resource count: 237208, 32 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_TupleContents_helper (correctness) ...
+  [0.218 s, solver resource count: 472414, 59 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_TupleContents_helper_bailout (well-formedness) ...
+  [0.139 s, solver resource count: 244609, 29 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_TupleContents_helper_bailout (correctness) ...
+  [0.218 s, solver resource count: 308652, 32 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseTupleContents (well-formedness) ...
+  [0.148 s, solver resource count: 218553, 10 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseTupleContents (correctness) ...
+  [0.517 s, solver resource count: 1468963, 142 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_Tuple (well-formedness) ...
+  [0.132 s, solver resource count: 220642, 23 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseTuple (well-formedness) ...
+  [0.118 s, solver resource count: 217529, 10 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseTuple (correctness) ...
+  [0.182 s, solver resource count: 253932, 18 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_ByteArray (well-formedness) ...
+  [0.055 s, solver resource count: 122340, 11 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseByteArray (well-formedness) ...
+  [0.093 s, solver resource count: 124574, 8 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseByteArray (correctness) ...
+  [0.121 s, solver resource count: 271589, 32 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_Case (well-formedness) ...
+  [0.179 s, solver resource count: 302698, 35 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseCase (well-formedness) ...
+  [0.133 s, solver resource count: 217529, 10 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseCase (correctness) ...
+  [0.163 s, solver resource count: 367234, 31 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.parse_Val (well-formedness) ...
+  [0.200 s, solver resource count: 297185, 42 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseVal (well-formedness) ...
+  [0.090 s, solver resource count: 214326, 15 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ParseVal (correctness) ...
+  [0.157 s, solver resource count: 478338, 35 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.Demarshallable (well-formedness) ...
+  [0.149 s, solver resource count: 206986, 25 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.DemarshallFunc (well-formedness) ...
+  [0.159 s, solver resource count: 215576, 29 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.Demarshall (well-formedness) ...
+  [0.160 s, solver resource count: 216828, 20 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.Demarshall (correctness) ...
+  [0.181 s, solver resource count: 246084, 64 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_ByteArray (well-formedness) ...
+  [0.110 s, solver resource count: 190398, 14 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_ByteArray (correctness) ...
+  [0.325 s, solver resource count: 1892239, 70 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_SeqSum_prefix (correctness) ...
+  [0.124 s, solver resource count: 153583, 16 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_SeqSum_bound (correctness) ...
+  [0.045 s, solver resource count: 114436, 10 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_SeqSum_bound_prefix (well-formedness) ...
+  [0.070 s, solver resource count: 93412, 1 proof obligation]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_SeqSum_bound_prefix (correctness) ...
+  [0.080 s, solver resource count: 118707, 8 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Array_contents_len (well-formedness) ...
+  [0.141 s, solver resource count: 191200, 18 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Array_contents_len (correctness) ...
+  [0.180 s, solver resource count: 221402, 36 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Array_contents (well-formedness) ...
+  [0.126 s, solver resource count: 227387, 42 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Array_contents (correctness) ...
+  [0.386 s, solver resource count: 1467374, 405 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Array (well-formedness) ...
+  [0.098 s, solver resource count: 256912, 46 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Array (correctness) ...
+  [0.432 s, solver resource count: 1720906, 149 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Tuple_contents (well-formedness) ...
+  [0.160 s, solver resource count: 233690, 24 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Tuple_contents (correctness) ...
+  [0.402 s, solver resource count: 2088026, 358 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Tuple (well-formedness) ...
+  [0.136 s, solver resource count: 240768, 27 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Tuple (correctness) ...
+  [0.122 s, solver resource count: 334800, 80 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Union (well-formedness) ...
+  [0.136 s, solver resource count: 241928, 26 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_Union (correctness) ...
+  [0.379 s, solver resource count: 1237368, 199 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view (well-formedness) ...
+  [0.107 s, solver resource count: 236753, 42 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view (correctness) ...
+  [0.269 s, solver resource count: 566809, 242 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_specific (well-formedness) ...
+  [0.128 s, solver resource count: 218522, 32 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_specific (correctness) ...
+  [0.138 s, solver resource count: 244611, 24 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_specific_size (well-formedness) ...
+  [0.154 s, solver resource count: 219994, 32 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_parse_Val_view_specific_size (correctness) ...
+  [0.144 s, solver resource count: 218809, 24 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ComputeSeqSum (correctness) ...
+  [0.047 s, solver resource count: 133215, 22 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.ComputeSizeOf (correctness) ...
+  [0.059 s, solver resource count: 151276, 31 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallUint64 (well-formedness) ...
+  [0.089 s, solver resource count: 191358, 56 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallUint64 (correctness) ...
+  [0.145 s, solver resource count: 514419, 19 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_marshall_array_contents (well-formedness) ...
+  [0.149 s, solver resource count: 271130, 33 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_marshall_array_contents (correctness) ...
+  [0.314 s, solver resource count: 729785, 161 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallArrayContents (well-formedness) ...
+  [0.139 s, solver resource count: 256851, 39 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallArrayContents (correctness) ...
+    checking split 1/2, 0.00%, (cost:10250188/177) ...
+      --> split #1 done,  [0.3916862 s] Valid
+    checking split 2/2, 99.93%, (cost:6982/39) ...
+      --> split #2 done,  [1.0530062 s] Valid
+  [1.518 s, solver resource count: 5701085, 216 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallArray (well-formedness) ...
+  [0.132 s, solver resource count: 239994, 37 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallArray (correctness) ...
+    checking split 1/2, 0.00%, (cost:5779/36) ...
+      --> split #1 done,  [0.1683974 s] Valid
+    checking split 2/2, 72.93%, (cost:2146/21) ...
+      --> split #2 done,  [0.2556064 s] Valid
+  [0.471 s, solver resource count: 1917091, 57 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_marshall_tuple_contents (well-formedness) ...
+  [0.149 s, solver resource count: 267284, 25 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.lemma_marshall_tuple_contents (correctness) ...
+  [0.375 s, solver resource count: 940992, 150 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallTupleContents (well-formedness) ...
+  [0.137 s, solver resource count: 256055, 30 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallTupleContents (correctness) ...
+    checking split 1/2, 0.00%, (cost:11605826/171) ...
+      --> split #1 done,  [0.3328175 s] Valid
+    checking split 2/2, 99.87%, (cost:15183/58) ...
+      --> split #2 done,  [0.6130854 s] Valid
+  [1.054 s, solver resource count: 3983224, 229 proof obligations]  verified
+
+Verifying Common__GenericMarshalling_i.MarshallTuple (well-formedness) ...
+Command exited with non-zero status 2
+234.52user 14.09system 0:24.19elapsed 1027%CPU (0avgtext+0avgdata 411496maxresident)k
+576inputs+2616outputs (1major+2608882minor)pagefaults 0swaps
+[+] Running build command:
+    cd /home/users/tzhou/automan/artifact/KV-I0/ironfleet && time scons -j 16 --dafny-path=/home/users/tzhou/automan/artifact/env/dafny3.13
+=========================================
+>>> Running workload=g, valuesize=128, nthreads=1
+=========================================
+Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET program, but dotnet-KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/build/IronfleetShell.dll does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.
+Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET program, but dotnet-KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/build/IronfleetShell.dll does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.
+Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET program, but dotnet-KV-I0/ironfleet/src/Dafny/Distributed/Services/SHT/build/IronfleetShell.dll does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.
+Could not execute because the specified command or file was not found.
+Possible reasons for this include:
+  * You misspelled a built-in dotnet command.
+  * You intended to execute a .NET program, but dotnet-KV-I0/ironfleet/src/IronKVClient/bin/Release/net6.0/IronKVClient.dll does not exist.
+  * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.
