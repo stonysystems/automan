@@ -27,25 +27,36 @@ Warning: 61 shift/reduce conflicts were arbitrarily resolved.
 ```
 # Quick Run
 
-We provide two sets of specifications, both adapted from 
-[IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet):
-1. Multi-Paxos (rsl), available at  `./asset/spec/RSL`.
-2. Key-Value Store (kv), available at `./asset/spec/KV`.
-3. Byzantine Multi-Paxos (byz), available at `./asset/spec/ByzRSL`.
-4. Negative Examples (ng), available at `./asset/spec/NgExamples`, demonstrates cases that would fail AutoMan's checks.
-5. Additional Examples to help you better understand the behavior of AutoMan, avilable at `./asset/spec/AddExamples`.
+We provide several example specifications:
 
-The necessary annotations (explained below) are available at `./asset/annotations`.
+1. **Multi-Paxos (rsl)** - Located at `./asset/spec/RSL` (adapted from [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet))
+2. **Key-Value Store (kv)** - Located at `./asset/spec/KV` (adapted from [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet))
+3. **Byzantine Multi-Paxos (byz)** - Located at `./asset/spec/ByzRSL` (our own implementation)
+4. **Negative Examples (ng)** - Located at `./asset/spec/NgExamples` (demonstrates cases that fail AutoMan's checks)
+5. **Additional Examples (add)** - Located at `./asset/spec/AddExamples` (helps understand AutoMan's behavior)
 
-Run `bash run.sh [rsl | kv | byz | ng | add]` to apply the translation.
+## Running the Examples
 
-The generated codes can be found in `./asset/impl`.
+To translate any of the provided examples:
+```bash
+bash run.sh [rsl | kv | byz | ng | add]
+```
 
-The command to translate a single file is as follows:
-`dune exe bin/main.exe [input Dafny file] [annotation file] [name remapping file] > [output file]`.
+The generated implementation code will be output to `./asset/impl`.
 
-This command specifies the input Dafny file, annotation file, and name remapping file, directing the output to the specified file.
-The method for writing the corresponding files is introduced below.
+## Single File Translation
+
+To translate a custom specification file:
+```bash
+dune exe bin/main.exe [input Dafny file] [annotation file] [name remapping file] > [output file]
+```
+
+Required files:
+- **Input Dafny file**: Your protocol specification
+- **Annotation file**: Parameter mode annotations (see `./asset/annotations` for examples)
+- **Name remapping file**: Custom naming rules (optional)
+
+The methods for writing these files are explained in the sections below.
 
 # Usage
 
