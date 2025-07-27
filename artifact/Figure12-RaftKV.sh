@@ -4,7 +4,7 @@ set -e
 RESULT_DIR="Figure12"
 CODE_DIR="pgo"
 Line="PGo-RaftKV"
-PARAM_DIR="$CODE_DIR/systems/raftkvs"
+PARAM_DIR="$CODE_DIR/raftkvs"
 mkdir -p "$RESULT_DIR"
 
 echo -n "" > "$RESULT_DIR/$Line.txt"

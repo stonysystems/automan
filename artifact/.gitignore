@@ -4,3 +4,5 @@ Figure9/
 Figure11/
 Figure12/
 *.log
+.nfs*
+*.txt
