@@ -18,7 +18,7 @@ To ensure reliable reproduction of results, we recommend:
 
 ## Environment Setup
 
-**Platform:** Our experiments were conducted on Ubuntu 22.04. Similar Linux environments should work as well. Our experiments were conducted on server with 128 logical CPUs and a max frequency of 2.18 GHz.
+**Platform:** Our experiments were conducted on Ubuntu 22.04. Similar Linux environments should work as well. The server is equipped with 128 logical CPUs and a max frequency of 2.18 GHz.
 
 **Dependencies:** Required tools like .NET and Dafny are already provided in the `env/` folder - no additional installation needed.
 
