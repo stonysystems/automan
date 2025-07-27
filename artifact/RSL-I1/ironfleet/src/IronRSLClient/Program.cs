@@ -52,9 +52,9 @@ output #req100, use at least initialseqno=101)
     IPAddress ip2 = IPAddress.Parse("127.0.0.1");
     IPAddress ip3 = IPAddress.Parse("127.0.0.1");
     int client_port = 6000;
-    int port1 = 4101;
-    int port2 = 4102;
-    int port3 = 4103;
+    int port1 = 4201;
+    int port2 = 4202;
+    int port3 = 4203;
     ulong initial_seq_no = 0;
 
     foreach (var arg in args)

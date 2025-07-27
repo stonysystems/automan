@@ -34,6 +34,7 @@ rm -f throughput_log.txt
 sed -i -E "s/(int[[:space:]]+port1[[:space:]]*=[[:space:]]*)[0-9]+;/\1$PORT1;/" "$CLIENT"
 sed -i -E "s/(int[[:space:]]+port2[[:space:]]*=[[:space:]]*)[0-9]+;/\1$PORT2;/" "$CLIENT"
 sed -i -E "s/(int[[:space:]]+port3[[:space:]]*=[[:space:]]*)[0-9]+;/\1$PORT3;/" "$CLIENT"
+sed -i -E "s/(int[[:space:]]+client_port[[:space:]]*=[[:space:]]*)[0-9]+;/\1$CPORT;/" "$PARAM_FILE"
 
 batch_size=16
 

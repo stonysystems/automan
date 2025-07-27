@@ -28,6 +28,7 @@ mkdir -p "$RESULT_DIR/$Line"
 sed -i -E "s/(int[[:space:]]+port1[[:space:]]*=[[:space:]]*)[0-9]+;/\1$PORT1;/" "$PARAM_FILE"
 sed -i -E "s/(int[[:space:]]+port2[[:space:]]*=[[:space:]]*)[0-9]+;/\1$PORT2;/" "$PARAM_FILE"
 sed -i -E "s/(int[[:space:]]+port3[[:space:]]*=[[:space:]]*)[0-9]+;/\1$PORT3;/" "$PARAM_FILE"
+sed -i -E "s/(int[[:space:]]+client_port[[:space:]]*=[[:space:]]*)[0-9]+;/\1$CPORT;/" "$PARAM_FILE"
 
 workloads=("g" "s")
 valuesizes=(128 1024 8192)
