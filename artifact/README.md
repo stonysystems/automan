@@ -61,7 +61,7 @@ This script processes the experimental data and creates PDF visualizations that 
 - `fig12.pdf` - **Figure 12** in the paper: PaxosKV vs RaftKV throughput analysis
 
 These generated PDFs provide the same visual representations as shown in the paper, allowing you to verify that the reproduced results match our published findings.
-
+The file `fig*_for_ref.pdf` is provided as a reference for comparison purposes.
 
 ### Run Individual Scripts
 
