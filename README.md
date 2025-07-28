@@ -35,7 +35,7 @@ We provide several example specifications:
 4. **Negative Examples (ng)** - Located at `./asset/spec/NgExamples` (demonstrates cases that fail AutoMan's checks)
 5. **Additional Examples (add)** - Located at `./asset/spec/AddExamples` (helps understand AutoMan's behavior)
 
-## Running the Examples
+## Running the Examplesg
 
 To translate any of the provided examples:
 ```bash
@@ -304,7 +304,5 @@ t1
 .
 
 The details about the templates and the motivation behind it can be found at
-`./doc/universal-quantification-templates.md`.
+[`here`](./doc/universal-quantification-templates.md).
 Universal quantifications that do not follow these templates will lead to failure to functionalize the containing predicate.
-
-
