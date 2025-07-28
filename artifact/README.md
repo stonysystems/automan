@@ -16,6 +16,8 @@ To ensure reliable reproduction of results, we recommend:
 
 > Note: Due to hardware differences (especially CPU count and frequency), your results may differ slightly from those in the paper.
 
+>Our experiments were originally conducted on three machines in a data center. However, for ease of reproduction, our scripts are configured to run on different ports of a single machine—this setup should theoretically reproduce similar results. The PDF samples provided in this directory were generated under the single-machine setup. If you prefer to run the experiments across three separate machines, you can modify the addresses and ports in the scripts accordingly.
+
 ## Environment Setup
 
 **Platform:** Our experiments were conducted on Ubuntu 22.04. Similar Linux environments should work as well. The server is equipped with 128 logical CPUs and a max frequency of 2.18 GHz.
