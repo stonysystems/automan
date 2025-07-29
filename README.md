@@ -35,7 +35,7 @@ We provide several example specifications:
 4. **Negative Examples (ng)** - Located at `./asset/spec/NgExamples` (demonstrates cases that fail AutoMan's checks)
 5. **Additional Examples (add)** - Located at `./asset/spec/AddExamples` (helps understand AutoMan's behavior)
 
-## Running the Examplesg
+## Running the Examples
 
 To translate any of the provided examples:
 ```bash
