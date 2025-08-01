@@ -116,11 +116,11 @@ module LiveRSL__ParametersState_i {
   function method StaticParams() : CParameters
   {
     CParameters(1000,   // max log length
-                60,   // baseline view timeout period (1000 ms = 1 sec)
+                100,   // baseline view timeout period (1000 ms = 1 sec)
                 10,     // heartbeat period (100 ms)
                         // 0x8000_0000_0000_0000 - 1,  // Max integer value:  2^63 - 1
                 CUpperBoundInfinite,
-                16, // max_batch_size
+                128, // max_batch_size
                 10)     // max_batch_delay (10 ms)
   }
 }

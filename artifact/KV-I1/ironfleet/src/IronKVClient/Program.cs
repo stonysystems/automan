@@ -55,7 +55,7 @@ ports to be used.
             IPAddress ip1 = IPAddress.Parse("127.0.0.1");
             IPAddress ip2 = IPAddress.Parse("127.0.0.1");
             IPAddress ip3 = IPAddress.Parse("127.0.0.1");
-            int client_port = 6000;
+            int client_port = 7000;
             int port1 = 5101;
             int port2 = 5102;
             int port3 = 5103;

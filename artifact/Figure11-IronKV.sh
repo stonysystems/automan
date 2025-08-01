@@ -76,7 +76,7 @@ for workload in "${workloads[@]}"; do
 
       sleep 3
 
-      dotnet $CODE_DIR/ironfleet/src/IronKVClient/bin/Release/net6.0/IronKVClient.dll duration=60 workload=$workload numkeys=10000 clientport=$CPORT valuesize=$valuesize nthreads=$nthreads
+      dotnet $CODE_DIR/ironfleet/src/IronKVClient/bin/Release/net6.0/IronKVClient.dll duration=30 workload=$workload numkeys=10000 clientport=$CPORT valuesize=$valuesize nthreads=$nthreads
       
       echo "[*] Waiting for experiment_result.txt..."
       while [ ! -f experiment_result.txt ]; do

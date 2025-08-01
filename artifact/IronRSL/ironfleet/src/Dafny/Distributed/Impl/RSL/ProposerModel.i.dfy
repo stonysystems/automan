@@ -1235,7 +1235,7 @@ method {:timeLimitMultiplier 12} ProposerMaybeNominateValueAndSend2a(proposer:Pr
           //        (opn > AbstractifyProposerStateToLProposer(proposer).next_operation_number_to_propose 
           //     && !LAllAcceptorsHadNoProposal(AbstractifyProposerStateToLProposer(proposer).received_1b_packets, opn))
           //     );
-  print "I am leader\n";
+  // print "I am leader\n";
           proposer', sent_packets := ProposerNominateNewValueAndSend2a(proposer, clock, log_truncation_point);
           assert OutboundPacketsHasCorrectSrc(Broadcast(sent_packets), proposer.constants.all.config.replica_ids[proposer.constants.my_index]); //OBSERVE
           //var end_timeNominateNew := Time.GetDebugTimeTicks();

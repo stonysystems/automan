@@ -1313,7 +1313,7 @@ method {:timeLimitMultiplier 12} CProposerMaybeNominateValueAndSend2a(proposer:C
           //     && !LAllAcceptorsHadNoProposal(AbstractifyProposerStateToLProposer(proposer).received_1b_packets, opn))
           //     );
           // var sent:OutboundPackets;
-  print "I am leader\n";
+  // print "I am leader\n";
           var (newproposer, sent) := CProposerNominateNewValueAndSend2a(proposer, clock, log_truncation_point);
           // proposer', sent := CProposerNominateNewValueAndSend2a(proposer, clock, log_truncation_point);
           assert LProposerNominateNewValueAndSend2a(

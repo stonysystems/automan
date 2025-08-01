@@ -615,7 +615,7 @@ method CProposerMaybeNominateValueAndSend2a(proposer:CProposer, clock:int, log_t
     || (|proposer.request_queue| > 0 && proposer.incomplete_batch_timer.CIncompleteBatchTimerOn? && clock >= proposer.incomplete_batch_timer.when)
   {
     var (proposer'_, sent_packets_) := CProposerNominateNewValueAndSend2a(proposer, clock, log_truncation_point);
-  print "I am leader\n";
+  // print "I am leader\n";
     proposer' := proposer'_;
     sent_packets := sent_packets_;
   } else if |proposer.request_queue| > 0 && proposer.incomplete_batch_timer.CIncompleteBatchTimerOff? {

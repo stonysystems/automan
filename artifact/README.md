@@ -148,9 +148,11 @@ In the result file under Figure9/, we keep monitoring the throughput.
 - PGo-RaftKV outperforms PaxosKV-I0.
 - PaxosKV-I1 significantly outperforms PGo-RaftKV.
 
-### Figure 10: Effort vs. Performance (Not Reproducible)
+### Figure 10: Effort vs. Performance
 
-This figure shows each incremental optimization step's performance improvement vs. effort during our development. It is not intended to be reproduced. However, the performance of AutoManRSL-I0 and IronRSL is reproduced in Figure 8.
+This figure illustrates the performance gains and development effort across multiple optimization stages during our iterative implementation process. However, the figure is not fully reproducible, as the intermediate stages were constructed incrementally and not preserved as standalone implementations.
+
+For reference, the performance results of AutoManRSL-I0 and IronRSL are fully reproducible and included in Figure 8. In particular, our final optimized step, +Process2a, corresponds to AutoManRSL-I1 in Figure 8.
 
 
 ## Notes
