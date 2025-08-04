@@ -2,7 +2,7 @@
 
 AutoMan is a tool for generating distributed system implementations from Dafny protocol specifications.
 
-# Produce the experiment results for the AutoMan paper (SOSP '25)
+# Reproduce the experiment results for the AutoMan paper (SOSP '25)
 
 The experimental artifact is located in the [`artifact/`](./artifact) directory.
 
