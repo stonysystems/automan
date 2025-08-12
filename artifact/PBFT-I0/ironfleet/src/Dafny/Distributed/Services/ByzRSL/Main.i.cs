@@ -11611,7 +11611,7 @@ module LiveByzRSL__ParametersState_i {
 
   function method StaticParams(): CParameters
   {
-    CParameters(1000, 1000, 30, CUpperBoundInfinite, 128, 10)
+    CParameters(1000, 1000, 30, CUpperBoundInfinite, 1, 10)
   }
 }
 
@@ -26643,7 +26643,7 @@ namespace LiveByzRSL____ParametersState__i_Compile {
 
   public partial class __default {
     public static LiveByzRSL____ParametersState__i_Compile._ICParameters StaticParams() {
-      return LiveByzRSL____ParametersState__i_Compile.CParameters.create(new BigInteger(1000), new BigInteger(1000), new BigInteger(30), Common____UpperBound__i_Compile.CUpperBound.create_CUpperBoundInfinite(), new BigInteger(128), new BigInteger(10));
+      return LiveByzRSL____ParametersState__i_Compile.CParameters.create(new BigInteger(1000), new BigInteger(1000), new BigInteger(30), Common____UpperBound__i_Compile.CUpperBound.create_CUpperBoundInfinite(), BigInteger.One, new BigInteger(10));
     }
   }
 } // end of namespace LiveByzRSL____ParametersState__i_Compile

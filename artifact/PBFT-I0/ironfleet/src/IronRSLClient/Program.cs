@@ -59,7 +59,7 @@ output #req100, use at least initialseqno=101)
             int port3 = 4103;
             int port4 = 4104;
             ulong initial_seq_no = 0;
-            string keyFilePath = "/home/users/zihao/keys.json";
+            string keyFilePath = "keys.json";
 
             foreach (var arg in args)
             {

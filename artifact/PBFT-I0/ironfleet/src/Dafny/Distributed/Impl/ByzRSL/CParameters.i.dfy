@@ -58,7 +58,7 @@ module LiveByzRSL__ParametersState_i {
                 30,     // heartbeat period (100 ms)
                         // 0x8000_0000_0000_0000 - 1,  // Max integer value:  2^63 - 1
                 CUpperBoundInfinite,
-                128, // max_batch_size
+                1, // max_batch_size
                 10)     // max_batch_delay (10 ms)
   }
 }

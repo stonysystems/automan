@@ -94,7 +94,7 @@ public partial class UdpClient
 
       try
         {
-            this.nodeKeys = LoadKeysFromFile("/home/users/zihao/keys.json");
+            this.nodeKeys = LoadKeysFromFile("keys.json");
             // Console.WriteLine("Keys successfully loaded.");
         }
         catch (FileNotFoundException e)

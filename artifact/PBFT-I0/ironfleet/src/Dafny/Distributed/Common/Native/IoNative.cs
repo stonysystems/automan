@@ -77,11 +77,6 @@ public partial class UdpClient
     internal ConcurrentQueue<Packet> receive_queue;
     private readonly Dictionary<string, byte[]> nodeKeys;
 
-    // public HmacBasedClient(string keyFilePath)
-    // {
-    //     // 加载密钥
-    //     nodeKeys = LoadKeysFromFile(keyFilePath);
-    // }
 
     internal UdpClient(UClient client) { 
       this.client = client;
@@ -94,7 +89,7 @@ public partial class UdpClient
 
       try
         {
-            this.nodeKeys = LoadKeysFromFile("/home/users/zihao/keys.json");
+            this.nodeKeys = LoadKeysFromFile("keys.json");
             // Console.WriteLine("Keys successfully loaded.");
         }
         catch (FileNotFoundException e)
@@ -177,8 +172,7 @@ public partial class UdpClient
                 timedOut = false;
                 remote = new IPEndPoint(packet.ep);
 
-                // 提取 HMAC 和消息内容
-                int hmacLength = 32; // HMAC-SHA256 的长度是 32 字节
+                int hmacLength = 32;
                 if (packet.buffer.Length < hmacLength)
                 {
                     System.Console.Error.WriteLine("Invalid packet length");
@@ -192,7 +186,6 @@ public partial class UdpClient
                 Buffer.BlockCopy(packet.buffer, 0, receivedHmac, 0, hmacLength);
                 Buffer.BlockCopy(packet.buffer, hmacLength, message, 0, message.Length);
 
-                // 验证 HMAC
                 if (!nodeKeys.ContainsKey(remote.endpoint.Address.ToString()))
                 {
                     System.Console.Error.WriteLine("Unknown sender: " + remote.endpoint.Address.ToString());
@@ -304,7 +297,6 @@ public partial class UdpClient
         }
     }
 
-    // 防止时序攻击的安全比较
     private bool SlowEquals(byte[] a, byte[] b)
     {
         uint diff = (uint)a.Length ^ (uint)b.Length;
